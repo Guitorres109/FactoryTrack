@@ -1,11 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Projeto</title>
+  <link rel="stylesheet" href="./style/style.css">
 </head>
 <body>
-    
+
+    <div class="logo-senai">
+        <h1>SESI-SP
+             SENAI-SP
+        </h1>
+    </div>
+
+  <div class="login-container">
+    <h2>⚙️META67⚙️</h2>
+    <p>Empresa focada na criação de peças metálicas. Faça o login para saber mais..</p>
+
+    <input id="email" type="email" placeholder="admin@meta67.com">
+    <input id="senha" type="password" placeholder="*******">
+
+    <button onclick="fazerLogin()">Entrar</button>
+
+    <div class="login-erro" id="login-erro"></div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
