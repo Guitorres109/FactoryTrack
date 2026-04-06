@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>FactoryTrack API</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      margin: 0;
+    }
+
+    header {
+      background: #020617;
+      padding: 25px;
+      border-bottom: 2px solid #1e293b;
+    }
+
+    h1 {
+      color: #38bdf8;
+      margin: 0;
+    }
+
+    h2 {
+      margin-top: 40px;
+      color: #7dd3fc;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .box {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .endpoint {
+      border-left: 5px solid #38bdf8;
+      margin-bottom: 20px;
+    }
+
+    .method {
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    .GET { background: #22c55e; }
+    .POST { background: #3b82f6; }
+    .PUT { background: #eab308; }
+    .DELETE { background: #ef4444; }
+    .PATCH { background: #a855f7; }
+
+    code {
+      display: block;
+      background: #020617;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      color: #38bdf8;
+      overflow-x: auto;
+    }
+
+    ul {
+      line-height: 1.6;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #334155;
+      padding: 4px 10px;
+      border-radius: 5px;
+      margin-right: 5px;
+      font-size: 12px;
+    }
+    footer {
+        padding: 20px;
+        text-align: center;
+        background: linear-gradient(90deg, #020617, #0f172a);
+        border-top: 1px solid #1e293b;
+        font-size: 14px;
+        color: #94a3b8;
+    }
+
+    footer span {
+        color: #38bdf8;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    footer span:hover {
+        color: #7dd3fc;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🚀 FactoryTrack API</h1>
+  <p>Sistema de gerenciamento de pedidos, clientes e produtos</p>
+</header>
+
+<div class="container">
+
+  <!-- DESCRIÇÃO -->
+  <h2>📖 Sobre o Projeto</h2>
+  <div class="box">
+    <p>
+      A <b>FactoryTrack API</b> é um backend desenvolvido em Node.js com SQLite,
+      projetado para gerenciar operações de uma pizzaria ou sistema de pedidos.
+    </p>
+
+    <p>Ela permite:</p>
+    <ul>
+      <li>👤 Gerenciamento de usuários (admin e atendente)</li>
+      <li>⚙️ Cadastro de produtos</li>
+      <li>📦 Controle de pedidos</li>
+      <li>📞 Cadastro de clientes</li>
+      <li>📊 Monitoramento completo via rota de debug</li>
+    </ul>
+
+    <p><b>Tecnologias:</b></p>
+    <span class="tag">Node.js</span>
+    <span class="tag">Express</span>
+    <span class="tag">SQLite</span>
+    <span class="tag">JWT</span>
+  </div>
+
+  <!-- AUTENTICAÇÃO -->
+  <h2>🔐 Autenticação</h2>
+  <div class="box">
+    <p>Utiliza JWT (JSON Web Token).</p>
+
+    <p>Após login, envie o token no header:</p>
+
+    <code>
+Authorization: Bearer SEU_TOKEN_AQUI
+    </code>
+  </div>
+
+  <!-- ESTRUTURA -->
+  <h2>📦 Estrutura de Dados</h2>
+  <div class="box">
+    <p><b>Cliente:</b></p>
+    <code>
+{
+  "id": 1,
+  "nome": "João",
+  "telefone": "11999999999",
+  "endereco": "Rua A, 123"
+}
+    </code>
+
+    <p><b>Produto:</b></p>
+    <code>
+{
+  "id": 1,
+  "nome": "Pizza Calabresa",
+  "descricao": "Deliciosa",
+  "disponivel": true
+}
+    </code>
+
+    <p><b>Ordem:</b></p>
+    <code>
+{
+  "id": 1,
+  "cliente": {...},
+  "itens": [
+    { "produto": 1, "quantidade": 2 }
+  ],
+  "status": "recebido"
+}
+    </code>
+  </div>
+
+  <!-- ENDPOINTS -->
+
+  <h2>📡 Endpoints</h2>
+
+  <!-- LOGIN -->
+  <div class="box endpoint">
+    <span class="method POST">POST</span> /api/auth/login
+    <p>Realiza login e retorna token JWT</p>
+
+    <code>
+{
+  "email": "admin@email.com",
+  "senha": "123456"
+}
+    </code>
+  </div>
+
+  <!-- PRODUTOS -->
+  <div class="box endpoint">
+    <span class="method GET">GET</span> /api/produtos
+    <p>Lista todos os produtos</p>
+  </div>
+
+  <div class="box endpoint">
+    <span class="method POST">POST</span> /api/produtos
+    <p>Cria um produto</p>
+
+    <code>
+{
+  "nome": "Pizza Calabresa"
+}
+    </code>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="box endpoint">
+    <span class="method GET">GET</span> /api/clientes
+    <p>Lista clientes</p>
+  </div>
+
+  <div class="box endpoint">
+    <span class="method POST">POST</span> /api/clientes
+    <p>Cria cliente</p>
+
+    <code>
+{
+  "nome": "João",
+  "telefone": "11999999999",
+  "endereco": "Rua A, 123"
+}
+    </code>
+  </div>
+
+  <!-- ORDENS -->
+  <div class="box endpoint">
+    <span class="method GET">GET</span> /api/ordens
+    <p>Lista pedidos</p>
+  </div>
+
+  <div class="box endpoint">
+    <span class="method POST">POST</span> /api/ordens
+    <p>Cria um novo pedido</p>
+
+    <code>
+{
+  "cliente": 1,
+  "itens": [
+    { "produto": 1, "quantidade": 2 }
+  ]
+}
+    </code>
+  </div>
+
+  <div class="box endpoint">
+    <span class="method PATCH">PATCH</span> /api/ordens/:id/status
+    <p>Atualiza status do pedido</p>
+
+    <code>
+{
+  "status": "em_preparo"
+}
+    </code>
+  </div>
+
+  <!-- DEBUG -->
+  <div class="box endpoint">
+    <span class="method GET">GET</span> /api/debug
+    <p>Retorna todos os dados do sistema</p>
+  </div>
+
+</div>
+
+<footer>
+    <p>Development by Meta 67</p>
+</footer>
+
+</body>
+</html>
