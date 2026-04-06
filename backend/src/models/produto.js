@@ -30,14 +30,20 @@ const Produtos = {
   },
 
   async create({ nome, descricao = '', disponivel = true, categoria = 'tradicional' }) {
-    await ready;
-    const info = run(
-      'INSERT INTO produtos (nome, disponivel) VALUES (?, ?)',
-      [nome.trim(), descricao.trim(),
-       disponivel ? 1 : 0]
-    );
-    return this.findById(info.lastInsertRowid);
-  },
+      await ready;
+
+      const info = run(
+        'INSERT INTO produtos (nome, descricao, disponivel, categoria) VALUES (?, ?, ?, ?)',
+        [
+          nome.trim(),
+          descricao.trim(),
+          disponivel ? 1 : 0,
+          categoria
+        ]
+      );
+
+      return this.findById(info.lastInsertRowid);
+    },
 
   //Update de modelos de pizza
   async update(id, { nome, descricao, disponivel}) {
@@ -46,7 +52,7 @@ const Produtos = {
     if (!atual) return null;
 
     run(`
-      UPDATE pizzas SET
+      UPDATE produtos SET
         nome         = ?,
         descricao    = ?,
         disponivel   = ?,

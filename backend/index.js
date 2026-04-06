@@ -14,7 +14,7 @@ const { ready } = require('./src/database/sqlite');  //importa requisições do 
 const routes    = require('./src/routes/routes');   //importa as rotas no arquivo de rotas
 
 ready.then(() => {
-    app.get("/", (req, res) => {
+    app.get("/api", (req, res) => {
         res.sendFile(path.join(__dirname, "src/pages/api.html"));
     });
 
