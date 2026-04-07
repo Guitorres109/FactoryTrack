@@ -284,3 +284,4 @@ João Pedro Nascimento Ferreira
 
 Este projeto está sob a licença MIT.
 Sinta-se livre para usar e modificar 🚀
+Eclesiastes 4:9-12 (NVI): "É melhor ter companhia do que estar sozinho, porque maior é a recompensa pelo trabalho de duas pessoas...".
