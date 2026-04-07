@@ -266,7 +266,16 @@ factorytrack/
 
 
 Pietro Pardim Vieira
-* GitHub: https://github.com/seu-usuario
+* GitHub: [https://github.com/seu-usuario](https://github.com/pietroxz777)
+
+Nicolas Stekl Tordino
+* GitHub: https://github.com/nttordino
+
+Guilherme Barbosa Torres
+* GitHub: https://github.com/guitorres109
+
+João Pedro Nascimento Ferreira
+* GitHub: https://github.com/joaozinhotx/javazin
 
 
 ---
