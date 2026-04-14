@@ -241,6 +241,48 @@ router.get('/usuarios', auth, async (req, res) => {
   }
 });
 
+router.post('/usuarios', auth, async (req, res) => {
+  try {
+    if (req.usuario.perfil !== 'Administrador')
+      return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+    const { nome, email, senha, perfil } = req.body;
+    if (!nome || !email || !senha)
+      return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios' });
+    res.status(201).json(await Usuario.create({ nome, email, senha, perfil }));
+  } catch (e) {
+    if (e.message?.includes('UNIQUE')) return res.status(400).json({ erro: 'E-mail já cadastrado' });
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+//====================================
+//Rota para atualizar ID 
+//====================================
+
+router.put('/usuarios/:id', auth, async (req, res) => {
+  try {
+    if (req.usuario.perfil !== 'Administrador')
+      return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+    const u = await Usuario.update(req.params.id, req.body);
+    if (!u) return res.status(404).json({ erro: 'Usuário não encontrado' });
+    res.json(u);
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
+
+//====================================
+//Rota para deletar os usuarios 
+//====================================
+
+router.delete('/usuarios/:id', auth, async (req, res) => {
+  try {
+    if (req.usuario.perfil !== 'Administrador')
+      return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+    const ok = await Usuario.delete(req.params.id);
+    if (!ok) return res.status(404).json({ erro: 'Usuário não encontrado' });
+    res.json({ mensagem: 'Usuário deletado' });
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
+
 // ================================
 // DEBUG
 // ================================

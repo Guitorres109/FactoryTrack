@@ -397,11 +397,8 @@ async function salvarordemMesa() {
     await api('POST', '/ordens', {
       cliente:        clienteId,
       itens,
-      taxaEntrega:    0,
       formaPagamento: 'pix',
       observacoes:    document.getElementById('pm-obs').value,
-      mesa,
-      origem:         'mesa',
       garcom:         USUARIO_LOGADO?.id,
     });
     toast(`ordem lançado na Mesa ${mesa}! 🍕`);
@@ -536,17 +533,12 @@ async function carregarProdutos() {
     el.innerHTML = `
       <table>
         <thead>
-          <tr><th>Nome</th><th>Categoria</th><th>Ingredientes</th><th>P</th><th>M</th><th>G</th><th>Status</th><th>Ações</th>
+          <tr><th>Nome</th><th>Status</th><th>Ações</th>
         </thead>
         <tbody>
           ${cProdutos.map(p => `
             <tr>
               <td><strong>${p.nome}</strong><br><small style="color:var(--muted)">${p.descricao || ''}</small></td>
-              <td><span class="badge b-cat">${p.categoria || 'tradicional'}</span></td>
-              <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.ingredientes}</td>
-              <td>${R$(p.precos?.P)}</td>
-              <td>${R$(p.precos?.M)}</td>
-              <td><strong style="color:var(--gold)">${R$(p.precos?.G)}</strong></td>
               <td><span class="badge ${p.disponivel ? 'b-on' : 'b-off'}">${p.disponivel ? '✅ Disponível' : '❌ Off'}</span></td>
               <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm" onclick="editarProduto('${p._id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarProduto('${p._id}','${p.nome}')">🗑️</button></div></td>
              </tr>`).join('')}
@@ -559,9 +551,6 @@ async function carregarProdutos() {
 
 function abrirProduto() {
   document.getElementById('m-Produto-t').textContent = 'Novo Produto';
-  ['p-id','p-nome','p-ing','p-desc','p-pp','p-pm','p-pg']
-    .forEach(id => document.getElementById(id).value = '');
-  document.getElementById('p-cat').value  = 'tradicional';
   document.getElementById('p-disp').value = 'true';
   abrir('m-Produto');
 }
@@ -576,12 +565,7 @@ function editarProduto(id) {
   document.getElementById('m-Produto-t').textContent = 'Editar Produto';
   document.getElementById('p-id').value   = p._id;
   document.getElementById('p-nome').value = p.nome;
-  document.getElementById('p-ing').value  = p.ingredientes;
   document.getElementById('p-desc').value = p.descricao || '';
-  document.getElementById('p-pp').value   = p.precos?.P || '';
-  document.getElementById('p-pm').value   = p.precos?.M || '';
-  document.getElementById('p-pg').value   = p.precos?.G || '';
-  document.getElementById('p-cat').value  = p.categoria || 'tradicional';
   document.getElementById('p-disp').value = String(p.disponivel);
   abrir('m-Produto');
 }
@@ -593,19 +577,11 @@ function editarProduto(id) {
 async function salvarProduto() {
   const id   = document.getElementById('p-id').value;
   const nome = document.getElementById('p-nome').value.trim();
-  const ing  = document.getElementById('p-ing').value.trim();
-  if (!nome || !ing) { toast('Nome e ingredientes são obrigatórios', 'err'); return; }
+  if (!nome) { toast('Nome é obrigatório', 'err'); return; }
 
   const d = {
     nome,
-    ingredientes: ing,
     descricao:    document.getElementById('p-desc').value.trim(),
-    precos: {
-      P: parseFloat(document.getElementById('p-pp').value) || 0,
-      M: parseFloat(document.getElementById('p-pm').value) || 0,
-      G: parseFloat(document.getElementById('p-pg').value) || 0,
-    },
-    categoria:  document.getElementById('p-cat').value,
     disponivel: document.getElementById('p-disp').value === 'true',
   };
 
@@ -710,31 +686,46 @@ function editarCliente(id) {
 //====================================
 
 async function salvarCliente() {
-  const id   = document.getElementById('c-id').value;
+  const id = document.getElementById('c-id').value.trim();
+
   const nome = document.getElementById('c-nome').value.trim();
   const tel  = document.getElementById('c-tel').value.trim();
-  if (!nome || !tel) { toast('Nome e telefone são obrigatórios', 'err'); return; }
+
+  if (!nome || !tel) {
+    toast('Nome e telefone são obrigatórios', 'err');
+    return;
+  }
 
   const d = {
     nome,
     telefone: tel,
     endereco: {
-      rua:         document.getElementById('c-rua').value.trim(),
-      numero:      document.getElementById('c-num').value.trim(),
-      bairro:      document.getElementById('c-bairro').value.trim(),
-      cidade:      document.getElementById('c-cidade').value.trim(),
-      cep:         document.getElementById('c-cep').value.trim(),
+      rua: document.getElementById('c-rua').value.trim(),
+      numero: document.getElementById('c-num').value.trim(),
+      bairro: document.getElementById('c-bairro').value.trim(),
+      cidade: document.getElementById('c-cidade').value.trim(),
+      cep: document.getElementById('c-cep').value.trim(),
       complemento: document.getElementById('c-comp').value.trim(),
     },
     observacoes: document.getElementById('c-obs').value.trim(),
   };
 
   try {
-    id ? await api('PUT', '/clientes/' + id, d) : await api('POST', '/clientes', d);
-    toast(id ? 'Cliente atualizado!' : 'Cliente cadastrado!');
+    const isEdit = !!id;
+
+    if (isEdit) {
+      await api('PUT', `/clientes/${id}`, d);
+    } else {
+      await api('POST', '/clientes', d);
+    }
+
+    toast(isEdit ? 'Cliente atualizado!' : 'Cliente cadastrado!');
     fechar('m-cliente');
     carregarClientes();
-  } catch (e) { toast('Erro: ' + e.message, 'err'); }
+
+  } catch (e) {
+    toast('Erro: ' + (e?.message || 'desconhecido'), 'err');
+  }
 }
 
 //====================================
@@ -793,7 +784,7 @@ async function carregarordens() {
 //função de abrir ordens
 //====================================
 
-async function abrirordem() {
+async function abrirOrdem() {
   try {
     // Rota alterada para produtos
     if (!cProdutos.length)   cProdutos   = await api('GET', '/produtos');
@@ -805,12 +796,9 @@ async function abrirordem() {
     cClientes.map(c => `<option value="${c._id}">${c.nome} · ${c.telefone}</option>`).join('');
 
   document.getElementById('itens-lista').innerHTML = '';
-  document.getElementById('ped-taxa').value  = '0';
   document.getElementById('ped-obs').value   = '';
   document.getElementById('ped-pag').value   = 'pix';
-  document.getElementById('ped-sub').textContent = 'R$ 0,00';
   document.getElementById('ped-tot').textContent = 'R$ 0,00';
-  document.getElementById('wrap-troco').style.display = 'none';
 
   addItem();
   abrir('m-ordem');
@@ -829,7 +817,6 @@ function addItem() {
 
   d.innerHTML = `
     <select class="ip" onchange="recalc()"><option value="">Selecione...</option>${opts}</select>
-    <select class="it" onchange="recalc()"><option value="P">P</option><option value="M">M</option><option value="G" selected>G</option></select>
     <input class="iq" type="number" value="1" min="1" oninput="recalc()">
     <div class="is" style="font-size:.8rem;text-align:right;color:var(--muted)">R$ 0,00</div>
     <button class="btn-rm" onclick="this.parentElement.remove(); recalc()">×</button>`;
@@ -841,10 +828,9 @@ function recalc() {
   let sub = 0;
   document.querySelectorAll('#itens-lista .item-row').forEach(row => {
     const sel = row.querySelector('.ip');
-    const tam = row.querySelector('.it').value.toLowerCase();
     const qtd = parseInt(row.querySelector('.iq').value) || 0;
     const opt = sel.options[sel.selectedIndex];
-    const pc  = parseFloat(opt?.dataset?.[tam] || 0);
+    const pc  = cProdutos.find
     const s   = pc * qtd;
     sub += s;
     row.querySelector('.is').textContent = R$(s);
@@ -964,12 +950,13 @@ async function carregarUsuarios() {
         <tbody>
           ${us.map(u => `
             <tr>
+              <input type="hidden" id= "e-id" value= ${u._id}>
               <td><strong>${u.nome}</strong></td>
               <td>${u.email}</td>
               <td><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
               <td><span class="badge ${u.ativo ? 'b-on' : 'b-off'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
               <td style="font-size:.73rem;color:var(--muted)">${new Date(u.createdAt).toLocaleDateString('pt-BR')}</td>
-              <td><button class="btn btn-danger btn-sm" onclick="deletarUsuario('${u._id}','${u.nome}')">🗑️</button></td>
+              <td><button class="btn btn-danger btn-sm" onclick="abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}')"">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarUsuario('${u._id}','${u.nome}')">🗑️</button></td>
             </tr>`).join('')}
         </tbody>
       </table>`;
@@ -1007,6 +994,42 @@ async function salvarUsuario() {
     fechar('m-usuario');
     carregarUsuarios();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
+}
+
+function abrirEdicaoUsuario(id, nome, email, perfil) {
+  abrir('e-usuario'); // abre modal
+
+  document.getElementById('e-nome').value = nome;
+  document.getElementById('e-email').value = email;
+  document.getElementById('e-perfil').value = perfil;
+
+  document.getElementById('u-senha').value = ''; // senha sempre vazia
+}
+
+async function editarUsuario() {
+  const id = document.getElementById('e-id').value;
+  const nome  = document.getElementById('e-nome').value.trim();
+  const email = document.getElementById('e-email').value.trim();
+  const perfil = document.getElementById('e-perfil').value;
+
+  if (!nome || !email) {
+    toast('Nome e email são obrigatórios', 'err');
+    return;
+  }
+
+  try {
+    const body = { nome, email, perfil };
+
+    if (id) {
+      await api('PUT', `/usuarios/${id}`, body);
+      toast('Usuário atualizado!');
+    }
+    fechar('e-usuario');
+    carregarUsuarios();
+
+  } catch (e) {
+    toast('Erro: ' + (e.message || 'desconhecido'), 'err');
+  }
 }
 
 //====================================

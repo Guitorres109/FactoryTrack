@@ -137,7 +137,7 @@
     <section id="pg-ordens" class="secao">
       <div class="pg-header">
         <div><h2>Ordens</h2><p>Acompanhe e gerencie os Ordens</p></div>
-        <button class="btn btn-red" onclick="abrirPedido()">+ Novo Pedido</button>
+        <button class="btn btn-red" onclick="abrirOrdem()">+ Nova ordem</button>
       </div>
       <div class="pg-body">
         <div class="card">
@@ -154,7 +154,7 @@
           <h2 id="pg-Produtos-titulo">Produtos</h2>
           <p id="pg-Produtos-sub">Gerencie o cardápio</p>
         </div>
-        <button class="btn btn-red" id="btn-nova-Produto" onclick="abrirProduto()">+ Nova Produto</button>
+        <button class="btn btn-red" id="btn-nova-Produto" onclick="abrirProduto()">+ Novo Produto</button>
       </div>
       <div class="pg-body">
         <div class="card">
@@ -197,53 +197,6 @@
       </div>
     </section>
 
-    <section id="pg-mesas" class="secao">
-      <div class="pg-header">
-        <div>
-          <h2>Mesas</h2>
-          <p id="mesas-sub">Seus ordens ativos</p>
-        </div>
-        <button class="btn btn-red" onclick="abrirPedidoMesa()">+ Novo Pedido</button>
-      </div>
-      <div class="pg-body">
-        <div class="stats-grid" style="margin-bottom:18px">
-          <div class="stat cr">
-            <span class="ico">📋</span>
-            <div class="lbl">Minhas Ordens</div>
-            <div class="val" id="g-ped">—</div>
-            <div class="sub" id="g-ped-sub">hoje</div>
-          </div>
-          <div class="stat cg">
-            <span class="ico">🪑</span>
-            <div class="lbl">Mesas Ativas</div>
-            <div class="val" id="g-mesas">—</div>
-            <div class="sub">com pedido aberto</div>
-          </div>
-          <div class="stat cb">
-            <span class="ico">👨‍🍳</span>
-            <div class="lbl">Em Preparo</div>
-            <div class="val" id="g-preparo">—</div>
-            <div class="sub">sendo preparados</div>
-          </div>
-          <div class="stat cp">
-            <span class="ico">🛵</span>
-            <div class="lbl">Prontos</div>
-            <div class="val" id="g-prontos">—</div>
-            <div class="sub">aguardando retirada</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-          <span style="font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Mesa:</span>
-          <div style="display:flex;gap:5px;flex-wrap:wrap" id="mesa-botoes"></div>
-          <button class="btn btn-ghost btn-sm" onclick="carregarMesas(null)">Todas</button>
-        </div>
-        <div id="grid-mesas" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px;">
-          <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
-        </div>
-      </div>
-    </section>
-  </div>
-</div>
 
 <div id="m-Produto" class="modal-bg">
   <div class="modal">
@@ -306,22 +259,20 @@
   </div>
 </div>
 
-<div id="m-pedido" class="modal-bg">
+<div id="m-ordem" class="modal-bg">
   <div class="modal lg">
-    <h3>Novo Pedido</h3>
+    <h3>Nova Ordem</h3>
     <div class="fg"><label>Cliente *</label><select id="ped-cli"></select></div>
     <div class="div"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-      <label style="margin-bottom:0;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Itens do Pedido</label>
+      <label style="margin-bottom:0;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Itens do ordem</label>
       <button class="btn btn-ghost btn-sm" onclick="addItem()">+ Produto</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 68px 58px 68px 30px;gap:6px;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;padding:0 1px">
-      <span>Produto</span><span>Tam.</span><span>Qtd</span><span>Subtotal</span><span></span>
+      <span>Produto</span><span>Qtd</span>
     </div>
     <div id="itens-lista"></div>
     <div class="total-box">
-      <div class="row"><span>Subtotal</span><span id="ped-sub">R$ 0,00</span></div>
-      <div class="row"><span>Taxa de Entrega (R$)</span><input id="ped-taxa" type="number" min="0" step="0.5" value="0" style="width:72px;text-align:right;padding:3px 6px" oninput="recalc()"></div>
       <div class="row tot"><span>TOTAL</span><span id="ped-tot">R$ 0,00</span></div>
     </div>
     <div class="fr2">
@@ -330,8 +281,8 @@
     </div>
     <div class="fg"><label>Observações</label><textarea id="ped-obs" rows="2" placeholder="Sem cebola, massa fina..."></textarea></div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-pedido')">Cancelar</button>
-      <button class="btn btn-red"   onclick="salvarPedido()">Confirmar Pedido</button>
+      <button class="btn btn-ghost" onclick="fechar('m-ordem')">Cancelar</button>
+      <button class="btn btn-red"   onclick="salvarordem()">Confirmar ordem</button>
     </div>
   </div>
 </div>
@@ -344,7 +295,6 @@
       <select id="st-val">
         <option value="recebido">📥 Recebido</option>
         <option value="em_preparo">👨‍🍳 Em Preparo</option>
-        <option value="saiu_entrega">🛵 Saiu para Entrega</option>
         <option value="entregue">✅ Entregue</option>
         <option value="cancelado">❌ Cancelado</option>
       </select>
@@ -372,43 +322,17 @@
   </div>
 </div>
 
-<div id="m-pedido-mesa" class="modal-bg">
-  <div class="modal lg">
-    <h3>Pedido de Mesa</h3>
+<div id="e-usuario" class="modal-bg">
+  <div class="modal">
+    <h3>Novo Usuário</h3>
     <div class="fr2">
-      <div class="fg"><label>Mesa *</label><select id="pm-mesa"><option value="">— Selecione a mesa —</option><option value="1">Mesa 1</option><option value="2">Mesa 2</option><option value="3">Mesa 3</option><option value="4">Mesa 4</option><option value="5">Mesa 5</option><option value="6">Mesa 6</option><option value="7">Mesa 7</option><option value="8">Mesa 8</option><option value="9">Mesa 9</option><option value="10">Mesa 10</option></select></div>
-      <div class="fg"><label>Cliente (opcional)</label><select id="pm-cli"><option value="">— Sem cadastro —</option></select></div>
+      <div class="fg"><label>Nome *</label><input id="e-nome" placeholder="Nome completo"></div>
+      <div class="fg"><label>Perfil</label><select id="e-perfil"><option value="Atendente">Atendente</option><option value="Garcom">Garçom</option><option value="Administrador">Administrador</option></select></div>
     </div>
-    <div class="div"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-      <label style="margin-bottom:0;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Itens do Pedido</label>
-      <button class="btn btn-ghost btn-sm" onclick="addItemMesa()">+ Produto</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 68px 58px 68px 30px;gap:6px;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;padding:0 1px">
-      <span>Produto</span><span>Tam.</span><span>Qtd</span><span>Subtotal</span><span></span>
-    </div>
-    <div id="itens-mesa-lista"></div>
-    <div class="total-box">
-      <div class="row"><span>Subtotal</span><span id="pm-sub">R$ 0,00</span></div>
-      <div class="row tot"><span>TOTAL DA MESA</span><span id="pm-tot">R$ 0,00</span></div>
-    </div>
-    <div class="fg"><label>Observações</label><textarea id="pm-obs" rows="2" placeholder="Sem cebola, bem passado..."></textarea></div>
+    <div class="fg"><label>E-mail *</label><input id="e-email" type="email" placeholder="usuario@Produtoria.com"></div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-pedido-mesa')">Cancelar</button>
-      <button class="btn btn-red"   onclick="salvarPedidoMesa()">Confirmar Pedido</button>
-    </div>
-  </div>
-</div>
-
-<div id="m-fechar-mesa" class="modal-bg">
-  <div class="modal" style="max-width:440px">
-    <h3 id="fm-titulo">Fechar Mesa</h3>
-    <div id="fm-resumo" style="margin-bottom:12px"></div>
-    <div class="total-box"><div class="row"><span>Total consumido</span><span id="fm-total">R$ 0,00</span></div></div>
-    <div class="fg"><label>Forma de Pagamento</label><select id="fm-pag"><option value="pix">PIX</option><option value="cartao_credito">Cartão de Crédito</option><option value="cartao_debito">Cartão de Débito</option><option value="dinheiro">Dinheiro</option></select></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-fechar-mesa')">Cancelar</button>
-      <button class="btn btn-green" onclick="confirmarFechamento()">✅ Fechar Mesa</button>
+      <button class="btn btn-ghost" onclick="fechar('e-usuario')">Cancelar</button>
+      <button class="btn btn-ghost" onclick="editarUsuario()">Editar</button>
     </div>
   </div>
 </div>

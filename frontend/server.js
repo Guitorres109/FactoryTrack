@@ -1,8 +1,10 @@
 const PORT = 3010;
 
+const os = require('os');
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+let IP = null
 
 const app = express();
 
@@ -25,8 +27,27 @@ app.get("/js/script.js", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/js/script.js"));
 });
 
+function obterIP() {
+  // Obtém as interfaces de rede
+  const interfaces = os.networkInterfaces();
+
+  // Itera pelas interfaces
+  for (const iface in interfaces) {
+    if (iface.toLowerCase() === 'ethernet 3') { // verifica o nome do adaptador
+      for (const ifaceDetails of interfaces[iface]) {
+        // Filtra a interface IPv4 e que esteja ativa (não "internal")
+        if (ifaceDetails.family === 'IPv4' && !ifaceDetails.internal) {
+            IP = ifaceDetails.address; 
+            return IP // Retorna o IP
+        }
+      }
+    }
+  }
+  return 'Adaptador Ethernet 3 não encontrado ou sem IP atribuído';
+}
 
 // 🚀 Inicia servidor
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    obterIP()
+    console.log(`Frontend rodando em http://${IP}:${PORT}`);
 });
