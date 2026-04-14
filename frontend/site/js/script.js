@@ -508,10 +508,10 @@ async function carregarDashboard() {
     const elC = document.getElementById('dash-cardapio');
     elC.innerHTML = Produtos.filter(p => p.disponivel).slice(0, 8).map(p => `
       <div class="mini-row">
-        <span>⚙️ ${p.nome}</span>
+        <span>🛠️ ${p.nome}</span>
         <small style="color:var(--muted)">${R$(p.precos?.G)}</small>
       </div>`).join('') ||
-      '<div class="empty"><span class="ei">🍕</span>Nenhuma Produto</div>';
+      '<div class="empty"><span class="ei">⚙️</span>Nenhuma Produto</div>';
 
   } catch (e) { toast('Erro dashboard: ' + e.message, 'err'); }
 }
@@ -654,6 +654,7 @@ function buscarCli(v) {
 //====================================
 
 function abrirCliente() {
+  console.log("safdsfa")
   document.getElementById('m-cli-t').textContent = 'Novo Cliente';
   ['c-id','c-nome','c-tel','c-rua','c-num','c-bairro','c-cidade','c-cep','c-comp','c-obs']
     .forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
@@ -664,23 +665,45 @@ function abrirCliente() {
 //função de editar cliente
 //====================================
 
-function editarCliente(id) {
-  const c = cClientes.find(x => x._id === id);
-  if (!c) return;
-  document.getElementById('m-cli-t').textContent    = 'Editar Cliente';
-  document.getElementById('c-id').value     = c._id;
-  document.getElementById('c-nome').value   = c.nome;
-  document.getElementById('c-tel').value    = c.telefone;
-  document.getElementById('c-rua').value    = c.endereco?.rua || '';
-  document.getElementById('c-num').value    = c.endereco?.numero || '';
-  document.getElementById('c-bairro').value = c.endereco?.bairro || '';
-  document.getElementById('c-cidade').value = c.endereco?.cidade || '';
-  document.getElementById('c-cep').value    = c.endereco?.cep || '';
-  document.getElementById('c-comp').value   = c.endereco?.complemento || '';
-  document.getElementById('c-obs').value    = c.observacoes || '';
-  abrir('m-cliente');
-}
 
+async function editarCliente(id) {
+  try {
+    // Abrir o modal
+    abrir('m-cliente');
+
+    // Procurar o cliente pelo ID
+    const c = cClientes.find(x => x._id === id);
+    
+    // Verificar se o cliente existe
+    if (!c) {
+      console.error(`Cliente com ID ${id} não encontrado.`);
+      return; // Se o cliente não for encontrado, interrompe a execução
+    }
+
+    // Atualizar o título do modal para "Editar Cliente"
+    document.getElementById('m-cli-t').textContent = 'Editar Cliente';
+
+    // Função para preencher os campos do formulário
+    const preencherCampo = (campoId, valor) => {
+      document.getElementById(campoId).value = valor || ''; // Preenche com valor ou vazio
+    };
+
+    // Preencher os campos com os dados do cliente
+    document.getElementById('c-id').value = c._id;
+    preencherCampo('c-nome', c.nome);
+    preencherCampo('c-tel', c.telefone);
+    preencherCampo('c-rua', c.endereco?.rua);
+    preencherCampo('c-num', c.endereco?.numero);
+    preencherCampo('c-bairro', c.endereco?.bairro);
+    preencherCampo('c-cidade', c.endereco?.cidade);
+    preencherCampo('c-cep', c.endereco?.cep);
+    preencherCampo('c-comp', c.endereco?.complemento);
+    preencherCampo('c-obs', c.observacoes);
+
+  } catch (error) {
+    console.error('Erro ao editar cliente:', error);
+  }
+}
 //====================================
 //função de salvar novo cliente
 //====================================
@@ -951,6 +974,7 @@ async function carregarUsuarios() {
           ${us.map(u => `
             <tr>
               <input type="hidden" id= "e-id" value= ${u._id}>
+              <input type="hidden" id= "e-ativo" value= ${u.ativo}>
               <td><strong>${u.nome}</strong></td>
               <td>${u.email}</td>
               <td><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
@@ -998,35 +1022,55 @@ async function salvarUsuario() {
 
 function abrirEdicaoUsuario(id, nome, email, perfil) {
   abrir('e-usuario'); // abre modal
-
   document.getElementById('e-nome').value = nome;
   document.getElementById('e-email').value = email;
   document.getElementById('e-perfil').value = perfil;
-
   document.getElementById('u-senha').value = ''; // senha sempre vazia
 }
 
 async function editarUsuario() {
   const id = document.getElementById('e-id').value;
-  const nome  = document.getElementById('e-nome').value.trim();
+  const nome = document.getElementById('e-nome').value.trim();
   const email = document.getElementById('e-email').value.trim();
   const perfil = document.getElementById('e-perfil').value;
+  
+  // Verificar diretamente o valor do checkbox
+  const ativo = document.getElementById('e-ativo').checked ? 1 : 0;
 
+  console.log('Checkbox Ativo:', ativo); // Log para depuração
+
+  const senha = document.getElementById('e-senha').value.trim();
+  const confirmarSenha = document.getElementById('e-confirmarSenha').value.trim();
+
+  // Validações iniciais
   if (!nome || !email) {
     toast('Nome e email são obrigatórios', 'err');
     return;
   }
 
-  try {
-    const body = { nome, email, perfil };
+  if (!id) {
+    toast('Erro: ID de usuário inválido', 'err');
+    return;
+  }
 
-    if (id) {
-      await api('PUT', `/usuarios/${id}`, body);
-      toast('Usuário atualizado!');
+  try {
+    // Criação do corpo da requisição
+    let body = { nome, email, perfil, ativo };
+
+    // Validar e incluir senha, se fornecida
+    if (senha) {
+      if (senha !== confirmarSenha) {
+        toast('Erro: As senhas não correspondem', 'err');
+        return;
+      }
+      body.senha = senha;
     }
+
+    // Enviar a requisição para a API
+    await api('PUT', `/usuarios/${id}`, body);
+    toast('Usuário atualizado!');
     fechar('e-usuario');
     carregarUsuarios();
-
   } catch (e) {
     toast('Erro: ' + (e.message || 'desconhecido'), 'err');
   }

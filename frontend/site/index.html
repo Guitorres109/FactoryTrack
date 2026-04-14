@@ -99,7 +99,7 @@
             <div class="sub">cadastrados</div>
           </div>
           <div class="stat cb">
-            <span class="ico">⚙️</span>
+            <span class="ico">🧰</span>
             <div class="lbl">Produtos</div>
             <div class="val" id="s-piz">—</div>
             <div class="sub">cadastrados</div>
@@ -125,7 +125,7 @@
             </div>
           </div>
           <div class="card">
-            <div class="card-head"><h3>Cardápio Ativo</h3></div>
+            <div class="card-head"><h3>Produtos Disponiveis</h3></div>
             <div class="card-body" id="dash-cardapio">
               <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
             </div>
@@ -152,7 +152,7 @@
       <div class="pg-header">
         <div>
           <h2 id="pg-Produtos-titulo">Produtos</h2>
-          <p id="pg-Produtos-sub">Gerencie o cardápio</p>
+          <p id="pg-Produtos-sub">Gerencie seus produtos</p>
         </div>
         <button class="btn btn-red" id="btn-nova-Produto" onclick="abrirProduto()">+ Novo Produto</button>
       </div>
@@ -330,6 +330,9 @@
       <div class="fg"><label>Perfil</label><select id="e-perfil"><option value="Atendente">Atendente</option><option value="Garcom">Garçom</option><option value="Administrador">Administrador</option></select></div>
     </div>
     <div class="fg"><label>E-mail *</label><input id="e-email" type="email" placeholder="usuario@Produtoria.com"></div>
+    <div class="fg"><label>Nova Senha *</label><input id="e-senha" type="password" placeholder="Mínimo 6 caracteres"></div>
+    <div class="fg"><label>Confirmar Senha *</label><input id="e-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres"></div>
+    <div class="fg"><label id="fg-checkbox"><input type="checkbox" id="e-ativo">Usario Inativo</label></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('e-usuario')">Cancelar</button>
       <button class="btn btn-ghost" onclick="editarUsuario()">Editar</button>
