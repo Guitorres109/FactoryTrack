@@ -13,10 +13,18 @@ app.use(express.json());
 const { ready } = require('./src/database/sqlite');  //importa requisições do banco de dados
 const routes    = require('./src/routes/routes');   //importa as rotas no arquivo de rotas
 
+
 ready.then(() => {
-    app.get("/api", (req, res) => {
-        res.sendFile(path.join(__dirname, "src/pages/api.html"));
-    });
+  app.get("/api", (req, res) => {
+    res.sendFile(path.join(__dirname, "src/pages/api.html"));
+  });
+  
+  app.get("/verificar", (req, res) => {
+      res.json({
+          status: "success",
+          message: "Servidor está online e respondendo!"
+      });
+  });
 
   app.use('/api', routes);  //define /api/(rota) para requisições da API
 
