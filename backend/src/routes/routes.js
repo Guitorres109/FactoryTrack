@@ -2,6 +2,7 @@ const express  = require('express');
 const jwt      = require('jsonwebtoken');
 const router   = express.Router();
 const auth     = require('../middlewares/auth');
+const { Op } = require('sequelize');
 
 const Usuario  = require('../models/usuario');
 const Produto  = require('../models/produto');
@@ -104,10 +105,30 @@ router.delete('/produtos/:id', auth, async (req, res) => {
 // ================================
 // CLIENTES
 // ================================
+
 router.get('/clientes', auth, async (req, res) => {
   try {
-    res.json(await Cliente.findAll());
+    const { busca } = req.query;
+
+    let where = {};
+
+    if (busca && busca.trim().length >= 2) {
+      where = {
+        nome: {
+          [Op.like]: `%${busca.trim()}%`
+        }
+      };
+    }
+
+    const clientes = await Cliente.findAll({
+      where,
+      limit: 20,
+      order: [['nome', 'ASC']]
+    });
+
+    res.json(clientes);
   } catch (e) {
+    console.error(e);
     res.status(500).json({ erro: e.message });
   }
 });

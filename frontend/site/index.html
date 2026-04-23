@@ -204,22 +204,8 @@
     <input type="hidden" id="p-id">
     <div class="fr2">
       <div class="fg"><label>Nome *</label><input id="p-nome" placeholder="Ex: Calabresa"></div>
-      <div class="fg"><label>Categoria</label>
-        <select id="p-cat">
-          <option value="tradicional">Tradicional</option>
-          <option value="especial">Especial</option>
-          <option value="premium">Premium</option>
-          <option value="doce">Doce</option>
-        </select>
-      </div>
     </div>
-    <div class="fg"><label>Ingredientes *</label><input id="p-ing" placeholder="Calabresa, cebola, mussarela..."></div>
     <div class="fg"><label>Descrição</label><input id="p-desc" placeholder="Breve descrição..."></div>
-    <div class="fr3">
-      <div class="fg"><label>Preço P (R$)</label><input id="p-pp" type="number" step="0.01" min="0" placeholder="35,00"></div>
-      <div class="fg"><label>Preço M (R$)</label><input id="p-pm" type="number" step="0.01" min="0" placeholder="45,00"></div>
-      <div class="fg"><label>Preço G (R$)</label><input id="p-pg" type="number" step="0.01" min="0" placeholder="55,00"></div>
-    </div>
     <div class="fg"><label>Disponível</label>
       <select id="p-disp">
         <option value="true">✅ Sim</option>
@@ -336,6 +322,52 @@
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('e-usuario')">Cancelar</button>
       <button class="btn btn-ghost" onclick="editarUsuario()">Editar</button>
+    </div>
+  </div>
+</div>
+
+<div id="e-cliente" class="modal-bg">
+  <div class="modal">
+    <h3 id="m-cli-t">Editar Cliente</h3>
+    <div class="fr2">
+      <div class="fg"><label>Nome *</label><input id="e-nomeclient" placeholder="João da Silva"></div>
+      <div class="fg"><label>Telefone *</label><input id="e-tel" placeholder="(11) 99999-9999"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Rua</label><input id="e-rua" placeholder="Rua das Flores"></div>
+      <div class="fg"><label>Número</label><input id="e-num" placeholder="123"></div>
+    </div>
+    <div class="fr3">
+      <div class="fg"><label>Bairro</label><input id="e-bairro" placeholder="Centro"></div>
+      <div class="fg"><label>Cidade</label><input id="e-cidade" placeholder="São Paulo"></div>
+      <div class="fg"><label>CEP</label><input id="e-cep" placeholder="00000-000"></div>
+    </div>
+    <div class="fg"><label>Complemento</label><input id="e-comp" placeholder="Apto 12, Bloco B"></div>
+    <div class="fg"><label>Observações</label><input id="e-obs" placeholder="Alergia, preferências..."></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="fechar('e-cliente')">Cancelar</button>
+      <button class="btn btn-red"   onclick="editarCliente()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div id="e-produto" class="modal-bg">
+  <div class="modal">
+    <h3 id="e-Produto-t">Editar Produto</h3>
+    <input type="hidden" id="p-id">
+    <div class="fr2">
+      <div class="fg"><label>Nome *</label><input id="e-nomeproduto" placeholder="Ex: Calabresa"></div>
+    </div>
+    <div class="fg"><label>Descrição</label><input id="e-desc" placeholder="Breve descrição..."></div>
+    <div class="fg"><label>Disponível</label>
+      <select id="e-disp">
+        <option value="true">✅ Sim</option>
+        <option value="false">❌ Não</option>
+      </select>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="fechar('e-produto')">Cancelar</button>
+      <button class="btn btn-red"   onclick="editarProduto()">Salvar</button>
     </div>
   </div>
 </div>

@@ -2,7 +2,7 @@
 //rota da Api
 //====================================
 
-const API = 'http://10.106.208.29:3000/api';
+const API = 'http://192.168.121.145:3000/api';
 
 let cProdutos   = [];
 let cClientes = [];
@@ -538,9 +538,10 @@ async function carregarProdutos() {
         <tbody>
           ${cProdutos.map(p => `
             <tr>
+              <input type="hidden" id= "p-id" value= ${p._id}>
               <td><strong>${p.nome}</strong><br><small style="color:var(--muted)">${p.descricao || ''}</small></td>
               <td><span class="badge ${p.disponivel ? 'b-on' : 'b-off'}">${p.disponivel ? '✅ Disponível' : '❌ Off'}</span></td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm" onclick="editarProduto('${p._id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarProduto('${p._id}','${p.nome}')">🗑️</button></div></td>
+              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm" onclick='abrirEdicaoProduto("${p.nome}, ${p.descricao}, ${p.disponivel}")'>✏️</button><button class="btn btn-danger btn-sm" onclick="deletarProduto('${p._id}','${p.nome}')">🗑️</button></div></td>
              </tr>`).join('')}
         </tbody>
       </table>`;
@@ -558,18 +559,6 @@ function abrirProduto() {
 //====================================
 //função de editar Produto no DB
 //====================================
-
-function editarProduto(id) {
-  const p = cProdutos.find(x => x._id === id);
-  if (!p) return;
-  document.getElementById('m-Produto-t').textContent = 'Editar Produto';
-  document.getElementById('p-id').value   = p._id;
-  document.getElementById('p-nome').value = p.nome;
-  document.getElementById('p-desc').value = p.descricao || '';
-  document.getElementById('p-disp').value = String(p.disponivel);
-  abrir('m-Produto');
-}
-
 //====================================
 //função de salvar Produtos no DB
 //====================================
@@ -585,15 +574,61 @@ async function salvarProduto() {
     disponivel: document.getElementById('p-disp').value === 'true',
   };
 
+  console.log(d)
+
   try {
     // Rotas alteradas para produtos
     id ? await api('PUT', '/produtos/' + id, d) : await api('POST', '/produtos', d);
     toast(id ? 'Produto atualizada!' : 'Produto criada!');
     fechar('m-Produto');
     carregarProdutos();
-  } catch (e) { toast('Erro: ' + e.message, 'err'); }
+  } catch (e) { toast('Erro: ' + e.message, 'err'); console.log(e.message)}
 }
 
+
+function abrirEdicaoProduto(nome, descricao, disponivel) {
+  // console.log("EDITANDO:", c);
+
+  abrir("e-produto")
+  document.getElementById('e-nomeproduto').value = nome || '';
+  document.getElementById('e-desc').value = descricao || '';
+  document.getElementById('e-disp').value = disponivel || false;
+  console.log(nome, descricao, disponivel)
+
+}
+
+async function editarProduto() {
+  const id = document.getElementById('p-id').value;
+  console.log(id)
+  const nome = document.getElementById('e-nomeproduto').value.trim();
+  const descricao = document.getElementById('e-desc').value.trim();
+  const disponivel = document.getElementById('e-disp').value;
+
+  // Validações iniciais
+  if (!nome) {
+    toast('Nome è obrigatório', 'err');
+    return;
+  }
+
+  if (!id) {
+    toast('Erro: ID de cliente inválido', 'err');
+    return;
+  }
+
+  try {
+    // Criação do corpo da requisição
+    let body = { nome, descricao, disponivel };
+
+    // Enviar a requisição para a API
+    await api('PUT', `/produtos/${id}`, body);
+    toast('Produto atualizado!');
+    fechar('e-poduto');
+    carregarProdutos();
+    
+  } catch (e) {
+    toast('Erro: ' + (e.message || 'desconhecido'), 'err');
+  }
+}
 //====================================
 //função de deletar Produtos do cardapio
 //====================================
@@ -614,10 +649,23 @@ async function deletarProduto(id, nome) {
 
 async function carregarClientes(busca = '') {
   const el = document.getElementById('tbl-clientes');
-  el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
+
   try {
-    const url = busca ? `/clientes?busca=${encodeURIComponent(busca)}` : '/clientes';
-    cClientes = await api('GET', url);
+    // evita requisição desnecessária
+    if (busca && busca.length < 2) {
+      el.innerHTML = '';
+      return;
+    }
+
+    el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
+
+    // 🔥 use UMA rota só (mais simples e evita erro)
+    const url = `/clientes${busca ? `?busca=${encodeURIComponent(busca.trim())}` : ''}`;
+
+    const resposta = await api('GET', url);
+
+    // garante que sempre seja array
+    const cClientes = Array.isArray(resposta) ? resposta : [];
 
     if (!cClientes.length) {
       el.innerHTML = '<div class="empty"><span class="ei">👥</span>Nenhum cliente</div>';
@@ -626,27 +674,55 @@ async function carregarClientes(busca = '') {
 
     el.innerHTML = `
       <table>
-        <thead><tr><th>Nome</th><th>Telefone</th><th>Endereço</th><th>Obs</th><th>Ações</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Endereço</th>
+            <th>Obs</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
         <tbody>
-          ${cClientes.map(c => `
-            <tr>
-              <td><strong>${c.nome}</strong></td>
-              <td>${c.telefone}</td>
-              <td style="font-size:.76rem;color:var(--muted)">${[c.endereco?.rua, c.endereco?.numero, c.endereco?.bairro, c.endereco?.cidade].filter(Boolean).join(', ') || '—'}</td>
-              <td style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm" onclick="editarCliente('${c._id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarCliente('${c._id}','${c.nome}')">🗑️</button></div></td>
-            </tr>`).join('')}
+          ${cClientes.map(c => {
+            const endereco = c.endereco
+              ? [c.endereco.rua, c.endereco.numero, c.endereco.bairro, c.endereco.cidade]
+                  .filter(Boolean)
+                  .join(', ')
+              : '—';
+
+            return `
+              <tr>
+                <input type="hidden" id= "e-id" value= ${c._id}>
+                <td><strong>${c.nome || '—'}</strong></td>
+                <td>${c.telefone || '—'}</td>
+                <td style="font-size:.76rem;color:var(--muted)">${endereco || '—'}</td>
+                <td style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
+                <td>
+                  <div style="display:flex;gap:5px">
+                  <button class="btn btn-ghost btn-sm"onclick='abrirEdicaoCliente(${JSON.stringify(c)})'>✏️</button>
+                  <button class="btn btn-danger btn-sm" onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join('')}
         </tbody>
       </table>`;
   } catch (e) {
-    el.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+    console.error('Erro carregarClientes:', e);
+    el.innerHTML = `<div class="empty" style="color:var(--red)">Erro ao carregar clientes</div>`;
   }
 }
 
-let _t;
-function buscarCli(v) {
+let _t = null;
+
+function buscarCli(valor) {
   clearTimeout(_t);
-  _t = setTimeout(() => carregarClientes(v), 400);
+
+  _t = setTimeout(() => {
+    carregarClientes(valor);
+  }, 400);
 }
 
 //====================================
@@ -654,7 +730,6 @@ function buscarCli(v) {
 //====================================
 
 function abrirCliente() {
-  console.log("safdsfa")
   document.getElementById('m-cli-t').textContent = 'Novo Cliente';
   ['c-id','c-nome','c-tel','c-rua','c-num','c-bairro','c-cidade','c-cep','c-comp','c-obs']
     .forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
@@ -666,42 +741,59 @@ function abrirCliente() {
 //====================================
 
 
-async function editarCliente(id) {
+function abrirEdicaoCliente(c) {
+  // console.log("EDITANDO:", c);
+
+  abrir("e-cliente")
+  document.getElementById('e-nomeclient').value = c.nome || '';
+  document.getElementById('e-tel').value = c.telefone || '';
+
+  const end = c.endereco || {};
+
+  document.getElementById('e-rua').value = end.rua || '';
+  document.getElementById('e-num').value = end.numero || '';
+  document.getElementById('e-bairro').value = end.bairro || '';
+  document.getElementById('e-cidade').value = end.cidade || '';
+  document.getElementById('e-cep').value = end.cep || '';
+  document.getElementById('e-comp').value = end.comp || '';
+
+  document.getElementById('e-obs').value = c.observacoes || '';
+}
+
+async function editarCliente() {
+  const id = document.getElementById('e-id').value;
+  const nome = document.getElementById('e-nomeclient').value.trim();
+  const telefone = document.getElementById('e-tel').value.trim();
+  const rua = document.getElementById('e-rua').value.trim();
+  const numero = document.getElementById('e-num').value.trim();
+  const bairro = document.getElementById('e-bairro').value.trim()
+  const cidade = document.getElementById('e-cidade').value.trim()
+  const cep = document.getElementById('e-cep').value.trim()
+  const complemento = document.getElementById('e-comp').value.trim()
+  const observacao = document.getElementById('e-obs').value.trim()
+
+  // Validações iniciais
+  if (!nome || !telefone) {
+    toast('Nome e telefone são obrigatórios', 'err');
+    return;
+  }
+
+  if (!id) {
+    toast('Erro: ID de cliente inválido', 'err');
+    return;
+  }
+
   try {
-    // Abrir o modal
-    abrir('m-cliente');
+    // Criação do corpo da requisição
+    let body = { nome, telefone, rua, numero, bairro, cidade, cep, complemento, observacao };
 
-    // Procurar o cliente pelo ID
-    const c = cClientes.find(x => x._id === id);
-    
-    // Verificar se o cliente existe
-    if (!c) {
-      console.error(`Cliente com ID ${id} não encontrado.`);
-      return; // Se o cliente não for encontrado, interrompe a execução
-    }
-
-    // Atualizar o título do modal para "Editar Cliente"
-    document.getElementById('m-cli-t').textContent = 'Editar Cliente';
-
-    // Função para preencher os campos do formulário
-    const preencherCampo = (campoId, valor) => {
-      document.getElementById(campoId).value = valor || ''; // Preenche com valor ou vazio
-    };
-
-    // Preencher os campos com os dados do cliente
-    document.getElementById('c-id').value = c._id;
-    preencherCampo('c-nome', c.nome);
-    preencherCampo('c-tel', c.telefone);
-    preencherCampo('c-rua', c.endereco?.rua);
-    preencherCampo('c-num', c.endereco?.numero);
-    preencherCampo('c-bairro', c.endereco?.bairro);
-    preencherCampo('c-cidade', c.endereco?.cidade);
-    preencherCampo('c-cep', c.endereco?.cep);
-    preencherCampo('c-comp', c.endereco?.complemento);
-    preencherCampo('c-obs', c.observacoes);
-
-  } catch (error) {
-    console.error('Erro ao editar cliente:', error);
+    // Enviar a requisição para a API
+    await api('PUT', `/clientes/${id}`, body);
+    toast('Cliente atualizado!');
+    fechar('e-cliente');
+    carregarClientes();
+  } catch (e) {
+    toast('Erro: ' + (e.message || 'desconhecido'), 'err');
   }
 }
 //====================================
@@ -1035,7 +1127,7 @@ async function editarUsuario() {
   const perfil = document.getElementById('e-perfil').value;
   
   // Verificar diretamente o valor do checkbox
-  const ativo = document.getElementById('e-ativo').checked ? 1 : 0;
+  const ativo = document.getElementById('e-ativo').checked ? 1 : 1;
 
   console.log('Checkbox Ativo:', ativo); // Log para depuração
 

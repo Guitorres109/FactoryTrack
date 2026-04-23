@@ -29,16 +29,15 @@ const Produtos = {
     return formatarPizza(get('SELECT * FROM produtos WHERE id = ?', [id]));
   },
 
-  async create({ nome, descricao = '', disponivel = true, categoria = 'tradicional' }) {
+  async create({ nome, descricao = '', disponivel = true }) {
       await ready;
 
       const info = run(
-        'INSERT INTO produtos (nome, descricao, disponivel, categoria) VALUES (?, ?, ?, ?)',
+        'INSERT INTO produtos (nome, descricao, disponivel) VALUES (?, ?, ?)',
         [
           nome.trim(),
           descricao.trim(),
           disponivel ? 1 : 0,
-          categoria
         ]
       );
 
