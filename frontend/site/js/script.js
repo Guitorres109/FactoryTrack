@@ -706,7 +706,6 @@ async function carregarClientes(busca = '') {
 
             return `
               <tr>
-                <input type="hidden" id= "e-id" value= ${c._id}>
                 <td><strong>${c.nome || '—'}</strong></td>
                 <td>${c.telefone || '—'}</td>
                 <td style="font-size:.76rem;color:var(--muted)">${endereco || '—'}</td>
@@ -755,25 +754,22 @@ function abrirCliente() {
 
 
 function abrirEdicaoCliente(c) {
-  console.log("EDITANDO:", c);
-  abrir("e-cliente")
+  document.getElementById('c-id').value = c.id || c._id;
+  abrir("e-cliente");
   document.getElementById('e-nomeclient').value = c.nome || '';
   document.getElementById('e-tel').value = c.telefone || '';
-
   const end = c.endereco || {};
-
   document.getElementById('e-rua').value = end.rua || '';
   document.getElementById('e-num').value = end.numero || '';
   document.getElementById('e-bairro').value = end.bairro || '';
   document.getElementById('e-cidade').value = end.cidade || '';
   document.getElementById('e-cep').value = end.cep || '';
-  document.getElementById('e-comp').value = end.comp || '';
-
+  document.getElementById('e-comp').value = end.complemento || '';
   document.getElementById('e-obs').value = c.observacoes || '';
 }
 
 async function editarCliente() {
-  const id = document.getElementById('e-id').value;
+  const id = document.getElementById('c-id').value;
   const nome = document.getElementById('e-nomeclient').value.trim();
   const telefone = document.getElementById('e-tel').value.trim();
   const rua = document.getElementById('e-rua').value.trim();
@@ -782,7 +778,7 @@ async function editarCliente() {
   const cidade = document.getElementById('e-cidade').value.trim()
   const cep = document.getElementById('e-cep').value.trim()
   const complemento = document.getElementById('e-comp').value.trim()
-  const observacao = document.getElementById('e-obs').value.trim()
+  const observacoes = document.getElementById('e-obs').value.trim()
 
   // Validações iniciais
   if (!nome || !telefone) {
@@ -796,11 +792,13 @@ async function editarCliente() {
   }
 
   try {
+    const endereco = {rua, numero, bairro, cidade, cep, complemento}
     // Criação do corpo da requisição
-    let body = { nome, telefone, rua, numero, bairro, cidade, cep, complemento, observacao };
+    let body = {nome, telefone, endereco, observacoes};
 
     // Enviar a requisição para a API
     await api('PUT', `/clientes/${id}`, body);
+    console.log(id)
     toast('Cliente atualizado!');
     fechar('e-cliente');
     carregarClientes();

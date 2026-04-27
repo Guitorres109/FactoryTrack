@@ -45,6 +45,7 @@ const Usuario = {
   },
 
   //Criar usuarios 
+
   async create({ nome, email, senha, perfil = 'Atendente' }) {
     await ready;
     const hash = await bcrypt.hash(senha, 10);
@@ -55,9 +56,11 @@ const Usuario = {
     return this.findById(info.lastInsertRowid);
   },
 
+
   //Atualizar usuarios
   async update(id, { nome, email, senha, perfil, ativo }) {
   await ready;
+  console.log(email)
 
   const atual = await get(
     'SELECT * FROM usuarios WHERE id = ?',
@@ -65,12 +68,14 @@ const Usuario = {
   );
 
   if (!atual) return null;
+  let existente 
 
   if (email === atual.email) {
-    const existente = await get(
+    existente = await get(
       'SELECT id FROM usuarios WHERE email = ? AND id != ?',
       [email, id]
     );
+    console.log(existente)
 
     if (existente) {
       email = atual.email
@@ -81,23 +86,44 @@ const Usuario = {
 
   if (senha) {senhaFinal = await bcrypt.hash(senha, 10);} 
   if (!senha){senhaFinal = atual.senha;}
-  await run(`
-    UPDATE usuarios SET
-      nome       = ?,
-      email      = ?,
-      senha      = ?,
-      perfil     = ?,
-      ativo      = ?,
-      updated_at = datetime('now')
-    WHERE id = ?
-  `, [
-    nome   ?? atual.nome,
-    email  ?? atual.email,
-    senhaFinal,
-    perfil ?? atual.perfil,
-    ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
-    id
-  ]);
+
+  if(existente){
+    await run(`
+      UPDATE usuarios SET
+        nome       = ?,
+        email      = ?,
+        senha      = ?,
+        perfil     = ?,
+        ativo      = ?,
+        updated_at = datetime('now')
+      WHERE id = ?
+    `, [
+      nome   ?? atual.nome,
+      email  ?? atual.email,
+      senhaFinal,
+      perfil ?? atual.perfil,
+      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+      id
+    ]);
+  } else{
+    await run(`
+      UPDATE usuarios SET
+        nome       = ?,
+        email      = ?,
+        senha      = ?,
+        perfil     = ?,
+        ativo      = ?,
+        updated_at = datetime('now')
+      WHERE id = ?
+    `, [
+      nome   ?? atual.nome,
+      email  ?? atual.email,
+      senhaFinal,
+      perfil ?? atual.perfil,
+      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+      id
+    ]);
+  }
 
   return await this.findById(id);
 },

@@ -78,39 +78,43 @@ const Cliente = {
     return this.findById(info.lastInsertRowid);
   },
 
-  // Atualizar cliente
   async update(id, { nome, telefone, endereco, observacoes, ativo }) {
-    await ready;
+  await ready;
 
-    const atual = get('SELECT * FROM clientes WHERE id = ?', [id]);
-    if (!atual) return null;
+  const atual = await get(
+    'SELECT * FROM clientes WHERE id = ?',
+    [id]
+  );
 
-    const endAtual = safeParse(atual.endereco);
-    const endFinal =
-      endereco && typeof endereco === 'object'
-        ? { ...endAtual, ...endereco }
-        : endAtual;
+  if (!atual) return null;
 
-    run(`
-      UPDATE clientes SET
-        nome        = ?,
-        telefone    = ?,
-        endereco    = ?,
-        observacoes = ?,
-        ativo       = ?,
-        updated_at  = datetime('now')
-      WHERE id = ?
-    `, [
-      nome        ?? atual.nome,
-      telefone    ?? atual.telefone,
-      JSON.stringify(endFinal),
-      observacoes ?? atual.observacoes,
-      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
-      id
-    ]);
+  const endAtual = safeParse(atual.endereco);
 
-    return this.findById(id);
-  },
+  const endFinal =
+    endereco && typeof endereco === 'object'
+      ? { ...endAtual, ...endereco }
+      : endAtual;
+
+  await run(`
+    UPDATE  clientes SET
+      nome        = ?,
+      telefone    = ?,
+      endereco    = ?,
+      observacoes = ?,
+      ativo       = ?,
+      updated_at  = datetime('now')
+    WHERE id = ?
+  `, [
+    nome ?? atual.nome,
+    telefone ?? atual.telefone,
+    JSON.stringify(endFinal),
+    observacoes ?? atual.observacoes,
+    ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+    id
+  ]);
+
+  return await this.findById(id);
+},
 
   // Deletar
   async delete(id) {
