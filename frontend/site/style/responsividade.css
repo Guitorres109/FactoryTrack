@@ -1,0 +1,128 @@
+@import url("/style/geral.css");
+
+@media (max-width: 480px) {
+  .login-box {
+    padding: 28px 20px;
+    max-width: 100%;
+    margin: 0 10px;
+  }
+
+  .login-logo h1 {
+    font-size: 1.3rem;
+  }
+
+  .pg-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pg-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .stat .val {
+    font-size: 1.4rem;
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  td, th {
+    padding: 6px 8px;
+  }
+
+  .modal {
+    padding: 16px;
+  }
+
+  .item-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.tbl-wrap {
+  overflow-x: auto;
+}
+
+/* ================= MOBILE / TABLET ================= */
+@media (max-width: 768px) {
+
+    table {
+    min-width: 600px;
+  }
+
+  .tbl-wrap {
+    overflow: visible;
+  }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    background: var(--surf);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 10px;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 4px;
+    border: none;
+    font-size: 0.78rem;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pg-header {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pg-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+}
+
+
+/* ================= TABLET / NOTEBOOK ================= */
+@media (max-width: 1024px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  #conteudo {
+    padding: 0;
+  }
+}

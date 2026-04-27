@@ -19,6 +19,9 @@ app.get("/style/style.css", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/style/style.css"));
 });
 
+app.get("/style/responsividade.css", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/style/responsividade.css"));
+});
 app.get("/style/geral.css", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/style/geral.css"));
 });
