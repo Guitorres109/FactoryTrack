@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-function autenticar(req, res, next) {
+async function autenticar(req, res, next) {
   const authHeader = req.headers['authorization'];
   //Criar token de verificação para o usuario ao fazer login
   const token      = authHeader && authHeader.split(' ')[1];

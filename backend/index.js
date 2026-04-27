@@ -40,7 +40,7 @@ ready.then(() => {
     res.sendFile(path.join(__dirname, "src/pages/api.html"));
   });
   
-  app.get("/verificar", (req, res) => {
+  app.get("/api/verificar", (req, res) => {
       res.json({
           status: "success",
           message: "Servidor está online e respondendo!"

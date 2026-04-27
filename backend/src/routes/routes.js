@@ -15,9 +15,13 @@ const Ordem = require('../models/ordem');
 router.post('/auth/login', async (req, res) => {
   try {
     const { email, senha } = req.body;
+    const autenticar = (await Usuario.findByEmail(email))?.ativo;
 
     if (!email || !senha)
       return res.status(400).json({ erro: 'E-mail e senha são obrigatórios' });
+
+    if (autenticar === 0)
+      return res.status(400).json({ erro: 'Usuario Inativo' });
 
     const usuario = await Usuario.findByEmail(email);
     if (!usuario)
@@ -46,6 +50,10 @@ router.post('/auth/login', async (req, res) => {
   } catch (e) {
     res.status(500).json({ erro: e.message });
   }
+});
+
+router.get('/auth/me', auth, (req, res) => {
+  res.json(req.usuario);
 });
 
 // ================================
@@ -106,29 +114,37 @@ router.delete('/produtos/:id', auth, async (req, res) => {
 // CLIENTES
 // ================================
 
+// router.get('/clientes', auth, async (req, res) => {
+//   try {
+//     const { busca } = req.query;
+
+//     let where = {};
+
+//     if (busca && busca.trim().length >= 2) {
+//       where = {
+//         nome: {
+//           [Op.like]: `%${busca.trim()}%`
+//         }
+//       };
+//     }
+
+//     const clientes = await Cliente.findAll({
+//       where,
+//       limit: 20,
+//       order: [['nome', 'ASC']]
+//     });
+
+//     res.json(clientes);
+//   } catch (e) {
+//     console.error(e);
+//     res.status(500).json({ erro: e.message });
+//   }
+// });
+
 router.get('/clientes', auth, async (req, res) => {
   try {
-    const { busca } = req.query;
-
-    let where = {};
-
-    if (busca && busca.trim().length >= 2) {
-      where = {
-        nome: {
-          [Op.like]: `%${busca.trim()}%`
-        }
-      };
-    }
-
-    const clientes = await Cliente.findAll({
-      where,
-      limit: 20,
-      order: [['nome', 'ASC']]
-    });
-
-    res.json(clientes);
+    res.json(await Cliente.findAll());
   } catch (e) {
-    console.error(e);
     res.status(500).json({ erro: e.message });
   }
 });
@@ -282,12 +298,21 @@ router.post('/usuarios', auth, async (req, res) => {
 
 router.put('/usuarios/:id', auth, async (req, res) => {
   try {
-    if (req.usuario.perfil !== 'Administrador')
+    if (req.usuario.perfil !== 'Administrador') {
       return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+    }
+
     const u = await Usuario.update(req.params.id, req.body);
-    if (!u) return res.status(404).json({ erro: 'Usuário não encontrado' });
+
+    if (!u) {
+      return res.status(404).json({ erro: 'Usuário não encontrado' });
+    }
+
     res.json(u);
-  } catch (e) { res.status(500).json({ erro: e.message }); }
+  } catch (e) {
+    console.error(e); // 🔥 importante pra debug
+    res.status(500).json({ erro: e.message });
+  }
 });
 
 //====================================

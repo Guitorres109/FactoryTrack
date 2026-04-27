@@ -2,7 +2,7 @@
 //rota da Api
 //====================================
 
-const API = 'http://192.168.121.145:3000/api';
+const API = 'http://10.106.208.32:3000/api';
 
 let cProdutos   = [];
 let cClientes = [];
@@ -19,6 +19,18 @@ const telaLogin = document.getElementById("tela-login")
 //====================================
 //função de fazer login
 //====================================
+
+async function verificar(){
+  try{
+    const res = await fetch(API + '/verificar');
+    const data = await res.json();
+    console.log(data.message)
+  } catch(e){
+    console.log('Servidor Inativo')
+    erro.textContent = "Servidor Inativo"
+  }
+}
+verificar()
 
 async function fazerLogin() {
   //Variaveis de elementos do HTML
@@ -59,6 +71,7 @@ async function fazerLogin() {
   } catch (e) {
     erro.style.display = 'block';
     erro.textContent   = e.message;
+    telaLogin.style.display = 'block';
   } finally {
     btn.disabled    = false;
     btn.textContent = 'Entrar';
@@ -578,7 +591,7 @@ async function salvarProduto() {
 
   try {
     // Rotas alteradas para produtos
-    id ? await api('PUT', '/produtos/' + id, d) : await api('POST', '/produtos', d);
+    await api('POST', '/produtos', d);
     toast(id ? 'Produto atualizada!' : 'Produto criada!');
     fechar('m-Produto');
     carregarProdutos();
@@ -742,8 +755,7 @@ function abrirCliente() {
 
 
 function abrirEdicaoCliente(c) {
-  // console.log("EDITANDO:", c);
-
+  console.log("EDITANDO:", c);
   abrir("e-cliente")
   document.getElementById('e-nomeclient').value = c.nome || '';
   document.getElementById('e-tel').value = c.telefone || '';
@@ -1065,14 +1077,14 @@ async function carregarUsuarios() {
         <tbody>
           ${us.map(u => `
             <tr>
-              <input type="hidden" id= "e-id" value= ${u._id}>
+              <input type="hidden" id= "u-id" value= ${u._id}>
               <input type="hidden" id= "e-ativo" value= ${u.ativo}>
               <td><strong>${u.nome}</strong></td>
               <td>${u.email}</td>
               <td><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
               <td><span class="badge ${u.ativo ? 'b-on' : 'b-off'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
               <td style="font-size:.73rem;color:var(--muted)">${new Date(u.createdAt).toLocaleDateString('pt-BR')}</td>
-              <td><button class="btn btn-danger btn-sm" onclick="abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}')"">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarUsuario('${u._id}','${u.nome}')">🗑️</button></td>
+              <td><button class="btn btn-danger btn-sm" onclick="abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}', '${u.ativo}')"">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarUsuario('${u._id}','${u.nome}')">🗑️</button></td>
             </tr>`).join('')}
         </tbody>
       </table>`;
@@ -1112,29 +1124,28 @@ async function salvarUsuario() {
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }
 
-function abrirEdicaoUsuario(id, nome, email, perfil) {
+function abrirEdicaoUsuario(id, nome, email, perfil, ativo) {
   abrir('e-usuario'); // abre modal
   document.getElementById('e-nome').value = nome;
   document.getElementById('e-email').value = email;
   document.getElementById('e-perfil').value = perfil;
   document.getElementById('u-senha').value = ''; // senha sempre vazia
+  document.getElementById('u-ativo').value = ativo || true
 }
 
 async function editarUsuario() {
-  const id = document.getElementById('e-id').value;
+  const id = document.getElementById('u-id').value;
   const nome = document.getElementById('e-nome').value.trim();
   const email = document.getElementById('e-email').value.trim();
   const perfil = document.getElementById('e-perfil').value;
-  
-  // Verificar diretamente o valor do checkbox
-  const ativo = document.getElementById('e-ativo').checked ? 1 : 1;
-
-  console.log('Checkbox Ativo:', ativo); // Log para depuração
+  const ativoValue = document.getElementById('u-ativo').value;
+  const ativo = ativoValue === "true" ? 1 : 0;
 
   const senha = document.getElementById('e-senha').value.trim();
   const confirmarSenha = document.getElementById('e-confirmarSenha').value.trim();
 
-  // Validações iniciais
+  let body = { nome, email, perfil, ativo };
+
   if (!nome || !email) {
     toast('Nome e email são obrigatórios', 'err');
     return;
@@ -1146,10 +1157,6 @@ async function editarUsuario() {
   }
 
   try {
-    // Criação do corpo da requisição
-    let body = { nome, email, perfil, ativo };
-
-    // Validar e incluir senha, se fornecida
     if (senha) {
       if (senha !== confirmarSenha) {
         toast('Erro: As senhas não correspondem', 'err');
@@ -1158,13 +1165,19 @@ async function editarUsuario() {
       body.senha = senha;
     }
 
-    // Enviar a requisição para a API
     await api('PUT', `/usuarios/${id}`, body);
+
     toast('Usuário atualizado!');
     fechar('e-usuario');
     carregarUsuarios();
+
   } catch (e) {
-    toast('Erro: ' + (e.message || 'desconhecido'), 'err');
+    console.error(e);
+    if (e.message.includes('Email já está em uso')) {
+      toast('Este email já está sendo usado por outro usuário', 'err');
+    } else {
+      toast('Erro: ' + e.message, 'err');
+    }
   }
 }
 

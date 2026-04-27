@@ -310,15 +310,40 @@
 
 <div id="e-usuario" class="modal-bg">
   <div class="modal">
-    <h3>Novo Usuário</h3>
+    <h3>Editar Usuário</h3>
     <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="e-nome" placeholder="Nome completo"></div>
-      <div class="fg"><label>Perfil</label><select id="e-perfil"><option value="Atendente">Atendente</option><option value="Garcom">Garçom</option><option value="Administrador">Administrador</option></select></div>
+      <div class="fg">
+        <label>Nome *</label>
+        <input id="e-nome" placeholder="Nome completo">
+      </div>
+      <div class="fg">
+        <label>Perfil</label>
+        <select id="e-perfil">
+          <option value="Atendente">Atendente</option>
+          <option value="Garcom">Garçom</option>
+          <option value="Administrador">Administrador</option>
+        </select>
+      </div>
     </div>
-    <div class="fg"><label>E-mail *</label><input id="e-email" type="email" placeholder="usuario@Produtoria.com"></div>
-    <div class="fg"><label>Nova Senha *</label><input id="e-senha" type="password" placeholder="Mínimo 6 caracteres"></div>
-    <div class="fg"><label>Confirmar Senha *</label><input id="e-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres"></div>
-    <div class="fg"><label id="fg-checkbox"><input type="checkbox" id="e-ativo">Usario Inativo</label></div>
+    <div class="fg">
+      <label>E-mail *</label>
+      <input id="e-email" type="email" placeholder="usuario@Produtoria.com">
+    </div>
+    <div class="fg">
+      <label>Nova Senha</label>
+      <input id="e-senha" type="password" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="fg">
+      <label>Confirmar Senha</label>
+      <input id="e-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6">
+    </div>
+    <div class="fg">
+      <label>Ativo</label>
+      <select id="u-ativo">
+        <option value="true">✅ Sim</option>
+        <option value="false">❌ Não</option>
+      </select>
+    </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('e-usuario')">Cancelar</button>
       <button class="btn btn-ghost" onclick="editarUsuario()">Editar</button>
@@ -373,6 +398,6 @@
 </div>
 
 <div id="toast"></div>
-<script src="/js/script.js"></script>
+<script src="/js/script.js" defer></script>
 </body>
 </html>

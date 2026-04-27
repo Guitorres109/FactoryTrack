@@ -57,33 +57,50 @@ const Usuario = {
 
   //Atualizar usuarios
   async update(id, { nome, email, senha, perfil, ativo }) {
-    await ready;
-    const atual = get('SELECT * FROM usuarios WHERE id = ?', [id]);
-    if (!atual) return null;
+  await ready;
 
-    let senhaFinal = atual.senha;
-    if (senha) senhaFinal = await bcrypt.hash(senha, 10);
+  const atual = await get(
+    'SELECT * FROM usuarios WHERE id = ?',
+    [id]
+  );
 
-    run(`
-      UPDATE usuarios SET
-        nome       = ?,
-        email      = ?,
-        senha      = ?,
-        perfil     = ?,
-        ativo      = ?,
-        updated_at = datetime('now')
-      WHERE id = ?
-    `, [
-      nome   ?? atual.nome,
-      email  ?? atual.email,
-      senhaFinal,
-      perfil ?? atual.perfil,
-      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
-      id
-    ]);
+  if (!atual) return null;
 
-    return this.findById(id);
-  },
+  if (email === atual.email) {
+    const existente = await get(
+      'SELECT id FROM usuarios WHERE email = ? AND id != ?',
+      [email, id]
+    );
+
+    if (existente) {
+      email = atual.email
+    }
+  }
+
+  let senhaFinal;
+
+  if (senha) {senhaFinal = await bcrypt.hash(senha, 10);} 
+  if (!senha){senhaFinal = atual.senha;}
+  await run(`
+    UPDATE usuarios SET
+      nome       = ?,
+      email      = ?,
+      senha      = ?,
+      perfil     = ?,
+      ativo      = ?,
+      updated_at = datetime('now')
+    WHERE id = ?
+  `, [
+    nome   ?? atual.nome,
+    email  ?? atual.email,
+    senhaFinal,
+    perfil ?? atual.perfil,
+    ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+    id
+  ]);
+
+  return await this.findById(id);
+},
 
   //Deletar usuarios
   async delete(id) {
