@@ -165,10 +165,15 @@ async function api(method, url, body) {
 function aplicarPerfil(usuario) {
   document.getElementById('sb-nome').textContent   = usuario.nome;
   document.getElementById('sb-perfil').textContent = usuario.perfil;
+  const sb_perfil = document.getElementById('sb-perfil')
+  const bntCreateOrdens = document.getElementById('novaOrdem')
+  const p_ordens = document.getElementById('p-ordens')
+  const btn_sm = document.getElementById('btn-sm')
 
   const perfil  = usuario.perfil;
   const isAdmin = perfil === 'Administrador';
   const isGar   = perfil === 'Garcom';
+  const isAten   = perfil === 'Atendente';
 
   function show(id, visible, type = 'flex') {
     const el = document.getElementById(id);
@@ -179,27 +184,39 @@ function aplicarPerfil(usuario) {
     if (el) el.style.display = visible ? type : 'none';
   }
 
+  if (perfil === 'Atendente'){
+    bntCreateOrdens.style.display = 'none'
+    btn_sm.style.display = 'none'
+    p_ordens.textContent = 'Acompanhe as Ordens de produção'
+    sb_perfil.style.background = 'rgba(59,130,246,.18)'
+    sb_perfil.style.color = '#93c5fd'
+  }
+
   show('menu-usuarios',   isAdmin, 'block');
   show('btn-usuarios',    isAdmin, 'flex');
   show('sb-group-garcom', isGar,   'block');
   show('btn-nav-mesas',   isGar,   'flex');
 
-  showEl(document.querySelector('[onclick*="clientes"]'),  !isGar);
-  showEl(document.querySelector('[onclick*="ordens"]'),   !isGar);
-  showEl(document.querySelector('[onclick*="dashboard"]'), !isGar);
-  showEl(document.querySelector('.sb-group'), !isGar, 'block');
+  const canShow = isAten || isAdmin;
 
-  const labelProdutos = document.getElementById('nav-Produtos-label');
-  if (labelProdutos) labelProdutos.textContent = isGar ? 'Cardápio' : 'Produtos';
+  showEl(document.querySelector('[onclick*="clientes"]'), canShow);
+  showEl(document.querySelector('[onclick*="ordens"]'), canShow);
+  showEl(document.querySelector('[onclick*="dashboard"]'), canShow);
+
+  // se for classe:
+  showEl(document.querySelector('.sb-group'), canShow, 'block');
+
+  // se também existir um elemento com ID "sb-group":
+  showEl(document.getElementById('sb-group'), canShow, 'block');
 
   const tituloProdutos = document.getElementById('pg-Produtos-titulo');
   const subProdutos    = document.getElementById('pg-Produtos-sub');
-  if (tituloProdutos) tituloProdutos.textContent = isGar ? 'Cardápio' : 'Produtos';
-  if (subProdutos)    subProdutos.textContent    = isGar ? 'Produtos disponíveis hoje' : 'Gerencie o cardápio';
+  if (tituloProdutos) tituloProdutos.textContent = isAten ? 'Cardápio' : 'Produtos';
+  if (subProdutos)    subProdutos.textContent    = isAten ? 'Produtos disponíveis hoje' : 'Gerencie o cardápio';
   show('btn-nova-Produto', !isGar, 'inline-flex');
 
-  show('stat-fat', !isGar, 'block');
-  show('stat-cli', !isGar, 'block');
+  show('stat-fat', novaOrdem, 'block');
+  show('stat-cli', novaOrdem, 'block');
 
   if (isGar) {
     ir('mesas', document.getElementById('btn-nav-mesas'));
