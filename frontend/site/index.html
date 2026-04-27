@@ -21,10 +21,23 @@
       <input id="l-email" type="email" placeholder="admin@gmail.com"
         onkeydown="if(event.key==='Enter') fazerLogin()">
     </div>
-    <div class="fg">
+    <div class="fg" style="position: relative;">
       <label>Senha</label>
       <input id="l-senha" type="password" placeholder="••••••"
-        onkeydown="if(event.key==='Enter') fazerLogin()">
+        onkeydown="if(event.key==='Enter') fazerLogin()"
+        style="padding-right: 40px;"
+      >
+      <button type="button" onclick="toggleSenha('l-senha')"
+        style="
+          position: absolute;
+          right: 10px;
+          top: 25px;
+          background: none;
+          border: none;
+          cursor: pointer;
+        ">
+        👁️
+      </button>
     </div>
     <button class="btn btn-red" id="btn-login"
       style="width:100%;padding:10px;margin-top:4px" onclick="fazerLogin()">Entrar</button>
@@ -64,7 +77,7 @@
       <div class="sb-group" id="sb-group-garcom" style="display:none">Mesas</div>
     </nav>
     <div class="sb-footer">
-      <span>v2.0</span>
+      <span>v6.7</span>
       <button class="btn-logout" onclick="sair()">Sair</button>
     </div>
   </aside>
@@ -300,7 +313,40 @@
       <div class="fg"><label>Perfil</label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Garcom">Garçom</option><option value="Administrador">Administrador</option></select></div>
     </div>
     <div class="fg"><label>E-mail *</label><input id="u-email" type="email" placeholder="usuario@Produtoria.com"></div>
-    <div class="fg"><label>Senha *</label><input id="u-senha" type="password" placeholder="Mínimo 6 caracteres"></div>
+    <div class="fg" style="position: relative;">
+      <label>Nova Senha</label>
+      <input id="u-senha" type="password" placeholder="Mínimo 6 caracteres"
+        style="padding-right: 40px;"
+      >
+      <button type="button" onclick="toggleSenha('u-senha')"
+        style="
+          position: absolute;
+          right: 10px;
+          top: 25px;
+          background: none;
+          border: none;
+          cursor: pointer;
+        ">
+        👁️
+      </button>
+    </div>
+    <div class="fg" style="position: relative;">
+      <label>Confirmar Senha</label>
+      <input id="u-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6"
+        style="padding-right: 40px;"
+      >
+      <button type="button" onclick="toggleSenha('u-confirmarSenha')"
+        style="
+          position: absolute;
+          right: 10px;
+          top: 25px;
+          background: none;
+          border: none;
+          cursor: pointer;
+        ">
+        👁️
+      </button>
+    </div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('m-usuario')">Cancelar</button>
       <button class="btn btn-ghost" onclick="salvarUsuario()">Criar</button>
@@ -329,13 +375,39 @@
       <label>E-mail *</label>
       <input id="e-email" type="email" placeholder="usuario@Produtoria.com">
     </div>
-    <div class="fg">
+    <div class="fg" style="position: relative;">
       <label>Nova Senha</label>
-      <input id="e-senha" type="password" placeholder="Mínimo 6 caracteres">
+      <input id="e-senha" type="password" placeholder="Mínimo 6 caracteres"
+        style="padding-right: 40px;"
+      >
+      <button type="button" onclick="toggleSenha('e-senha')"
+        style="
+          position: absolute;
+          right: 10px;
+          top: 25px;
+          background: none;
+          border: none;
+          cursor: pointer;
+        ">
+        👁️
+      </button>
     </div>
-    <div class="fg">
+    <div class="fg" style="position: relative;">
       <label>Confirmar Senha</label>
-      <input id="e-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6">
+      <input id="e-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6"
+        style="padding-right: 40px;"
+      >
+      <button type="button" onclick="toggleSenha('e-confirmarSenha')"
+        style="
+          position: absolute;
+          right: 10px;
+          top: 25px;
+          background: none;
+          border: none;
+          cursor: pointer;
+        ">
+        👁️
+      </button>
     </div>
     <div class="fg">
       <label>Ativo</label>

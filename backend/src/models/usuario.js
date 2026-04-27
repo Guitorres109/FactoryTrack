@@ -60,7 +60,6 @@ const Usuario = {
   //Atualizar usuarios
   async update(id, { nome, email, senha, perfil, ativo }) {
   await ready;
-  console.log(email)
 
   const atual = await get(
     'SELECT * FROM usuarios WHERE id = ?',
@@ -68,62 +67,45 @@ const Usuario = {
   );
 
   if (!atual) return null;
-  let existente 
 
-  if (email === atual.email) {
-    existente = await get(
+  let emailFinal = atual.email;
+
+  // Só verifica duplicidade se o email foi alterado
+  if (email && email !== atual.email) {
+    const existente = await get(
       'SELECT id FROM usuarios WHERE email = ? AND id != ?',
       [email, id]
     );
-    console.log(existente)
 
-    if (existente) {
-      email = atual.email
+    // Se NÃO existir outro usuário com o email, permite atualizar
+    if (!existente) {
+      emailFinal = email;
     }
+    // Se existir, mantém o email antigo (não atualiza)
   }
 
-  let senhaFinal;
-
-  if (senha) {senhaFinal = await bcrypt.hash(senha, 10);} 
-  if (!senha){senhaFinal = atual.senha;}
-
-  if(existente){
-    await run(`
-      UPDATE usuarios SET
-        nome       = ?,
-        email      = ?,
-        senha      = ?,
-        perfil     = ?,
-        ativo      = ?,
-        updated_at = datetime('now')
-      WHERE id = ?
-    `, [
-      nome   ?? atual.nome,
-      email  ?? atual.email,
-      senhaFinal,
-      perfil ?? atual.perfil,
-      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
-      id
-    ]);
-  } else{
-    await run(`
-      UPDATE usuarios SET
-        nome       = ?,
-        email      = ?,
-        senha      = ?,
-        perfil     = ?,
-        ativo      = ?,
-        updated_at = datetime('now')
-      WHERE id = ?
-    `, [
-      nome   ?? atual.nome,
-      email  ?? atual.email,
-      senhaFinal,
-      perfil ?? atual.perfil,
-      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
-      id
-    ]);
+  let senhaFinal = atual.senha;
+  if (senha) {
+    senhaFinal = await bcrypt.hash(senha, 10);
   }
+
+  await run(`
+    UPDATE usuarios SET
+      nome       = ?,
+      email      = ?,
+      senha      = ?,
+      perfil     = ?,
+      ativo      = ?,
+      updated_at = datetime('now')
+    WHERE id = ?
+  `, [
+    nome   ?? atual.nome,
+    emailFinal,
+    senhaFinal,
+    perfil ?? atual.perfil,
+    ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+    id
+  ]);
 
   return await this.findById(id);
 },

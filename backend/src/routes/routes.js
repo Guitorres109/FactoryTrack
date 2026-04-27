@@ -21,7 +21,7 @@ router.post('/auth/login', async (req, res) => {
       return res.status(400).json({ erro: 'E-mail e senha são obrigatórios' });
 
     if (autenticar === 0)
-      return res.status(400).json({ erro: 'Usuario Inativo' });
+      return res.status(400).json({ erro: 'Este Usuario esta com o perfil inativo' });
 
     const usuario = await Usuario.findByEmail(email);
     if (!usuario)

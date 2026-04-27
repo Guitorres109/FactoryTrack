@@ -2,7 +2,7 @@
 //rota da Api
 //====================================
 
-const API = 'http://10.106.208.32:3000/api';
+const API = 'http://10.106.208.18:3000/api';
 
 let cProdutos   = [];
 let cClientes = [];
@@ -76,6 +76,10 @@ async function fazerLogin() {
     btn.disabled    = false;
     btn.textContent = 'Entrar';
   }
+}
+function toggleSenha(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
 }
 
 //====================================
@@ -513,7 +517,7 @@ async function carregarDashboard() {
         </div>
         <div style="text-align:right">
           ${badge(p.status)}<br>
-          <small style="color:var(--muted)">${R$(p.total)}</small>
+          <small style="color:var(--muted)"></small>
         </div>
       </div>`).join('') ||
       '<div class="empty"><span class="ei">📋</span>Nenhum ordem ainda</div>';
@@ -522,7 +526,7 @@ async function carregarDashboard() {
     elC.innerHTML = Produtos.filter(p => p.disponivel).slice(0, 8).map(p => `
       <div class="mini-row">
         <span>🛠️ ${p.nome}</span>
-        <small style="color:var(--muted)">${R$(p.precos?.G)}</small>
+        <small style="color:var(--muted)"></small>
       </div>`).join('') ||
       '<div class="empty"><span class="ei">⚙️</span>Nenhuma Produto</div>';
 
@@ -601,7 +605,6 @@ async function salvarProduto() {
 
 function abrirEdicaoProduto(nome, descricao, disponivel) {
   // console.log("EDITANDO:", c);
-
   abrir("e-produto")
   document.getElementById('e-nomeproduto').value = nome || '';
   document.getElementById('e-desc').value = descricao || '';
@@ -1109,7 +1112,9 @@ async function salvarUsuario() {
   const nome  = document.getElementById('u-nome').value.trim();
   const email = document.getElementById('u-email').value.trim();
   const senha = document.getElementById('u-senha').value;
-  if (!nome || !email || !senha) { toast('Preencha todos os campos', 'err'); return; }
+  const confirmarSenha = document.getElementById('u-confirmarSenha').value;
+  if (!nome || !email || !senha ) { toast('Preencha todos os campos', 'err'); return; }
+  if (senha != confirmarSenha){ toast('As senhas não correspondem', 'err'); return}
 
   try {
     await api('POST', '/usuarios', {
