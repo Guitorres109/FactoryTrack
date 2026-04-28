@@ -3,16 +3,23 @@ const { ready, query, run, get } = require('../database/sqlite');
 
 //Formatar pizza
 function formatarPizza(row) {
-  if (!row) return null;
-  return {
+
+  if (!row) {
+    console.log('⚠️ Row inválido');
+    return null;
+  }
+
+  const resultado = {
     _id:         row.id,
     id:          row.id,
     nome:        row.nome,
     descricao:   row.descricao,
-    disponivel:  row.disponivel === 1,
+    disponivel: Number(row.disponivel) === 1,
     createdAt:   row.created_at,
     updatedAt:   row.updated_at,
   };
+
+  return resultado;
 }
 
 //Objeto de pizza
@@ -29,7 +36,7 @@ const Produtos = {
     return formatarPizza(get('SELECT * FROM produtos WHERE id = ?', [id]));
   },
 
-  async create({ nome, descricao = '', disponivel = true }) {
+  async create({ nome, descricao = '', disponivel }) {
       await ready;
 
       const info = run(
@@ -49,6 +56,7 @@ const Produtos = {
     await ready;
     const atual = get('SELECT * FROM produtos WHERE id = ?', [id]);
     if (!atual) return null;
+    console.log(nome, descricao, disponivel)
 
     run(`
       UPDATE produtos SET
@@ -60,9 +68,10 @@ const Produtos = {
     `, [
       nome         ?? atual.nome,
       descricao    ?? atual.descricao,
-      disponivel   !== undefined ? (disponivel ? 1 : 0) : atual.disponivel,
+      disponivel   ?? atual.disponivel,
       id
     ]);
+    
 
     return this.findById(id);
   },

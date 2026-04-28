@@ -141,6 +141,15 @@ function badge(s) {
   return `<span class="badge b-${s}">${r[s] || s}</span>`;
 }
 
+function badgeDisponivel(v) {
+  const r = {
+    1: '🟢 Disponível',
+    0: '🔴 Indisponível'
+  };
+
+  return `<span class="badge b-${v}">${r[v] ?? v}</span>`;
+}
+
 //====================================
 //função de fconectar com a API
 //====================================
@@ -264,9 +273,9 @@ async function carregarDashboard() {
 
   try {
     const [Produtos, clientes, ordens] = await Promise.all([
-      api('GET', '/produtos'), // Rota alterada
+      api('GET', '/produtos'), 
       api('GET', '/clientes'),
-      api('GET', '/ordens'),   // Rota alterada
+      api('GET', '/ordens'),   
     ]);
 
     cProdutos   = Produtos;
@@ -321,13 +330,13 @@ async function carregarProdutos() {
           <tr><th>Nome</th><th>Status</th><th>Ações</th>
         </thead>
         <tbody>
-          ${cProdutos.map(p => `
+        ${cProdutos.map(p => `
             <tr>
-              <input type="hidden" id= "p-id" value= ${p._id}>
+              <input type="hidden" id= "p-id">
               <td><strong>${p.nome}</strong><br><small style="color:var(--muted)">${p.descricao || ''}</small></td>
-              <td><span class="badge ${p.disponivel ? 'b-on' : 'b-off'}">${p.disponivel ? '✅ Disponível' : '❌ Off'}</span></td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm" onclick='abrirEdicaoProduto("${p.nome}, ${p.descricao}, ${p.disponivel}")'>✏️</button><button class="btn btn-danger btn-sm" onclick="deletarProduto('${p._id}','${p.nome}')">🗑️</button></div></td>
-             </tr>`).join('')}
+              <td><span class="badge ${Number(p.disponivel) === 1 ? 'b-on' : 'b-off'}">${badgeDisponivel(Number(p.disponivel))}</span></td>
+              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm"onclick='abrirEdicaoProduto(${JSON.stringify(p)})'>✏️</button>
+              <button class="btn btn-danger btn-sm"onclick="deletarProduto('${p._id}','${p.nome}')">🗑️</button></div></td>`).join('')}
         </tbody>
       </table>`;
   } catch (e) {
@@ -337,7 +346,7 @@ async function carregarProdutos() {
 
 function abrirProduto() {
   document.getElementById('m-Produto-t').textContent = 'Novo Produto';
-  document.getElementById('p-disp').value = 'true';
+  document.getElementById('p-disp').value = '1';
   abrir('m-Produto');
 }
 
@@ -356,10 +365,8 @@ async function salvarProduto() {
   const d = {
     nome,
     descricao:    document.getElementById('p-desc').value.trim(),
-    disponivel: document.getElementById('p-disp').value === 'true',
+    disponivel: document.getElementById('p-disp').value
   };
-
-  console.log(d)
 
   try {
     // Rotas alteradas para produtos
@@ -371,22 +378,23 @@ async function salvarProduto() {
 }
 
 
-function abrirEdicaoProduto(nome, descricao, disponivel) {
-  // console.log("EDITANDO:", c);
+function abrirEdicaoProduto(p) {
   abrir("e-produto")
-  document.getElementById('e-nomeproduto').value = nome || '';
-  document.getElementById('e-desc').value = descricao || '';
-  document.getElementById('e-disp').value = disponivel || false;
-  console.log(nome, descricao, disponivel)
-
+  document.getElementById('p-id').value = p.id || p._id
+  document.getElementById('e-nomeproduto').value = p.nome;
+  document.getElementById('e-desc').value = p.descricao || '';
+  if (p.disponivel === false){
+    document.getElementById('e-disp').value = 0;
+  } else{
+    document.getElementById('e-disp').value = 1;
+  }
 }
 
 async function editarProduto() {
   const id = document.getElementById('p-id').value;
-  console.log(id)
   const nome = document.getElementById('e-nomeproduto').value.trim();
   const descricao = document.getElementById('e-desc').value.trim();
-  const disponivel = document.getElementById('e-disp').value;
+  const disponivel = Number(document.getElementById('e-disp').value);
 
   // Validações iniciais
   if (!nome) {
@@ -402,15 +410,15 @@ async function editarProduto() {
   try {
     // Criação do corpo da requisição
     let body = { nome, descricao, disponivel };
-
     // Enviar a requisição para a API
     await api('PUT', `/produtos/${id}`, body);
     toast('Produto atualizado!');
-    fechar('e-poduto');
+    fechar('e-produto');
     carregarProdutos();
     
   } catch (e) {
     toast('Erro: ' + (e.message || 'desconhecido'), 'err');
+    console.log(e)
   }
 }
 //====================================
@@ -595,7 +603,6 @@ async function editarCliente() {
 
     // Enviar a requisição para a API
     await api('PUT', `/clientes/${id}`, body);
-    console.log(id)
     toast('Cliente atualizado!');
     fechar('e-cliente');
     carregarClientes();
@@ -805,7 +812,6 @@ function recalc() {
 
 async function salvarordem() {
   const cliId = document.getElementById('ped-cli').value;
-  console.log(cliId)
   if (!cliId) { toast('Selecione um cliente', 'err'); return; }
 
   const itens = [];
@@ -952,7 +958,6 @@ function abrirEdicaoUsuario(id, nome, email, perfil, ativo) {
   document.getElementById('e-perfil').value = perfil;
   document.getElementById('u-senha').value = ''; // senha sempre vazia
   document.getElementById('u-ativo').value = ativo || true
-  console.log({id, nome, email, perfil, ativo})
 }
 
 async function editarUsuario() {
@@ -962,7 +967,6 @@ async function editarUsuario() {
   const perfil = document.getElementById('e-perfil').value;
   const ativoValue = document.getElementById('u-ativo').value;
   const ativo = ativoValue === "true" ? 1 : 0;
-  console.log({id, nome, email, perfil, ativo})
 
   const senha = document.getElementById('e-senha').value.trim();
   const confirmarSenha = document.getElementById('e-confirmarSenha').value.trim();
@@ -989,7 +993,6 @@ async function editarUsuario() {
     }
 
     await api('PUT', `/usuarios/${id}`, body);
-    console.log(id)
     toast('Usuário atualizado!');
     fechar('e-usuario');
     carregarUsuarios();
