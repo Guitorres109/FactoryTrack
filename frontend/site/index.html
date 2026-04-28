@@ -118,12 +118,6 @@
             <div class="val" id="s-piz">—</div>
             <div class="sub">cadastrados</div>
           </div>
-          <div class="stat cp">
-            <span class="ico">🛵</span>
-            <div class="lbl">Em entrega</div>
-            <div class="val" id="s-ent">—</div>
-            <div class="sub">saíram agora</div>
-          </div>
         </div>
         <div class="dash-grid">
           <div class="card">
@@ -154,6 +148,13 @@
         <button id="novaOrdem" class="btn btn-red" onclick="abrirOrdem()">+ Nova ordem</button>
       </div>
       <div class="pg-body">
+        <select style="width: 150px; margin-bottom: 10px;"
+          onchange="aplicarFiltroOrdens(this.value)">
+          <option value="todas">Todas</option>
+          <option value="recebido">Aguardando Produção</option>
+          <option value="em_producao">Em Produção</option>
+          <option value="entregue">Finalizado</option>
+        </select>
         <div class="card">
           <div class="card-body tbl-wrap" id="tbl-ordens">
             <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
@@ -287,7 +288,7 @@
     <div class="fg"><label>Novo Status</label>
       <select id="st-val">
         <option value="recebido">📥 Recebido</option>
-        <option value="em_producao">👨‍🍳 Em Produção</option>
+        <option value="em_producao">⚒️ Em Produção</option>
         <option value="entregue">✅ Entregue</option>
         <option value="cancelado">❌ Cancelado</option>
       </select>
@@ -304,7 +305,7 @@
     <h3>Novo Usuário</h3>
     <div class="fr2">
       <div class="fg"><label>Nome *</label><input id="u-nome" placeholder="Nome completo"></div>
-      <div class="fg"><label>Perfil</label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Garcom">Garçom</option><option value="Administrador">Administrador</option></select></div>
+      <div class="fg"><label>Perfil</label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Administrador">Administrador</option></select></div>
     </div>
     <div class="fg"><label>E-mail *</label><input id="u-email" type="email" placeholder="usuario@Produtoria.com"></div>
     <div class="fg" style="position: relative;">
@@ -360,7 +361,6 @@
         <label>Perfil</label>
         <select id="e-perfil">
           <option value="Atendente">Atendente</option>
-          <option value="Garcom">Garçom</option>
           <option value="Administrador">Administrador</option>
         </select>
       </div>

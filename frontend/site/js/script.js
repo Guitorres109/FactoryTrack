@@ -27,7 +27,7 @@ async function verificar(){
     console.log(data.message)
   } catch(e){
     console.log('Servidor Inativo')
-    erro.textContent = "Servidor Inativo"
+    alert('Erro de conexão com o Servidor')
   }
 }
 verificar()
@@ -70,7 +70,11 @@ async function fazerLogin() {
 
   } catch (e) {
     erro.style.display = 'block';
-    erro.textContent   = e.message;
+    if (e.message === 'Failed to fetch'){
+      erro.textContent = 'Erro de conexão com o Servidor'
+    } else{
+      erro.textContent   = e.message;
+    }
     telaLogin.style.display = 'block';
   } finally {
     btn.disabled    = false;
@@ -130,6 +134,7 @@ function R$(v) {
 function badge(s) {
   const r = {
     recebido:     '📥 Recebido',
+    em_producao:  '⚒️ Em Produção',
     entregue:     '✅ Entregue',
     cancelado:    '❌ Cancelado',
   };
@@ -234,12 +239,6 @@ function ir(pg, btn) {
   if (pg === 'usuarios' && perfil !== 'Administrador') {
     toast('Acesso restrito a Administradores', 'err'); return;
   }
-  if (pg === 'mesas' && perfil !== 'Garcom') {
-    toast('Área exclusiva para Garçom', 'err'); return;
-  }
-  if (perfil === 'Garcom' && !['mesas','Produtos'].includes(pg)) {
-    toast('Acesso não permitido para Garçom', 'err'); return;
-  }
   document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('ativo'));
   document.getElementById('pg-' + pg).classList.add('ativa');
@@ -276,19 +275,12 @@ async function carregarDashboard() {
     document.getElementById('s-piz').textContent = Produtos.length;
     document.getElementById('s-cli').textContent = clientes.length;
     document.getElementById('s-ped').textContent = ordens.length;
-    document.getElementById('s-ent').textContent =
-      ordens.filter(p => p.status === 'saiu_entrega').length;
-    document.getElementById('s-fat').textContent =
-      R$(ordens.reduce((acc, p) => acc + (p.total || 0), 0));
-
-    const pend = ordens.filter(p => !['entregue','cancelado'].includes(p.status)).length;
-    document.getElementById('s-ped-sub').textContent = `${pend} pendente(s)`;
 
     const elP = document.getElementById('dash-ordens');
     elP.innerHTML = ordens.slice(0, 8).map(p => `
       <div class="mini-row">
         <div>
-          <div class="mn">#${String(p.id || '?').padStart(3,'0')} · ${p.cliente?.nome || '—'}</div>
+          <div class="mn">#${String(p.numeroOrdem || '?').padStart(3,'0')} · ${p.cliente?.nome || '—'}</div>
           <div class="mc">${new Date(p.createdAt).toLocaleString('pt-BR')}</div>
         </div>
         <div style="text-align:right">
@@ -439,86 +431,112 @@ async function deletarProduto(id, nome) {
 //função de carregar clientes
 //====================================
 
+let clientesCache = [];
+
 async function carregarClientes(busca = '') {
   const el = document.getElementById('tbl-clientes');
 
   try {
-    // evita requisição desnecessária
     if (busca && busca.length < 2) {
-      el.innerHTML = '';
+      renderClientes(clientesCache);
       return;
     }
 
     el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
 
-    // 🔥 use UMA rota só (mais simples e evita erro)
     const url = `/clientes${busca ? `?busca=${encodeURIComponent(busca.trim())}` : ''}`;
 
     const resposta = await api('GET', url);
 
-    // garante que sempre seja array
-    const cClientes = Array.isArray(resposta) ? resposta : [];
+    clientesCache = Array.isArray(resposta) ? resposta : [];
 
-    if (!cClientes.length) {
-      el.innerHTML = '<div class="empty"><span class="ei">👥</span>Nenhum cliente</div>';
-      return;
-    }
+    renderClientes(clientesCache);
 
-    el.innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Telefone</th>
-            <th>Endereço</th>
-            <th>Obs</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${cClientes.map(c => {
-            const endereco = c.endereco
-              ? [c.endereco.rua, c.endereco.numero, c.endereco.bairro, c.endereco.cidade]
-                  .filter(Boolean)
-                  .join(', ')
-              : '—';
-
-            return `
-              <tr>
-                <td><strong>${c.nome || '—'}</strong></td>
-                <td>${c.telefone || '—'}</td>
-                <td style="font-size:.76rem;color:var(--muted)">${endereco || '—'}</td>
-                <td style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
-                <td>
-                  <div style="display:flex;gap:5px">
-                  <button class="btn btn-ghost btn-sm"onclick='abrirEdicaoCliente(${JSON.stringify(c)})'>✏️</button>
-                  <button class="btn btn-danger btn-sm" onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>`;
   } catch (e) {
     console.error('Erro carregarClientes:', e);
     el.innerHTML = `<div class="empty" style="color:var(--red)">Erro ao carregar clientes</div>`;
   }
 }
 
-let _t = null;
+function renderClientes(lista) {
+  const el = document.getElementById('tbl-clientes');
 
-function buscarCli(valor) {
-  clearTimeout(_t);
+  if (!el) return;
 
-  _t = setTimeout(() => {
-    carregarClientes(valor);
-  }, 400);
+  if (!lista.length) {
+    el.innerHTML = '<div class="empty"><span class="ei">👥</span>Nenhum cliente</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>Obs</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${lista.map(c => {
+          const endereco = c.endereco
+            ? [c.endereco.rua, c.endereco.numero, c.endereco.bairro, c.endereco.cidade]
+                .filter(Boolean)
+                .join(', ')
+            : '—';
+
+          return `
+            <tr>
+              <td><strong>${c.nome || '—'}</strong></td>
+              <td>${c.telefone || '—'}</td>
+              <td style="font-size:.76rem;color:var(--muted)">${endereco}</td>
+              <td style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
+              <td>
+                <div style="display:flex;gap:5px">
+                  <button class="btn btn-ghost btn-sm"
+                    onclick='abrirEdicaoCliente(${JSON.stringify(c)})'>✏️</button>
+
+                  <button class="btn btn-danger btn-sm"
+                    onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
-//====================================
-//função de abrir cliente
-//====================================
+function normalizar(txt) {
+  return txt
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function buscarCli(valor) {
+  const query = normalizar(valor)
+    .trim()
+    .split(' ')
+    .filter(Boolean);
+
+  if (!query.length) {
+    renderClientes(clientesCache);
+    return;
+  }
+
+  const filtrados = clientesCache.filter(cli => {
+    const nome = normalizar(cli.nome || '');
+
+    return query.every(p => nome.includes(p));
+  });
+
+  renderClientes(filtrados);
+}
+
 
 function abrirCliente() {
   document.getElementById('m-cli-t').textContent = 'Novo Cliente';
@@ -655,6 +673,8 @@ async function carregarordens() {
   try {
     // Rota alterada para ordens
     const ordens = await api('GET', '/ordens');
+    ordensCache = ordens;
+
     if (!ordens.length) {
       el.innerHTML = '<div class="empty"><span class="ei">📋</span>Nenhum ordem</div>';
       return;
@@ -666,11 +686,10 @@ async function carregarordens() {
         </thead>
         <tbody>
           ${ordens.map(p => `
-            ${console.log(p)}
             <tr>
               <td><strong style="color:var(--red)">#${String(p.numeroOrdem||'?').padStart(3,'0')}</strong></td>
               <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
-              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div></td>
+              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
               <td>${badge(p.status)}</td>
               <td style="font-size:.7rem;color:var(--muted)">${new Date(p.createdAt).toLocaleString('pt-BR')}</td>
               <td><div style="display:flex;gap:5px"><button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button><button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button></div></td>
@@ -680,6 +699,54 @@ async function carregarordens() {
   } catch (e) {
     el.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
   }
+}
+
+let ordensCache = [];
+function aplicarFiltroOrdens(status) {
+  const el = document.getElementById('tbl-ordens');
+
+  if (!ordensCache.length) return;
+
+  const norm = (s) =>
+    (s || '')
+      .toString()
+      .toLowerCase()
+      .replace(/\s/g, '_'); // transforma espaços em _
+
+  let filtradas = ordensCache;
+
+  if (status && status !== 'todas') {
+    filtradas = ordensCache.filter(o =>
+      norm(o.status) === norm(status)
+    );
+  }
+
+  if (!filtradas.length) {
+    el.innerHTML = '<div class="empty">Nenhuma ordem encontrada</div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th><th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtradas.map(p => `
+          <tr>
+            <td><strong style="color:var(--red)">#${String(p.numeroOrdem||'?').padStart(3,'0')}</strong></td>
+              <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
+              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
+              <td>${badge(p.status)}</td>
+              <td style="font-size:.7rem;color:var(--muted)">${new Date(p.createdAt).toLocaleString('pt-BR')}</td>
+              <td><div style="display:flex;gap:5px"><button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button><button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button></div></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
 }
 
 //====================================
@@ -946,3 +1013,13 @@ async function deletarUsuario(id, nome) {
     carregarUsuarios();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }
+
+// setInterval(() => {
+//   if (document.visibilityState === 'visible') {
+//     carregarDashboard();
+//     carregarClientes();
+//     carregarProdutos();
+//     carregarUsuarios();
+//     carregarordens();
+//   }
+// }, 10000);
