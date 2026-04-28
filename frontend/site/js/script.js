@@ -280,10 +280,14 @@ async function carregarDashboard() {
 
     cProdutos   = Produtos;
     cClientes = clientes;
+    const emAberto = ordens.filter(o =>
+      o.status === 'recebido' || o.status === 'em_producao'
+    );
 
     document.getElementById('s-piz').textContent = Produtos.length;
     document.getElementById('s-cli').textContent = clientes.length;
     document.getElementById('s-ped').textContent = ordens.length;
+    if (emAberto.length === 1){document.getElementById('s-ped-sub').textContent = `${emAberto.length} Ordem de produção pendente`}else{document.getElementById('s-ped-sub').textContent = `${emAberto.length} Ordens de produção pendentes`}
 
     const elP = document.getElementById('dash-ordens');
     elP.innerHTML = ordens.slice(0, 8).map(p => `

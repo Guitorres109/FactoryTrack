@@ -116,7 +116,7 @@
         <div class="dash-grid">
           <div class="card">
             <div class="card-head">
-              <h3>Ordens Recentes</h3>
+              <h3>Ordens de produção Recentes</h3>
               <button id="btn-sm" class="btn btn-red btn-sm"
                 onclick="ir('ordens', document.querySelector('[onclick*=ordens]'))">
                 + Novo
@@ -138,11 +138,11 @@
 
     <section id="pg-ordens" class="secao">
       <div class="pg-header">
-        <div><h2>Ordens</h2><p id="p-ordens">Acompanhe e gerencie os Ordens</p></div>
+        <div><h2>Ordens de Produção</h2><p id="p-ordens">Acompanhe e gerencie suas Ordens de produção</p></div>
         <button id="novaOrdem" class="btn btn-red" onclick="abrirOrdem()">+ Nova ordem</button>
       </div>
       <div class="pg-body">
-        <select style="width: 150px; margin-bottom: 10px;"
+        <select style="width: 200px; margin-bottom: 10px;"
           onchange="aplicarFiltroOrdens(this.value)">
           <option value="todas">Todas</option>
           <option value="recebido">Aguardando Produção</option>
