@@ -895,7 +895,7 @@ async function carregarUsuarios() {
         <tbody>
           ${us.map(u => `
             <tr>
-              <input type="hidden" id= "u-id" value= ${u._id}>
+              <input type="hidden" id= "u-id">
               <input type="hidden" id= "e-ativo" value= ${u.ativo}>
               <td><strong>${u.nome}</strong></td>
               <td>${u.email}</td>
@@ -946,11 +946,13 @@ async function salvarUsuario() {
 
 function abrirEdicaoUsuario(id, nome, email, perfil, ativo) {
   abrir('e-usuario'); // abre modal
+  document.getElementById("u-id").value = id;
   document.getElementById('e-nome').value = nome;
   document.getElementById('e-email').value = email;
   document.getElementById('e-perfil').value = perfil;
   document.getElementById('u-senha').value = ''; // senha sempre vazia
   document.getElementById('u-ativo').value = ativo || true
+  console.log({id, nome, email, perfil, ativo})
 }
 
 async function editarUsuario() {
@@ -960,6 +962,7 @@ async function editarUsuario() {
   const perfil = document.getElementById('e-perfil').value;
   const ativoValue = document.getElementById('u-ativo').value;
   const ativo = ativoValue === "true" ? 1 : 0;
+  console.log({id, nome, email, perfil, ativo})
 
   const senha = document.getElementById('e-senha').value.trim();
   const confirmarSenha = document.getElementById('e-confirmarSenha').value.trim();
@@ -986,7 +989,7 @@ async function editarUsuario() {
     }
 
     await api('PUT', `/usuarios/${id}`, body);
-
+    console.log(id)
     toast('Usuário atualizado!');
     fechar('e-usuario');
     carregarUsuarios();
