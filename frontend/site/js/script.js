@@ -2,7 +2,7 @@
 //rota da Api
 //====================================
 
-const API = 'http://10.106.208.18:3000/api';
+const API = 'http://10.106.208.15:3000/api';
 
 let cProdutos   = [];
 let cClientes = [];
@@ -229,246 +229,6 @@ function aplicarPerfil(usuario) {
 //função de atualizar dados no HTML
 //====================================
 
-async function carregarMesas(mesaFiltro = null) {
-  const grid = document.getElementById('grid-mesas');
-  grid.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
-
-  document.getElementById('mesas-sub').textContent =
-    `Olá, ${USUARIO_LOGADO?.nome}! Suas ordens ativas.`;
-
-  try {
-    // Rota alterada para ordens
-    const url = `/ordens?garcom=${USUARIO_LOGADO.id}`;
-    const ordens = await api('GET', url);
-
-    const ativos = ordens.filter(p => !['entregue','cancelado'].includes(p.status));
-
-    document.getElementById('g-ped').textContent     = ordens.length;
-    document.getElementById('g-ped-sub').textContent = `${ativos.length} ativo(s)`;
-
-    const mesasAtivas = new Set(ativos.map(p => p.mesa).filter(Boolean));
-    document.getElementById('g-mesas').textContent   = mesasAtivas.size;
-    document.getElementById('g-preparo').textContent = ativos.filter(p => p.status === 'em_preparo').length;
-    document.getElementById('g-prontos').textContent = ativos.filter(p => p.status === 'saiu_entrega').length;
-
-    const botoes = document.getElementById('mesa-botoes');
-    botoes.innerHTML = Array.from({length: 10}, (_, i) => {
-      const n      = i + 1;
-      const temPed = mesasAtivas.has(n);
-      const ativo  = mesaFiltro === n;
-      return `
-        <button class="btn btn-sm ${ativo ? 'btn-red' : temPed ? 'btn-green' : 'btn-ghost'}"
-          onclick="carregarMesas(${n})"
-          title="${temPed ? 'Mesa com ordem ativo' : 'Mesa livre'}">
-          ${n}${temPed ? ' 🔴' : ''}
-        </button>`;
-    }).join('');
-
-    const ordensFiltrados = mesaFiltro
-      ? ativos.filter(p => p.mesa === mesaFiltro)
-      : ativos;
-
-    if (!ordensFiltrados.length) {
-      grid.innerHTML = `
-        <div class="empty" style="grid-column:1/-1">
-          <span class="ei">🪑</span>
-          Nenhuma ordem ativa no momento.<br>
-          <button class="btn btn-red" style="margin-top:12px" onclick="abrirordemMesa()">
-            + Abrir primeiro ordem
-          </button>
-        </div>`;
-      return;
-    }
-
-    const porMesa = {};
-    ordensFiltrados.forEach(p => {
-      const key = p.mesa || 'balcão';
-      if (!porMesa[key]) porMesa[key] = [];
-      porMesa[key].push(p);
-    });
-
-    grid.innerHTML = Object.entries(porMesa).map(([mesa, peds]) => {
-      const totalMesa  = peds.reduce((s, p) => s + (p.total || 0), 0);
-      const todosItens = peds.flatMap(p => p.itens);
-      const itensAgrup = {};
-      todosItens.forEach(it => {
-        const k = `${it.nomeProduto} (${it.tamanho})`;
-        itensAgrup[k] = (itensAgrup[k] || 0) + it.quantidade;
-      });
-      const statusAtual = peds[peds.length - 1]?.status;
-
-      return `
-        <div class="mesa-card">
-          <div class="mesa-card-head">
-            <div>
-              <div class="mesa-num">Mesa ${mesa}</div>
-              <div style="font-size:.72rem;color:var(--muted);margin-top:2px">
-                ${peds.length} ordem(s) · ${peds[0]?.cliente?.nome || 'Sem cadastro'}
-              </div>
-            </div>
-            ${badge(statusAtual)}
-          </div>
-          <div class="mesa-card-body">
-            ${Object.entries(itensAgrup).map(([nome, qtd]) => `
-              <div class="mesa-item">
-                <strong>${qtd}x ${nome}</strong>
-              </div>`).join('')}
-            <div class="mesa-total">
-              <span style="color:var(--muted)">Total da mesa</span>
-              <span style="color:var(--gold)">${R$(totalMesa)}</span>
-            </div>
-          </div>
-          <div class="mesa-card-foot">
-            <button class="btn btn-ghost btn-sm" style="flex:1"
-              onclick="abrirordemMesa(${mesa})">
-              + Item
-            </button>
-            <button class="btn btn-blue btn-sm"
-              onclick="abrirStatus('${peds[peds.length-1]?._id}','${statusAtual}')">
-              📝 Status
-            </button>
-            <button class="btn btn-green btn-sm"
-              onclick="abrirFecharMesa(${mesa}, ${totalMesa}, '${peds.map(p=>p._id).join(',')}')">
-              ✅ Fechar
-            </button>
-          </div>
-        </div>`;
-    }).join('');
-
-  } catch (e) {
-    grid.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
-  }
-}
-
-async function abrirordemMesa(mesaNum = null) {
-  try {
-    // Rota alterada para produtos
-    if (!cProdutos.length)   cProdutos   = await api('GET', '/produtos');
-    if (!cClientes.length) cClientes = await api('GET', '/clientes');
-  } catch (e) { toast('Erro ao carregar dados', 'err'); return; }
-
-  document.getElementById('pm-cli').innerHTML =
-    '<option value="">— Sem cadastro —</option>' +
-    cClientes.map(c => `<option value="${c._id}">${c.nome} · ${c.telefone}</option>`).join('');
-
-  document.getElementById('pm-mesa').value = mesaNum || '';
-  document.getElementById('itens-mesa-lista').innerHTML = '';
-  document.getElementById('pm-obs').value  = '';
-  document.getElementById('pm-sub').textContent = 'R$ 0,00';
-  document.getElementById('pm-tot').textContent = 'R$ 0,00';
-
-  addItemMesa();
-  abrir('m-ordem-mesa');
-}
-
-function addItemMesa() {
-  const d = document.createElement('div');
-  d.className = 'item-row';
-  const opts = cProdutos.filter(p => p.disponivel)
-    .map(p => `<option value="${p._id}"
-      data-p="${p.precos?.P||0}" data-m="${p.precos?.M||0}" data-g="${p.precos?.G||0}">
-      ${p.nome}</option>`).join('');
-  d.innerHTML = `
-    <select class="ip" onchange="recalcMesa()"><option value="">Selecione...</option>${opts}</select>
-    <select class="it" onchange="recalcMesa()">
-      <option value="P">P</option><option value="M">M</option><option value="G" selected>G</option>
-    </select>
-    <input class="iq" type="number" value="1" min="1" oninput="recalcMesa()">
-    <div class="is" style="font-size:.8rem;text-align:right;color:var(--muted)">R$ 0,00</div>
-    <button class="btn-rm" onclick="this.parentElement.remove();recalcMesa()">×</button>`;
-  document.getElementById('itens-mesa-lista').appendChild(d);
-}
-
-function recalcMesa() {
-  let sub = 0;
-  document.querySelectorAll('#itens-mesa-lista .item-row').forEach(row => {
-    const sel = row.querySelector('.ip');
-    const tam = row.querySelector('.it').value.toLowerCase();
-    const qtd = parseInt(row.querySelector('.iq').value) || 0;
-    const pc  = parseFloat(sel.options[sel.selectedIndex]?.dataset?.[tam] || 0);
-    const s   = pc * qtd; sub += s;
-    row.querySelector('.is').textContent = R$(s);
-  });
-  document.getElementById('pm-sub').textContent = R$(sub);
-  document.getElementById('pm-tot').textContent = R$(sub);
-}
-
-async function salvarordemMesa() {
-  const mesa = parseInt(document.getElementById('pm-mesa').value) || 0;
-  if (!mesa || mesa < 1) { toast('Selecione a mesa', 'err'); return; }
-
-  const cliId = document.getElementById('pm-cli').value || null;
-  const itens = []; let valido = true;
-  document.querySelectorAll('#itens-mesa-lista .item-row').forEach(row => {
-    const pid = row.querySelector('.ip').value;
-    if (!pid) { valido = false; return; }
-    itens.push({
-      Produto:      pid,
-      tamanho:    row.querySelector('.it').value,
-      quantidade: parseInt(row.querySelector('.iq').value) || 1,
-    });
-  });
-
-  if (!valido || !itens.length) { toast('Adicione ao menos um item', 'err'); return; }
-
-  let clienteId = cliId;
-  if (!clienteId) {
-    try {
-      const todos = await api('GET', `/clientes?busca=Mesa ${mesa}`);
-      const existe = todos.find(c => c.nome === `Mesa ${mesa}`);
-      if (existe) {
-        clienteId = existe._id;
-      } else {
-        const novo = await api('POST', '/clientes', { nome: `Mesa ${mesa}`, telefone: 'Mesa' });
-        clienteId = novo._id;
-        cClientes = [];
-      }
-    } catch (e) { toast('Erro ao registrar mesa', 'err'); return; }
-  }
-
-  try {
-    // Rota alterada para ordens
-    await api('POST', '/ordens', {
-      cliente:        clienteId,
-      itens,
-      formaPagamento: 'pix',
-      observacoes:    document.getElementById('pm-obs').value,
-      garcom:         USUARIO_LOGADO?.id,
-    });
-    toast(`ordem lançado na Mesa ${mesa}! 🍕`);
-    fechar('m-ordem-mesa');
-    carregarMesas();
-  } catch (e) { toast('Erro: ' + e.message, 'err'); }
-}
-
-function abrirFecharMesa(mesa, total, ids) {
-  mesaEmFechamento = { mesa, total, ids: ids.split(',') };
-  document.getElementById('fm-titulo').textContent = `Fechar Mesa ${mesa}`;
-  document.getElementById('fm-total').textContent  = R$(total);
-  document.getElementById('fm-resumo').innerHTML   =
-    `<p style="font-size:.82rem;color:var(--muted)">
-      ${mesaEmFechamento.ids.length} ordem(s) serão marcados como <strong style="color:var(--green)">Entregue</strong>.
-    </p>`;
-  abrir('m-fechar-mesa');
-}
-
-async function confirmarFechamento() {
-  if (!mesaEmFechamento) return;
-
-  try {
-    await Promise.all(
-      mesaEmFechamento.ids.map(id =>
-        // Rota alterada para ordens
-        api('PATCH', `/ordens/${id}/status`, { status: 'entregue' })
-      )
-    );
-    toast(`Mesa ${mesaEmFechamento.mesa} fechada! ✅`);
-    fechar('m-fechar-mesa');
-    mesaEmFechamento = null;
-    carregarMesas();
-  } catch (e) { toast('Erro: ' + e.message, 'err'); }
-}
-
 function ir(pg, btn) {
   const perfil = document.getElementById('sb-perfil').textContent;
   if (pg === 'usuarios' && perfil !== 'Administrador') {
@@ -490,7 +250,6 @@ function ir(pg, btn) {
     Produtos:    carregarProdutos,
     clientes:  carregarClientes,
     usuarios:  carregarUsuarios,
-    mesas:     carregarMesas,
   };
   if (loaders[pg]) loaders[pg]();
 }
@@ -529,7 +288,7 @@ async function carregarDashboard() {
     elP.innerHTML = ordens.slice(0, 8).map(p => `
       <div class="mini-row">
         <div>
-          <div class="mn">#${String(p.numeroordem || '?').padStart(3,'0')} · ${p.cliente?.nome || '—'}</div>
+          <div class="mn">#${String(p.id || '?').padStart(3,'0')} · ${p.cliente?.nome || '—'}</div>
           <div class="mc">${new Date(p.createdAt).toLocaleString('pt-BR')}</div>
         </div>
         <div style="text-align:right">
@@ -903,17 +662,15 @@ async function carregarordens() {
     el.innerHTML = `
       <table>
         <thead>
-          <tr><th>#</th><th>Cliente</th><th>Itens</th><th>Subtotal</th><th>Entrega</th><th>Total</th><th>Pagamento</th><th>Status</th><th>Data</th><th>Ações</th>
+          <tr><th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th><th>Ações</th>
         </thead>
         <tbody>
           ${ordens.map(p => `
+            ${console.log(p)}
             <tr>
-              <td><strong style="color:var(--red)">#${String(p.numeroordem||'?').padStart(3,'0')}</strong></td>
+              <td><strong style="color:var(--red)">#${String(p.numeroOrdem||'?').padStart(3,'0')}</strong></td>
               <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
-              <td style="font-size:.76rem">${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'} (${it.tamanho})`).join('<br>')}</td>
-              <td>${R$(p.subtotal)}</td><td>${R$(p.taxaEntrega)}</td>
-              <td><strong style="color:var(--gold)">${R$(p.total)}</strong></td>
-              <td style="font-size:.76rem">${(p.formaPagamento || '—').replace('_', ' ')}</td>
+              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div></td>
               <td>${badge(p.status)}</td>
               <td style="font-size:.7rem;color:var(--muted)">${new Date(p.createdAt).toLocaleString('pt-BR')}</td>
               <td><div style="display:flex;gap:5px"><button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button><button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button></div></td>
@@ -942,8 +699,6 @@ async function abrirOrdem() {
 
   document.getElementById('itens-lista').innerHTML = '';
   document.getElementById('ped-obs').value   = '';
-  document.getElementById('ped-pag').value   = 'pix';
-  document.getElementById('ped-tot').textContent = 'R$ 0,00';
 
   addItem();
   abrir('m-ordem');
@@ -958,12 +713,11 @@ function addItem() {
   d.className = 'item-row';
   const opts = cProdutos
     .filter(p => p.disponivel)
-    .map(p => `<option value="${p._id}" data-p="${p.precos?.P || 0}" data-m="${p.precos?.M || 0}" data-g="${p.precos?.G || 0}">${p.nome}</option>`).join('');
+    .map(p => `<option value="${p._id}">${p.nome}</option>`).join('');
 
   d.innerHTML = `
     <select class="ip" onchange="recalc()"><option value="">Selecione...</option>${opts}</select>
     <input class="iq" type="number" value="1" min="1" oninput="recalc()">
-    <div class="is" style="font-size:.8rem;text-align:right;color:var(--muted)">R$ 0,00</div>
     <button class="btn-rm" onclick="this.parentElement.remove(); recalc()">×</button>`;
 
   document.getElementById('itens-lista').appendChild(d);
@@ -975,25 +729,7 @@ function recalc() {
     const sel = row.querySelector('.ip');
     const qtd = parseInt(row.querySelector('.iq').value) || 0;
     const opt = sel.options[sel.selectedIndex];
-    const pc  = cProdutos.find
-    const s   = pc * qtd;
-    sub += s;
-    row.querySelector('.is').textContent = R$(s);
   });
-
-  const taxa = parseFloat(document.getElementById('ped-taxa').value) || 0;
-  document.getElementById('ped-sub').textContent = R$(sub);
-  document.getElementById('ped-tot').textContent = R$(sub + taxa);
-}
-
-//====================================
-//função de fcalcular troco
-//====================================
-
-function toggleTroco() {
-  const pag = document.getElementById('ped-pag').value;
-  document.getElementById('wrap-troco').style.display =
-    pag === 'dinheiro' ? 'block' : 'none';
 }
 
 //====================================
@@ -1002,6 +738,7 @@ function toggleTroco() {
 
 async function salvarordem() {
   const cliId = document.getElementById('ped-cli').value;
+  console.log(cliId)
   if (!cliId) { toast('Selecione um cliente', 'err'); return; }
 
   const itens = [];
@@ -1010,8 +747,7 @@ async function salvarordem() {
     const pid = row.querySelector('.ip').value;
     if (!pid) { valido = false; return; }
     itens.push({
-      Produto:      pid,
-      tamanho:    row.querySelector('.it').value,
+      produto: pid,
       quantidade: parseInt(row.querySelector('.iq').value) || 1,
     });
   });
@@ -1025,12 +761,9 @@ async function salvarordem() {
     await api('POST', '/ordens', {
       cliente:        cliId,
       itens,
-      taxaEntrega:    parseFloat(document.getElementById('ped-taxa').value) || 0,
-      formaPagamento: document.getElementById('ped-pag').value,
-      troco:          parseFloat(document.getElementById('ped-troco')?.value) || 0,
       observacoes:    document.getElementById('ped-obs').value,
     });
-    toast('ordem criado! 🍕');
+    toast('ordem de produção criada! ⚒️');
     fechar('m-ordem');
     carregarordens();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }

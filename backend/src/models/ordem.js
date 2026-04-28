@@ -89,56 +89,51 @@ const Ordem = {
   // CRIAR ORDEM
   // ============================
   async create({ clienteId, itens, observacoes = '' }) {
-    await ready;
+  await ready;
 
-    const Produto = require('./produto');
+  const Produto = require('./produto');
 
-    const itensProcessados = [];
-    let total = 0;
+  const itensProcessados = [];
 
-    for (const item of itens) {
-      const prod = await Produto.findById(item.produto);
+  for (const item of itens) {
+    // ⚠️ ajuste aqui: "Produto" com P maiúsculo
+    const prod = await Produto.findById(item.produto);
 
-      if (!prod) {
-        throw new Error(`Produto ID ${item.produto} não encontrado`);
-      }
-
-      const preco = 30; // valor fixo (pode melhorar depois)
-
-      itensProcessados.push({
-        produtoId: prod.id,
-        nomeProduto: prod.nome,
-        quantidade: item.quantidade,
-        preco
-      });
-
-      total += preco * item.quantidade;
+    if (!prod) {
+      throw new Error(`Produto ID ${item.Produto} não encontrado`);
     }
 
-    // gerar número da ordem
-    const contagem = get('SELECT COUNT(*) as total FROM ordens');
-    const numeroOrdem = (contagem?.total || 0) + 1;
+    itensProcessados.push({
+      produtoId: prod.id,
+      nomeProduto: prod.nome,
+      quantidade: item.quantidade,
+    });
+  }
 
-    // criar ordem
-    const infoOrdem = run(`
-      INSERT INTO ordens
-        (numero_ordem, cliente_id, total, status, observacoes)
-      VALUES (?, ?, ?, ?, ?)
-    `, [numeroOrdem, clienteId, total, 'recebido', observacoes]);
+  // gerar número da ordem
+  const contagem = get('SELECT COUNT(*) as total FROM ordens');
+  const numeroOrdem = (contagem?.total || 0) + 1;
 
-    const ordemId = infoOrdem.lastInsertRowid;
+  // ⚠️ CORREÇÃO IMPORTANTE: número de placeholders
+  const infoOrdem = run(`
+    INSERT INTO ordens
+      (numero_ordem, cliente_id, status, observacoes)
+    VALUES (?, ?, ?, ?)
+  `, [numeroOrdem, clienteId, 'recebido', observacoes]);
 
-    // inserir itens
-    for (const it of itensProcessados) {
-      run(`
-        INSERT INTO itens_pedido
-          (pedido_id, produto_id, nome_produto, quantidade, preco_unitario)
-        VALUES (?, ?, ?, ?, ?)
-      `, [ordemId, it.produtoId, it.nomeProduto, it.quantidade, it.preco]);
-    }
+  const ordemId = infoOrdem.lastInsertRowid;
 
-    return this.findById(ordemId);
-  },
+  // inserir itens
+  for (const it of itensProcessados) {
+    run(`
+      INSERT INTO itens_pedido
+        (pedido_id, produto_id, nome_produto, quantidade)
+      VALUES (?, ?, ?, ?)
+    `, [ordemId, it.produtoId, it.nomeProduto, it.quantidade]);
+  }
+
+  return this.findById(ordemId);
+},
 
   // ============================
   // ATUALIZAR STATUS

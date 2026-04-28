@@ -114,33 +114,6 @@ router.delete('/produtos/:id', auth, async (req, res) => {
 // CLIENTES
 // ================================
 
-// router.get('/clientes', auth, async (req, res) => {
-//   try {
-//     const { busca } = req.query;
-
-//     let where = {};
-
-//     if (busca && busca.trim().length >= 2) {
-//       where = {
-//         nome: {
-//           [Op.like]: `%${busca.trim()}%`
-//         }
-//       };
-//     }
-
-//     const clientes = await Cliente.findAll({
-//       where,
-//       limit: 20,
-//       order: [['nome', 'ASC']]
-//     });
-
-//     res.json(clientes);
-//   } catch (e) {
-//     console.error(e);
-//     res.status(500).json({ erro: e.message });
-//   }
-// });
-
 router.get('/clientes', auth, async (req, res) => {
   try {
     res.json(await Cliente.findAll());
@@ -237,7 +210,7 @@ router.patch('/ordens/:id/status', auth, async (req, res) => {
   try {
     const status = req.body.status;
 
-    const validos = ['recebido','em_preparo','entregue','cancelado'];
+    const validos = ['recebido','em_producao','entregue','cancelado'];
 
     if (!status || !validos.includes(status))
       return res.status(400).json({ erro: 'Status inválido' });

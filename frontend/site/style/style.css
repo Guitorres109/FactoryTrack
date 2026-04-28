@@ -282,7 +282,7 @@ td { padding: 10px 12px; vertical-align: middle; }
 }
 
 .b-recebido     { background: rgba(59,130,246,.18);  color: #93c5fd; }
-.b-em_preparo   { background: rgba(245,200,66,.18);  color: var(--gold); }
+.b-em_producao   { background: rgba(245,200,66,.18);  color: var(--gold); }
 .b-saiu_entrega { background: rgba(139,92,246,.18);  color: #c4b5fd; }
 .b-entregue     { background: rgba(41,199,111,.18);  color: var(--green); }
 .b-cancelado    { background: rgba(232,55,42,.18);   color: var(--red); }
@@ -553,7 +553,7 @@ select option { background: var(--surf2); }
   padding-top: 6px;
 }
 
-@media (max-width: 860px) {
+/* @media (max-width: 860px) {
   #sidebar { width: 52px; }
   #sidebar .sb-logo h1,
   #sidebar .sb-user,
@@ -565,4 +565,4 @@ select option { background: var(--surf2); }
   .dash-grid { grid-template-columns: 1fr; }
   .fr2, .fr3 { grid-template-columns: 1fr; }
   .pg-body { padding: 14px; }
-}
+} */

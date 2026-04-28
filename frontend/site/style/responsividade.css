@@ -49,17 +49,24 @@
 /* ================= MOBILE / TABLET ================= */
 @media (max-width: 768px) {
 
+  body{
+    overflow: hidden;
+  }
     table {
-    min-width: 600px;
+    min-width: 400px;
   }
 
   .tbl-wrap {
     overflow: visible;
   }
 
+  .btn-red{
+    width: 100%;
+  }
+
   table, thead, tbody, th, td, tr {
     display: block;
-    width: 100%;
+    width: 80%;
   }
 
   thead {
@@ -125,4 +132,21 @@
   #conteudo {
     padding: 0;
   }
+}
+
+@media (max-width: 860px) {
+  #sidebar {align-items: center;}
+  #sidebar { width: 52px; }
+  #sidebar .sb-logo h1,
+  #sidebar .sb-user,
+  #sidebar .nav-btn span:not(.ic),
+  #sidebar .sb-group,
+  #sidebar #menu-usuarios {font-size: 0;}
+  #sidebar .sb-footer span { display: none; }
+  #sidebar .sb-logo { padding: 14px 8px; }
+  #sb-perfil{font-size: 3px;}
+  #conteudo { margin-left: 52px; }
+  .dash-grid { grid-template-columns: 1fr; }
+  .fr2, .fr3 { grid-template-columns: 1fr; }
+  .pg-body { padding: 14px; }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projetinho</title>
+    <title>MetalTech</title>
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/responsividade.css">
     <link rel="stylesheet" href="/style/geral.css">
@@ -272,14 +272,7 @@
       <span>Produto</span><span>Qtd</span>
     </div>
     <div id="itens-lista"></div>
-    <div class="total-box">
-      <div class="row tot"><span>TOTAL</span><span id="ped-tot">R$ 0,00</span></div>
-    </div>
-    <div class="fr2">
-      <div class="fg"><label>Forma de Pagamento *</label><select id="ped-pag" onchange="toggleTroco()"><option value="pix">PIX</option><option value="cartao_credito">Cartão de Crédito</option><option value="cartao_debito">Cartão de Débito</option><option value="dinheiro">Dinheiro</option></select></div>
-      <div class="fg" id="wrap-troco" style="display:none"><label>Troco para (R$)</label><input id="ped-troco" type="number" min="0" step="1" placeholder="Ex: 100"></div>
-    </div>
-    <div class="fg"><label>Observações</label><textarea id="ped-obs" rows="2" placeholder="Sem cebola, massa fina..."></textarea></div>
+    <div class="fg"><label>Observações</label><textarea id="ped-obs" rows="2" placeholder="Observações"></textarea></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('m-ordem')">Cancelar</button>
       <button class="btn btn-red"   onclick="salvarordem()">Confirmar ordem</button>
@@ -294,7 +287,7 @@
     <div class="fg"><label>Novo Status</label>
       <select id="st-val">
         <option value="recebido">📥 Recebido</option>
-        <option value="em_preparo">👨‍🍳 Em Preparo</option>
+        <option value="em_producao">👨‍🍳 Em Produção</option>
         <option value="entregue">✅ Entregue</option>
         <option value="cancelado">❌ Cancelado</option>
       </select>
