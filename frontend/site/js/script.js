@@ -2,7 +2,7 @@
 //rota da Api
 //====================================
 
-const API = 'http://10.106.208.15:3000/api';
+const API = 'http://192.168.1.4:3000/api';
 
 let cProdutos   = [];
 let cClientes = [];
@@ -33,7 +33,6 @@ async function verificar(){
 verificar()
 
 async function fazerLogin() {
-  //Variaveis de elementos do HTML
   const email = document.getElementById('l-email').value.trim(); 
   const senha = document.getElementById('l-senha').value;
   const btn   = document.getElementById('btn-login');
@@ -48,7 +47,6 @@ async function fazerLogin() {
   btn.disabled    = true;
   btn.textContent = 'Entrando...';
   erro.style.display = 'none';
-  telaLogin.style.display = 'none';
 
   try {
     const res  = await fetch(API + '/auth/login', {
@@ -60,27 +58,29 @@ async function fazerLogin() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.erro || 'Credenciais inválidas');
 
-    TOKEN = data.token;
-    USUARIO_LOGADO = data.usuario;
-    localStorage.setItem('pz_token', TOKEN);
+    // 💾 salva sessão
+    localStorage.setItem('pz_token', data.token);
     localStorage.setItem('pz_usuario', JSON.stringify(data.usuario));
+    localStorage.setItem('pz_usuarioId', JSON.stringify(data.usuario.id));
 
-    aplicarPerfil(data.usuario);
-    document.body.classList.add('logado');
+    // 🚀 redireciona para o sistema (ex: index.html)
+    window.location.href = '/metaltech';
 
   } catch (e) {
     erro.style.display = 'block';
-    if (e.message === 'Failed to fetch'){
-      erro.textContent = 'Erro de conexão com o Servidor'
-    } else{
-      erro.textContent   = e.message;
+
+    if (e.message === 'Failed to fetch') {
+      erro.textContent = 'Erro de conexão com o servidor';
+    } else {
+      erro.textContent = e.message;
     }
-    telaLogin.style.display = 'block';
+
   } finally {
     btn.disabled    = false;
     btn.textContent = 'Entrar';
   }
 }
+
 function toggleSenha(id) {
   const input = document.getElementById(id);
   input.type = input.type === 'password' ? 'text' : 'password';
@@ -91,13 +91,11 @@ function toggleSenha(id) {
 //====================================
 
 function sair() {
-  TOKEN = '';
+  TOKEN = null;
   USUARIO_LOGADO = null;
   localStorage.removeItem('pz_token');
   localStorage.removeItem('pz_usuario');
-  document.body.classList.remove('logado');
-  document.getElementById('l-senha').value = '';
-  telaLogin.style.display = 'block';
+  window.location.href = '/';
 }
 
 if (TOKEN && USUARIO_LOGADO) {
@@ -116,7 +114,7 @@ function toast(msg, tipo = 'ok') {
   setTimeout(() => el.className = '', 3000);
 }
 
-function abrir(id)  { document.getElementById(id).classList.add('open'); }
+function abrir(id)  {document.getElementById(id).classList.add('open'); if (id === 'm-Produto'){document.getElementById('p-disp').value = true}}
 function fechar(id) { document.getElementById(id).classList.remove('open'); }
 
 document.querySelectorAll('.modal-bg').forEach(bg =>
@@ -232,11 +230,7 @@ function aplicarPerfil(usuario) {
   show('stat-fat', novaOrdem, 'block');
   show('stat-cli', novaOrdem, 'block');
 
-  if (isGar) {
-    ir('mesas', document.getElementById('btn-nav-mesas'));
-  } else {
-    ir('dashboard', document.querySelector('[onclick*="dashboard"]'));
-  }
+  ir('dashboard', document.querySelector('[onclick*="dashboard"]'))
 }
 
 //====================================
@@ -245,21 +239,48 @@ function aplicarPerfil(usuario) {
 
 function ir(pg, btn) {
   const perfil = document.getElementById('sb-perfil').textContent;
+
+  // 🔒 Restrição de acesso
   if (pg === 'usuarios' && perfil !== 'Administrador') {
-    toast('Acesso restrito a Administradores', 'err'); return;
+    toast('Acesso restrito a Administradores', 'err');
+    return;
   }
+
+  // 🔄 Limpa estado
   document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('ativo'));
-  document.getElementById('pg-' + pg).classList.add('ativa');
+
+  // 🧠 Caso especial: nova ordem
+  if (pg === 'ordens-novo') {
+    const pagina = document.getElementById('pg-ordens');
+    if (pagina) pagina.classList.add('ativa');
+
+    if (btn) btn.classList.add('ativo');
+
+    carregarordens(); // mantém seu padrão atual
+
+    abrirOrdem()
+
+    return;
+  }
+
+  // 📄 Página normal
+  const pagina = document.getElementById('pg-' + pg);
+  if (pagina) pagina.classList.add('ativa');
+
   if (btn) btn.classList.add('ativo');
+
   const loaders = {
     dashboard: carregarDashboard,
-    ordens:   carregarordens,
-    Produtos:    carregarProdutos,
-    clientes:  carregarClientes,
-    usuarios:  carregarUsuarios,
+    ordens: carregarordens,
+    Produtos: carregarProdutos,
+    clientes: carregarClientes,
+    usuarios: carregarUsuarios,
   };
-  if (loaders[pg]) loaders[pg]();
+
+  if (loaders[pg]) {
+    loaders[pg]();
+  }
 }
 
 //====================================
@@ -293,8 +314,14 @@ async function carregarDashboard() {
     elP.innerHTML = ordens.slice(0, 8).map(p => `
       <div class="mini-row">
         <div>
-          <div class="mn">#${String(p.numeroOrdem || '?').padStart(3,'0')} · ${p.cliente?.nome || '—'}</div>
-          <div class="mc">${new Date(p.createdAt).toLocaleString('pt-BR')}</div>
+          <div class="mn">
+  #${
+    p.numeroOrdem
+      ? String(p.numeroOrdem).padStart(3, '0')
+      : '???'
+  } · ${p.cliente?.nome || '—'}
+</div>
+          <div class="mc">${p.usuario?.nome || '—'} · ${new Date(p.createdAt).toLocaleString('pt-BR')}</div>
         </div>
         <div style="text-align:right">
           ${badge(p.status)}<br>
@@ -502,24 +529,38 @@ function renderClientes(lista) {
           return `
             <tr>
               <td><strong>${c.nome || '—'}</strong></td>
-              <td>${c.telefone || '—'}</td>
+              <td>${formatarTelefone(c.telefone)}</td>
               <td style="font-size:.76rem;color:var(--muted)">${endereco}</td>
               <td style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
-              <td>
-                <div style="display:flex;gap:5px">
-                  <button class="btn btn-ghost btn-sm"
-                    onclick='abrirEdicaoCliente(${JSON.stringify(c)})'>✏️</button>
-
-                  <button class="btn btn-danger btn-sm"
-                    onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button>
-                </div>
-              </td>
+              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm"onclick='abrirEdicaoCliente(${JSON.stringify(c)})'>✏️</button><button class="btn btn-danger btn-sm"onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button></div></td>
             </tr>
           `;
         }).join('')}
       </tbody>
     </table>
   `;
+}
+
+function formatarTelefone(tel) {
+  if (!tel) return '—';
+
+  // remove tudo que não for número
+  const nums = tel.replace(/\D/g, '');
+
+  // se não tiver 10 ou 11 dígitos, retorna original
+  if (nums.length !== 10 && nums.length !== 11) {
+    return tel;
+  }
+
+  const ddd = nums.slice(0, 2);
+
+  // celular (11 dígitos)
+  if (nums.length === 11) {
+    return `(${ddd}) ${nums.slice(2, 7)}-${nums.slice(7)}`;
+  }
+
+  // fixo (10 dígitos)
+  return `(${ddd}) ${nums.slice(2, 6)}-${nums.slice(6)}`;
 }
 
 function normalizar(txt) {
@@ -690,21 +731,90 @@ async function carregarordens() {
       el.innerHTML = '<div class="empty"><span class="ei">📋</span>Nenhum ordem</div>';
       return;
     }
+
+    const usuario = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
+    const perfil = usuario?.perfil || '';
+    const isAtendente = perfil === 'Atendente';
     el.innerHTML = `
       <table>
         <thead>
-          <tr><th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th><th>Ações</th>
+          <tr>
+          <th>#</th>
+          <th>Cliente</th>
+          <th>Itens</th>
+          <th>Status</th>
+          <th>Data</th>
+          ${!isAtendente ? '<th>Ações</th>' : ''}
         </thead>
         <tbody>
           ${ordens.map(p => `
             <tr>
-              <td><strong style="color:var(--red)">#${String(p.numeroOrdem||'?').padStart(3,'0')}</strong></td>
-              <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
-              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
+              <td>
+                <div>
+                  <strong style="color:var(--red)">
+                    #${
+                      p.numeroOrdem
+                        ? String(p.numeroOrdem).padStart(3, '0')
+                        : '???'
+                    }
+                  </strong>
+                </div>
+
+                <small style="color:var(--muted); font-size: 11px">
+                  ${p.usuario?.nome || '—'}
+                </small>
+              </td>
+              <td>
+                <strong>${p.cliente?.nome || '—'}</strong><br>
+                <small style="color:var(--muted)">${p.cliente?.telefone || ''}</small>
+              </td>
+
+              <td style="font-size:.76rem">
+                <div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div>
+                <small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small>
+              </td>
+
               <td>${badge(p.status)}</td>
-              <td style="font-size:.7rem;color:var(--muted)">${new Date(p.createdAt).toLocaleString('pt-BR')}</td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button><button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button></div></td>
-            </tr>`).join('')}
+
+              <td style="font-size:0.75rem; line-height:1.4;">
+                ${
+                  new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()
+                  ? `
+                    <div style="margin-bottom:6px;">
+                      <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
+                      <strong style="font-size:0.7rem; font-weight:100;">
+                        ${new Date(p.createdAt).toLocaleString('pt-BR')}
+                      </strong>
+                    </div>
+                  `
+                  : `
+                    <div style="margin-bottom:6px;">
+                      <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
+                      <strong style="font-size:0.7rem; font-weight:100;">
+                        ${new Date(p.createdAt).toLocaleString('pt-BR')}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Última alteração</span>
+                      <strong style="font-size:0.7rem; font-weight:100;">
+                        ${new Date(p.updatedAt).toLocaleString('pt-BR')}
+                      </strong>
+                    </div>
+                  `
+                }
+              </td>
+              ${!isAtendente ? `
+                <td class="td-acoes">
+                  <div style="display:flex;gap:5px">
+                    <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
+                  </div>
+                </td>
+              ` : ''}
+
+            </tr>
+          `).join('')}
         </tbody>
       </table>`;
   } catch (e) {
@@ -715,6 +825,9 @@ async function carregarordens() {
 let ordensCache = [];
 function aplicarFiltroOrdens(status) {
   const el = document.getElementById('tbl-ordens');
+  const usuario = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
+  const perfil = usuario?.perfil || '';
+  const isAtendente = perfil === 'Atendente';
 
   if (!ordensCache.length) return;
 
@@ -741,18 +854,73 @@ function aplicarFiltroOrdens(status) {
     <table>
       <thead>
         <tr>
-          <th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th><th>Ações</th>
+          <th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th>${!isAtendente ? '<th>Ações</th>' : ''}
         </tr>
       </thead>
       <tbody>
         ${filtradas.map(p => `
           <tr>
-            <td><strong style="color:var(--red)">#${String(p.numeroOrdem||'?').padStart(3,'0')}</strong></td>
+            <td>
+                <div>
+                  <strong style="color:var(--red)">
+                    #${
+                      p.numeroOrdem
+                        ? String(p.numeroOrdem).padStart(3, '0')
+                        : '???'
+                    }
+                  </strong>
+                </div>
+
+                <small style="color:var(--muted); font-size: 11px">
+                  ${p.usuario?.nome || '—'}
+                </small>
+              </td>
               <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
               <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
               <td>${badge(p.status)}</td>
-              <td style="font-size:.7rem;color:var(--muted)">${new Date(p.createdAt).toLocaleString('pt-BR')}</td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button><button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button></div></td>
+              <td style="font-size:0.75rem; line-height:1.4;">
+                ${
+                  new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()
+                    ? `
+                      <div style="margin-bottom:6px;">
+                        <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">
+                          Criado em
+                        </span>
+                        <strong style="font-size:0.7rem; font-weight:100;">
+                          ${new Date(p.createdAt).toLocaleString('pt-BR')}
+                        </strong>
+                      </div>
+                    `
+                    : `
+                      <div style="margin-bottom:6px;">
+                        <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">
+                          Criado em
+                        </span>
+                        <strong style="font-size:0.7rem; font-weight:100;">
+                          ${new Date(p.createdAt).toLocaleString('pt-BR')}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">
+                          Última alteração
+                        </span>
+                        <strong style="font-size:0.7rem; font-weight:100;">
+                          ${new Date(p.updatedAt).toLocaleString('pt-BR')}
+                        </strong>
+                      </div>
+                    `
+                }
+              </td>
+
+              ${!isAtendente ? `
+                <td class="td-acoes">
+                  <div style="display:flex;gap:5px">
+                    <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
+                  </div>
+                </td>
+              ` : ''}
           </tr>
         `).join('')}
       </tbody>
@@ -817,6 +985,7 @@ function recalc() {
 async function salvarordem() {
   const cliId = document.getElementById('ped-cli').value;
   if (!cliId) { toast('Selecione um cliente', 'err'); return; }
+  console.log(localStorage.getItem('pz_usuario').id);
 
   const itens = [];
   let valido = true;
@@ -839,6 +1008,7 @@ async function salvarordem() {
       cliente:        cliId,
       itens,
       observacoes:    document.getElementById('ped-obs').value,
+      userId:         localStorage.getItem('pz_usuarioId')
     });
     toast('ordem de produção criada! ⚒️');
     fechar('m-ordem');
@@ -912,7 +1082,7 @@ async function carregarUsuarios() {
               <td><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
               <td><span class="badge ${u.ativo ? 'b-on' : 'b-off'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
               <td style="font-size:.73rem;color:var(--muted)">${new Date(u.createdAt).toLocaleDateString('pt-BR')}</td>
-              <td><button class="btn btn-danger btn-sm" onclick="abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}', '${u.ativo}')"">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarUsuario('${u._id}','${u.nome}')">🗑️</button></td>
+              <td><div style="display:flex;gap:5px"><button class="btn btn-danger btn-sm" onclick="abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}', '${u.ativo}')"">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarUsuario('${u._id}','${u.nome}')">🗑️</button></td>
             </tr>`).join('')}
         </tbody>
       </table>`;

@@ -12,6 +12,10 @@ app.use(cors());
 
 // 🌐 Rotas HTML
 app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/login.html"));
+});
+
+app.get("/metaltech", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/index.html"));
 });
 

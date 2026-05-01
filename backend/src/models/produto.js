@@ -5,7 +5,6 @@ const { ready, query, run, get } = require('../database/sqlite');
 function formatarPizza(row) {
 
   if (!row) {
-    console.log('⚠️ Row inválido');
     return null;
   }
 
@@ -56,7 +55,6 @@ const Produtos = {
     await ready;
     const atual = get('SELECT * FROM produtos WHERE id = ?', [id]);
     if (!atual) return null;
-    console.log(nome, descricao, disponivel)
 
     run(`
       UPDATE produtos SET

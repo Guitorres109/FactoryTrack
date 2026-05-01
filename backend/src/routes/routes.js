@@ -188,15 +188,15 @@ router.get('/ordens/:id', auth, async (req, res) => {
 
 router.post('/ordens', auth, async (req, res) => {
   try {
-    const { cliente, itens, observacoes } = req.body;
-
+    const { cliente, itens, observacoes, userId } = req.body;
     if (!cliente || !itens?.length)
       return res.status(400).json({ erro: 'cliente e itens são obrigatórios' });
 
     const novo = await Ordem.create({
       clienteId: cliente,
       itens,
-      observacoes
+      observacoes,
+      userId
     });
 
     res.status(201).json(novo);

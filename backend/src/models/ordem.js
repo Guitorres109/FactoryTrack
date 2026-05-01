@@ -7,9 +7,11 @@ const SELECT_ORDEM = `
   SELECT
     o.*,
     c.nome     AS cliente_nome,
-    c.telefone AS cliente_telefone
+    c.telefone AS cliente_telefone,
+    u.nome     AS usuario_nome
   FROM ordens o
   LEFT JOIN clientes c ON c.id = o.cliente_id
+  LEFT JOIN usuarios u ON u.id = o.usuario_id
 `;
 
 // ==============================
@@ -42,9 +44,14 @@ function formatarOrdem(row, itens = []) {
     observacoes: row.observacoes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+
+    // 🔥 agora vem o nome em vez do ID
+    usuario: {
+      id: row.usuario_id,
+      nome: row.usuario_nome || '—'
+    }
   };
 }
-
 // ==============================
 // MODEL
 // ==============================
@@ -88,7 +95,7 @@ const Ordem = {
   // ============================
   // CRIAR ORDEM
   // ============================
-  async create({ clienteId, itens, observacoes = '' }) {
+  async create({ clienteId, itens, observacoes = '', userId}) {
   await ready;
 
   const Produto = require('./produto');
@@ -114,12 +121,27 @@ const Ordem = {
   const contagem = get('SELECT COUNT(*) as total FROM ordens');
   const numeroOrdem = (contagem?.total || 0) + 1;
 
+  const now = new Date();
+
+    const brasilia = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+    );
+
+    const formatted =
+      brasilia.getFullYear() + "-" +
+      String(brasilia.getMonth() + 1).padStart(2, "0") + "-" +
+      String(brasilia.getDate()).padStart(2, "0") + " " +
+      String(brasilia.getHours()).padStart(2, "0") + ":" +
+      String(brasilia.getMinutes()).padStart(2, "0") + ":" +
+      String(brasilia.getSeconds()).padStart(2, "0");
+    
+
   // ⚠️ CORREÇÃO IMPORTANTE: número de placeholders
   const infoOrdem = run(`
     INSERT INTO ordens
-      (numero_ordem, cliente_id, status, observacoes)
-    VALUES (?, ?, ?, ?)
-  `, [numeroOrdem, clienteId, 'recebido', observacoes]);
+      (numero_ordem, cliente_id, status, observacoes, created_at, updated_at, usuario_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `, [numeroOrdem, clienteId, 'recebido', observacoes, formatted, formatted, userId]);
 
   const ordemId = infoOrdem.lastInsertRowid;
 
@@ -141,9 +163,23 @@ const Ordem = {
   async updateStatus(id, status) {
     await ready;
 
+    const now = new Date();
+
+    const brasilia = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+    );
+
+    const formatted =
+      brasilia.getFullYear() + "-" +
+      String(brasilia.getMonth() + 1).padStart(2, "0") + "-" +
+      String(brasilia.getDate()).padStart(2, "0") + " " +
+      String(brasilia.getHours()).padStart(2, "0") + ":" +
+      String(brasilia.getMinutes()).padStart(2, "0") + ":" +
+      String(brasilia.getSeconds()).padStart(2, "0");
+    
     const info = run(
-      "UPDATE ordens SET status = ?, updated_at = datetime('now') WHERE id = ?",
-      [status, id]
+      "UPDATE ordens SET status = ?, updated_at = ? WHERE id = ?",
+      [status, formatted, id]
     );
 
     return info.changes > 0 ? this.findById(id) : null;

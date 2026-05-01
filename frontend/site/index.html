@@ -9,43 +9,6 @@
     <link rel="stylesheet" href="/style/geral.css">
 </head>
 <body>
-  <div id="tela-login">
-  <div class="login-box">
-    <div class="login-logo">
-      <span class="em">⚙️</span>
-      <h1>MetalTech</h1>
-      <p>Sistema de Gestão · Faça login para continuar</p>
-    </div>
-    <div class="login-erro" id="login-erro"></div>
-    <div class="fg">
-      <label>E-mail</label>
-      <input id="l-email" type="email" placeholder="admin@gmail.com"
-        onkeydown="if(event.key==='Enter') fazerLogin()">
-    </div>
-    <div class="fg" style="position: relative;">
-      <label>Senha</label>
-      <input id="l-senha" type="password" placeholder="••••••"
-        onkeydown="if(event.key==='Enter') fazerLogin()"
-        style="padding-right: 40px;"
-      >
-      <button type="button" onclick="toggleSenha('l-senha')"
-        style="
-          position: absolute;
-          right: 10px;
-          top: 25px;
-          background: none;
-          border: none;
-          cursor: pointer;
-        ">
-        👁️
-      </button>
-    </div>
-    <button class="btn btn-red" id="btn-login"
-      style="width:100%;padding:10px;margin-top:4px" onclick="fazerLogin()">Entrar</button>
-    <!-- <p style="text-align:center;font-size:.69rem;color:var(--muted);margin-top:14px">
-      Rode <strong style="color:var(--text)">node seed.js</strong> para criar o admin inicial</p> -->
-  </div>
-</div>
     <div id="app">
   <aside id="sidebar">
     <div class="sb-logo">
@@ -118,7 +81,7 @@
             <div class="card-head">
               <h3>Ordens de produção Recentes</h3>
               <button id="btn-sm" class="btn btn-red btn-sm"
-                onclick="ir('ordens', document.querySelector('[onclick*=ordens]'))">
+                onclick="ir('ordens-novo', document.querySelector('[onclick*=ordens]'))">
                 + Novo
               </button>
             </div>

@@ -74,7 +74,8 @@ const ready = (async () => {
       status          TEXT    NOT NULL DEFAULT '',
       observacoes     TEXT    NOT NULL DEFAULT '',
       created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
-      updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
+      updated_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+      usuario_id      INTEGER NOT NULL DEFAULT 1 REFERENCES usuarios(id)
     )
   `);
 
