@@ -19,6 +19,18 @@ app.get("/metaltech", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/index.html"));
 });
 
+app.get("/assets/img/icon1", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/assets/img/icon1.svg"));
+});
+
+app.get("/assets/img/icon2", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/assets/img/icon2.svg"));
+});
+
+app.get("/assets/img/icon3", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/assets/img/icon3.svg"));
+});
+
 app.get("/style/style.css", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/style/style.css"));
 });

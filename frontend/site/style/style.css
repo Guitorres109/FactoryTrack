@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: radial-gradient(ellipse at 55% 40%, #1c0b0b 0%, var(--bg) 65%);
+  background: radial-gradient(ellipse at 55% 40%, #1d50744d  0%, var(--bg) 65%);
 }
 
 .login-box {
@@ -34,7 +34,7 @@
   font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: -0.3px;
-  color: var(--red);
+  color: var(--primary);
 }
 
 .login-logo p {
@@ -81,7 +81,7 @@ body.logado #app        { display: flex; }
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.2px;
-  color: var(--red);
+  color: var(--primary);
 }
 
 .sb-user {
@@ -136,8 +136,8 @@ body.logado #app        { display: flex; }
   font-family: 'Inter', sans-serif;
 }
 
-.nav-btn:hover { background: var(--surf2); color: var(--text); }
-.nav-btn.ativo { background: rgba(232,55,42,.11); color: var(--red); }
+.nav-btn:hover { background: #1d507479; color: var(--text); }
+.nav-btn.ativo { background: #1d507479; color: var(--text); }
 .nav-btn .ic   { font-size: 0.95rem; width: 17px; text-align: center; }
 
 .sb-footer {
@@ -217,7 +217,7 @@ body.logado #app        { display: flex; }
   height: 3px;
 }
 
-.stat.cr::before { background: var(--red); }
+.stat.cr::before { background: var(--primary); }
 .stat.co::before { background: var(--orange); }
 .stat.cg::before { background: var(--green); }
 .stat.cb::before { background: var(--blue); }
@@ -295,6 +295,7 @@ td { padding: 10px 12px; vertical-align: middle; }
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
   padding: 7px 14px;
   border-radius: 8px;
@@ -307,8 +308,8 @@ td { padding: 10px 12px; vertical-align: middle; }
   white-space: nowrap;
 }
 
-.btn-red    { background: var(--red);   color: #fff; }
-.btn-red:hover { background: var(--red-dk); }
+.btn-red    { background: var(--primary);   color: #fff; }
+.btn-red:hover { background: var(--secundary); }
 .btn-blue   { background: var(--blue);  color: #fff; }
 .btn-blue:hover { filter: brightness(.9); }
 .btn-green  { background: var(--green); color: #fff; }
@@ -346,7 +347,7 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: var(--red);
+  border-color: var(--primary);
 }
 
 input::placeholder { color: #444; }
@@ -409,7 +410,7 @@ select option { background: var(--surf2); }
   background: rgba(232,55,42,.1);
   border: none;
   border-radius: 6px;
-  color: var(--red);
+  color: var(--primary);
   font-size: 1.05rem;
   width: 30px; height: 30px;
   cursor: pointer;
@@ -453,7 +454,7 @@ select option { background: var(--surf2); }
 }
 
 .mini-row:last-child { border-bottom: none; }
-.mini-row .mn  { font-weight: 600; color: var(--red); font-size: 0.76rem; }
+.mini-row .mn  { font-weight: 600; color: var(--primary); font-size: 0.76rem; }
 .mini-row .mc  { font-size: 0.71rem; color: var(--muted); margin-top: 1px; }
 
 .div { height: 1px; background: var(--border); margin: 12px 0; }
@@ -486,7 +487,7 @@ select option { background: var(--surf2); }
 .spin {
   width: 14px; height: 14px;
   border: 2px solid var(--border);
-  border-top-color: var(--red);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin .6s linear infinite;
 }
@@ -520,7 +521,7 @@ select option { background: var(--surf2); }
 .mesa-num {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--red);
+  color: var(--primary);
   letter-spacing: -0.5px;
 }
 

@@ -13,7 +13,6 @@ let cClientes = [];
 
 let TOKEN          = localStorage.getItem('pz_token') || '';
 let USUARIO_LOGADO = JSON.parse(localStorage.getItem('pz_usuario') || 'null');
-let mesaEmFechamento = null;
 const telaLogin = document.getElementById("tela-login")
 
 //====================================
@@ -61,9 +60,6 @@ async function fazerLogin() {
     // 💾 salva sessão
     localStorage.setItem('pz_token', data.token);
     localStorage.setItem('pz_usuario', JSON.stringify(data.usuario));
-    localStorage.setItem('pz_usuarioId', JSON.stringify(data.usuario.id));
-
-    // 🚀 redireciona para o sistema (ex: index.html)
     window.location.href = '/metaltech';
 
   } catch (e) {
@@ -288,6 +284,8 @@ function ir(pg, btn) {
 //====================================
 
 async function carregarDashboard() {
+  const spin = document.getElementById('spin-dashboard');
+  spin.style.display = 'block';
   const h = new Date().getHours();
   const s = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   document.getElementById('dash-sub').textContent = `${s}! Aqui está o resumo.`;
@@ -337,7 +335,7 @@ async function carregarDashboard() {
         <small style="color:var(--muted)"></small>
       </div>`).join('') ||
       '<div class="empty"><span class="ei">⚙️</span>Nenhuma Produto</div>';
-
+    spin.style.display = 'none';
   } catch (e) { toast('Erro dashboard: ' + e.message, 'err'); }
 }
 
@@ -457,7 +455,7 @@ async function editarProduto() {
 //====================================
 
 async function deletarProduto(id, nome) {
-  if (!confirm(`Deletar "${nome}"?`)) return;
+  if (!confirm(`Você tem certeza que deseja deletar o produto "${nome}"?`)) return;
   try {
     // Rota alterada para produtos
     await api('DELETE', '/produtos/' + id);
@@ -493,7 +491,7 @@ async function carregarClientes(busca = '') {
 
   } catch (e) {
     console.error('Erro carregarClientes:', e);
-    el.innerHTML = `<div class="empty" style="color:var(--red)">Erro ao carregar clientes</div>`;
+    el.innerHTML = `<div class="empty" style="color:var(--primary)">Erro ao carregar clientes</div>`;
   }
 }
 
@@ -707,7 +705,7 @@ async function salvarCliente() {
 //====================================
 
 async function deletarCliente(id, nome) {
-  if (!confirm(`Deletar "${nome}"?`)) return;
+  if (!confirm(`Você tem certeza que deseja deletar o cliente "${nome}"?`)) return;
   try {
     await api('DELETE', '/clientes/' + id);
     toast('Cliente deletado!');
@@ -751,7 +749,7 @@ async function carregarordens() {
             <tr>
               <td>
                 <div>
-                  <strong style="color:var(--red)">
+                  <strong style="color:var(--primary)">
                     #${
                       p.numeroOrdem
                         ? String(p.numeroOrdem).padStart(3, '0')
@@ -808,7 +806,7 @@ async function carregarordens() {
                 <td class="td-acoes">
                   <div style="display:flex;gap:5px">
                     <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
-                    <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}', '${p.usuario?.nome || '—'}')">🗑️</button>
                   </div>
                 </td>
               ` : ''}
@@ -818,7 +816,7 @@ async function carregarordens() {
         </tbody>
       </table>`;
   } catch (e) {
-    el.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
+    el.innerHTML = `<div class="empty" style="color:var(--primary)">${e.message}</div>`;
   }
 }
 
@@ -862,7 +860,7 @@ function aplicarFiltroOrdens(status) {
           <tr>
             <td>
                 <div>
-                  <strong style="color:var(--red)">
+                  <strong style="color:var(--primary)">
                     #${
                       p.numeroOrdem
                         ? String(p.numeroOrdem).padStart(3, '0')
@@ -985,8 +983,8 @@ function recalc() {
 async function salvarordem() {
   const cliId = document.getElementById('ped-cli').value;
   if (!cliId) { toast('Selecione um cliente', 'err'); return; }
-  console.log(localStorage.getItem('pz_usuario').id);
-
+  const usuario = JSON.parse(localStorage.getItem('pz_usuario'));
+  
   const itens = [];
   let valido = true;
   document.querySelectorAll('#itens-lista .item-row').forEach(row => {
@@ -1008,7 +1006,7 @@ async function salvarordem() {
       cliente:        cliId,
       itens,
       observacoes:    document.getElementById('ped-obs').value,
-      userId:         localStorage.getItem('pz_usuarioId')
+      userId:         usuario.id || usuario._id,
     });
     toast('ordem de produção criada! ⚒️');
     fechar('m-ordem');
@@ -1046,8 +1044,8 @@ async function salvarStatus() {
 //função de deletar ordem
 //====================================
 
-async function deletarordem(id) {
-  if (!confirm('Deletar este ordem?')) return;
+async function deletarordem(id, usuario) {
+  if (!confirm(`Você tem certeza que deseja deletar esta ordem criada por ${usuario}?`)) return;
   try {
     // Rota alterada para ordens
     await api('DELETE', '/ordens/' + id);
@@ -1186,7 +1184,7 @@ async function editarUsuario() {
 //====================================
 
 async function deletarUsuario(id, nome) {
-  if (!confirm(`Deletar "${nome}"?`)) return;
+  if (!confirm(`Você tem certeza que deseja deletar o usuário "${nome}"?`)) return;
   try {
     await api('DELETE', '/usuarios/' + id);
     toast('Usuário deletado!');

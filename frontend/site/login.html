@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MetalTech</title>
+    <title>Login | MetalTech</title>
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/responsividade.css">
     <link rel="stylesheet" href="/style/geral.css">
+    <link rel="icon" href="/assets/img/icon2">
 </head>
 <body>
   <div id="tela-login">
   <div class="login-box">
     <div class="login-logo">
-      <span class="em">⚙️</span>
-      <h1>MetalTech</h1>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <img src="/assets/img/icon1" alt="" style="width: 200px;">
+      </div>
       <p>Sistema de Gestão · Faça login para continuar</p>
     </div>
     <div class="login-erro" id="login-erro"></div>
     <div class="fg">
       <label>E-mail</label>
-      <input id="l-email" type="email" placeholder="admin@gmail.com"
+      <input id="l-email" type="email" placeholder="metaltech@email.com"
         onkeydown="if(event.key==='Enter') fazerLogin()">
     </div>
     <div class="fg" style="position: relative;">
@@ -42,8 +44,8 @@
     </div>
     <button class="btn btn-red" id="btn-login"
       style="width:100%;padding:10px;margin-top:4px" onclick="fazerLogin()">Entrar</button>
-    <!-- <p style="text-align:center;font-size:.69rem;color:var(--muted);margin-top:14px">
-      Rode <strong style="color:var(--text)">node seed.js</strong> para criar o admin inicial</p> -->
+    <p style="text-align:center;font-size:.69rem;color:var(--muted);margin-top:14px">
+      Se ouver algum problema de login entre em contato com o suporte em <strong style="color:var(--text)">meta67@gmail.com</strong></p>
   </div>
 </div>
 <script src="/js/script.js" defer></script>

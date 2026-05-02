@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MetalTech</title>
+    <title>MetalTech | Sistema de Gestão</title>
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/responsividade.css">
     <link rel="stylesheet" href="/style/geral.css">
+    <link rel="icon" href="/assets/img/icon2">
 </head>
 <body>
     <div id="app">
   <aside id="sidebar">
     <div class="sb-logo">
-      <h1>⚙️ MetalTech</h1>
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <img src="/assets/img/icon3" alt="logo-metaltech" style="width: 80px;">
+      </div>
       <div class="sb-user">
         <span class="tag" id="sb-perfil">—</span>
         <span id="sb-nome">—</span>
@@ -53,7 +56,10 @@
           <h2>Dashboard</h2>
           <p id="dash-sub">Resumo do sistema</p>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="carregarDashboard()">↻ Atualizar</button>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="spin" id="spin-dashboard" style="display: none;"></div>
+          <button class="btn btn-ghost btn-sm" onclick="carregarDashboard()">↻ Atualizar</button>
+        </div>
       </div>
       <div class="pg-body">
         <div class="stats-grid">
@@ -102,7 +108,7 @@
     <section id="pg-ordens" class="secao">
       <div class="pg-header">
         <div><h2>Ordens de Produção</h2><p id="p-ordens">Acompanhe e gerencie suas Ordens de produção</p></div>
-        <button id="novaOrdem" class="btn btn-red" onclick="abrirOrdem()">+ Nova ordem</button>
+        <button id="novaOrdem" class="btn btn-ghost" onclick="abrirOrdem()">+ Nova ordem</button>
       </div>
       <div class="pg-body">
         <select style="width: 200px; margin-bottom: 10px;"
@@ -126,7 +132,7 @@
           <h2 id="pg-Produtos-titulo">Produtos</h2>
           <p id="pg-Produtos-sub">Gerencie seus produtos</p>
         </div>
-        <button class="btn btn-red" id="btn-nova-Produto" onclick="abrirProduto()">+ Novo Produto</button>
+        <button class="btn btn-ghost" id="btn-nova-Produto" onclick="abrirProduto()">+ Novo Produto</button>
       </div>
       <div class="pg-body">
         <div class="card">
@@ -140,7 +146,7 @@
     <section id="pg-clientes" class="secao">
       <div class="pg-header">
         <div><h2>Clientes</h2><p>Cadastre e busque clientes</p></div>
-        <button class="btn btn-red" onclick="abrirCliente()">+ Novo Cliente</button>
+        <button class="btn btn-ghost" onclick="abrirCliente()">+ Novo Cliente</button>
       </div>
       <div class="pg-body">
         <div style="margin-bottom:12px">
@@ -423,5 +429,14 @@
 
 <div id="toast"></div>
 <script src="/js/script.js" defer></script>
+<script src="https://unpkg.com/@studio-freight/lenis"></script>
+<script>
+    const lenis = new Lenis();
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+</script>
 </body>
 </html>
