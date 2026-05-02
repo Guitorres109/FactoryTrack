@@ -45,7 +45,6 @@ function formatarOrdem(row, itens = []) {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
 
-    // 🔥 agora vem o nome em vez do ID
     usuario: {
       id: row.usuario_id,
       nome: row.usuario_nome || '—'
@@ -142,6 +141,11 @@ const Ordem = {
       (numero_ordem, cliente_id, status, observacoes, created_at, updated_at, usuario_id)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `, [numeroOrdem, clienteId, 'recebido', observacoes, formatted, formatted, userId]);
+  const atividade = run(
+        'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+        [userId, 'Criou', 'ordens', numeroOrdem]
+      )
+      console.log('Atividade registrada:', { usuarioId: userId, atividade: 'Criou', area: 'ordens', areaItem: numeroOrdem });
 
   const ordemId = infoOrdem.lastInsertRowid;
 
@@ -169,6 +173,8 @@ const Ordem = {
       now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
     );
 
+    const ordem = await this.findById(id);
+
     const formatted =
       brasilia.getFullYear() + "-" +
       String(brasilia.getMonth() + 1).padStart(2, "0") + "-" +
@@ -188,12 +194,18 @@ const Ordem = {
   // ============================
   // DELETAR
   // ============================
-  async delete(id) {
+  async delete(id, userId) {
     await ready;
 
+    const ordem = await this.findById(id);
     run('DELETE FROM itens_pedido WHERE pedido_id = ?', [id]);
 
     const info = run('DELETE FROM ordens WHERE id = ?', [id]);
+    const atividade = run(
+        'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+        [userId, 'Editou', 'ordens', ordem.numeroOrdem]
+      )
+      console.log('Atividade registrada:', { usuarioId: userId, atividade: 'Deletou', area: 'ordens', areaItem: ordem.numeroOrdem });
 
     return info.changes > 0;
   },

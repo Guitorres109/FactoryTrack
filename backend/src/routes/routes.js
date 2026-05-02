@@ -8,6 +8,7 @@ const Usuario  = require('../models/usuario');
 const Produto  = require('../models/produto');
 const Cliente  = require('../models/cliente');
 const Ordem = require('../models/ordem');
+const Atividades = require('../models/atividades');
 
 // ================================
 // LOGIN
@@ -57,8 +58,24 @@ router.get('/auth/me', auth, (req, res) => {
 });
 
 // ================================
-// PRODUTOS
+// ATIVIDADES
 // ================================
+router.get('/atividades', auth, async (req, res) => {
+  try {
+    res.json(await Atividades.findAll());
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+router.delete('/atividades/:id', auth, async (req, res) => {
+  try {
+    res.json(await Atividades.delete(req.params.id));
+  } catch (e) {
+    res.status(500).json({ erro: e.message });
+  }
+});
+
 router.get('/produtos', auth, async (req, res) => {
   try {
     res.json(await Produto.findAll());
@@ -102,7 +119,7 @@ router.put('/produtos/:id', auth, async (req, res) => {
 
 router.delete('/produtos/:id', auth, async (req, res) => {
   try {
-    const ok = await Produto.delete(req.params.id);
+    const ok = await Produto.delete(req.params.id, req.body.usuarioId);
     if (!ok) return res.status(404).json({ erro: 'Produto não encontrado' });
     res.json({ mensagem: 'Produto deletado' });
   } catch (e) {
@@ -157,7 +174,7 @@ router.put('/clientes/:id', auth, async (req, res) => {
 
 router.delete('/clientes/:id', auth, async (req, res) => {
   try {
-    const ok = await Cliente.delete(req.params.id);
+    const ok = await Cliente.delete(req.params.id, req.body.usuarioId);
     if (!ok) return res.status(404).json({ erro: 'Cliente não encontrado' });
     res.json({ mensagem: 'Cliente deletado' });
   } catch (e) {
@@ -228,7 +245,9 @@ router.patch('/ordens/:id/status', auth, async (req, res) => {
 
 router.delete('/ordens/:id', auth, async (req, res) => {
   try {
-    const ok = await Ordem.delete(req.params.id);
+    console.log(req.body)
+    console.log(req.body.userId);
+    const ok = await Ordem.delete(req.params.id, req.body.userId);
     if (!ok) return res.status(404).json({ erro: 'Ordem não encontrada' });
     res.json({ mensagem: 'Ordem deletada' });
   } catch (e) {
@@ -255,10 +274,10 @@ router.post('/usuarios', auth, async (req, res) => {
   try {
     if (req.usuario.perfil !== 'Administrador')
       return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
-    const { nome, email, senha, perfil } = req.body;
+    const { nome, email, senha, perfil, usuarioId  } = req.body;
     if (!nome || !email || !senha)
       return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios' });
-    res.status(201).json(await Usuario.create({ nome, email, senha, perfil }));
+    res.status(201).json(await Usuario.create({ nome, email, senha, perfil, usuarioId }));
   } catch (e) {
     if (e.message?.includes('UNIQUE')) return res.status(400).json({ erro: 'E-mail já cadastrado' });
     res.status(500).json({ erro: e.message });
@@ -296,7 +315,7 @@ router.delete('/usuarios/:id', auth, async (req, res) => {
   try {
     if (req.usuario.perfil !== 'Administrador')
       return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
-    const ok = await Usuario.delete(req.params.id);
+    const ok = await Usuario.delete(req.params.id, req.body.usuarioId);
     if (!ok) return res.status(404).json({ erro: 'Usuário não encontrado' });
     res.json({ mensagem: 'Usuário deletado' });
   } catch (e) { res.status(500).json({ erro: e.message }); }

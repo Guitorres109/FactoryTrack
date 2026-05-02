@@ -26,3 +26,8 @@ body {
   min-height: 100vh;
   font-size: 14px;
 }
+
+#icon-obrigatorio{
+  color: var(--red);
+  font-size: 10px;
+}

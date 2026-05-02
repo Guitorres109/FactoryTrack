@@ -181,18 +181,19 @@
     <h3 id="m-Produto-t">Novo Produto</h3>
     <input type="hidden" id="p-id">
     <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="p-nome" placeholder="Ex: Calabresa"></div>
+      <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="p-nome" placeholder="Ex: Barra Sextavada de Aço" onkeydown="if(event.key==='Enter') salvarProduto()"></div>
     </div>
-    <div class="fg"><label>Descrição</label><input id="p-desc" placeholder="Breve descrição..."></div>
+    <div class="fg"><label>Descrição</label><input type="text" id="p-desc" placeholder="Breve descrição..." onkeydown="if(event.key==='Enter') salvarProduto()"></div>
     <div class="fg"><label>Disponível</label>
       <select id="p-disp">
         <option value="true">✅ Sim</option>
         <option value="false">❌ Não</option>
       </select>
     </div>
+    <div class="fg"><small id="icon-obrigatorio">* Indica um item obrigatório</small></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('m-Produto')">Cancelar</button>
-      <button class="btn btn-red"   onclick="salvarProduto()">Salvar</button>
+      <button class="btn btn-red"   onclick="salvarProduto()" onkeydown="if(event.key==='Enter') salvarProduto()">Salvar</button>
     </div>
   </div>
 </div>
@@ -202,20 +203,21 @@
     <h3 id="m-cli-t">Novo Cliente</h3>
     <input type="hidden" id="c-id">
     <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="c-nome" placeholder="João da Silva"></div>
-      <div class="fg"><label>Telefone *</label><input id="c-tel" placeholder="(11) 99999-9999"></div>
+      <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="c-nome" placeholder="Ferro & Cia"></div>
+      <div class="fg"><label>Telefone <small id="icon-obrigatorio">*</small></label><input type="number" id="c-tel" placeholder="(11) 99999-9999" maxlength="11"></div>
     </div>
     <div class="fr2">
-      <div class="fg"><label>Rua</label><input id="c-rua" placeholder="Rua das Flores"></div>
-      <div class="fg"><label>Número</label><input id="c-num" placeholder="123"></div>
+      <div class="fg"><label>Rua <small id="icon-obrigatorio">*</small></label><input type="text" id="c-rua" placeholder="Rua das Flores"><small style="color:var(--muted); font-size: 8px;">(Busca por CEP)</small></div>
+      <div class="fg"><label>Número <small id="icon-obrigatorio">*</small></label><input type="number" id="c-num" placeholder="123"></div>
     </div>
     <div class="fr3">
-      <div class="fg"><label>Bairro</label><input id="c-bairro" placeholder="Centro"></div>
-      <div class="fg"><label>Cidade</label><input id="c-cidade" placeholder="São Paulo"></div>
-      <div class="fg"><label>CEP</label><input id="c-cep" placeholder="00000-000"></div>
+      <div class="fg"><label>CEP <small id="icon-obrigatorio">*</small></label><input type="text" id="c-cep" placeholder="00000-000"></div>
+      <div class="fg"><label>Bairro <small id="icon-obrigatorio">*</small></label><input type="text" id="c-bairro" placeholder="Centro"><small style="color:var(--muted); font-size: 8px;">(Busca por CEP)</small></div>
+      <div class="fg"><div></div><label>Cidade <small id="icon-obrigatorio">*</small></label><input type="text" id="c-cidade" placeholder="São Paulo"><small style="color:var(--muted); font-size: 8px; ">(Busca por CEP)</small></div>
     </div>
-    <div class="fg"><label>Complemento</label><input id="c-comp" placeholder="Apto 12, Bloco B"></div>
-    <div class="fg"><label>Observações</label><input id="c-obs" placeholder="Alergia, preferências..."></div>
+    <div class="fg"><label>Complemento</label><input type="text" id="c-comp" placeholder="Apto 12, Bloco B"></div>
+    <div class="fg"><label>Observações</label><input type="text" id="c-obs" placeholder="Urgência, preferências..."></div>
+    <div class="fg"><small id="icon-obrigatorio">* Indica um item obrigatório</small></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('m-cliente')">Cancelar</button>
       <button class="btn btn-red"   onclick="salvarCliente()">Salvar</button>
@@ -226,17 +228,18 @@
 <div id="m-ordem" class="modal-bg">
   <div class="modal lg">
     <h3>Nova Ordem</h3>
-    <div class="fg"><label>Cliente *</label><select id="ped-cli"></select></div>
+    <div class="fg"><label>Cliente <small id="icon-obrigatorio">*</small></label><select id="ped-cli"></select></div>
     <div class="div"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
       <label style="margin-bottom:0;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Itens do ordem</label>
       <button class="btn btn-ghost btn-sm" onclick="addItem()">+ Produto</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 68px 58px 68px 30px;gap:6px;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;padding:0 1px">
-      <span>Produto</span><span>Qtd</span>
+      <span>Produto <small id="icon-obrigatorio">*</small></span><span>Qtd <small id="icon-obrigatorio">*</small></span>
     </div>
     <div id="itens-lista"></div>
     <div class="fg"><label>Observações</label><textarea id="ped-obs" rows="2" placeholder="Observações"></textarea></div>
+    <div class="fg"><small id="icon-obrigatorio">* Indica um item obrigatório</small></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('m-ordem')">Cancelar</button>
       <button class="btn btn-red"   onclick="salvarordem()">Confirmar ordem</button>
@@ -267,12 +270,12 @@
   <div class="modal">
     <h3>Novo Usuário</h3>
     <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="u-nome" placeholder="Nome completo"></div>
-      <div class="fg"><label>Perfil</label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Administrador">Administrador</option></select></div>
+      <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="u-nome" placeholder="Nome Completo"></div>
+      <div class="fg"><label>Perfil <small id="icon-obrigatorio">*</small></label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Administrador">Administrador</option></select></div>
     </div>
-    <div class="fg"><label>E-mail *</label><input id="u-email" type="email" placeholder="usuario@Produtoria.com"></div>
+    <div class="fg"><label>E-mail <small id="icon-obrigatorio">*</small></label><input type="email" id="u-email" placeholder="usuario@metaltech.com"></div>
     <div class="fg" style="position: relative;">
-      <label>Nova Senha</label>
+      <label>Senha <small id="icon-obrigatorio">*</small></label>
       <input id="u-senha" type="password" placeholder="Mínimo 6 caracteres"
         style="padding-right: 40px;"
       >
@@ -289,7 +292,7 @@
       </button>
     </div>
     <div class="fg" style="position: relative;">
-      <label>Confirmar Senha</label>
+      <label>Confirmar Senha <small id="icon-obrigatorio">*</small></label>
       <input id="u-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6"
         style="padding-right: 40px;"
       >
@@ -305,6 +308,7 @@
         👁️
       </button>
     </div>
+    <div class="fg"><small id="icon-obrigatorio">* Indica um item obrigatório</small></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('m-usuario')">Cancelar</button>
       <button class="btn btn-ghost" onclick="salvarUsuario()">Criar</button>
@@ -317,7 +321,7 @@
     <h3>Editar Usuário</h3>
     <div class="fr2">
       <div class="fg">
-        <label>Nome *</label>
+        <label>Nome</label>
         <input id="e-nome" placeholder="Nome completo">
       </div>
       <div class="fg">
@@ -385,7 +389,7 @@
     <h3 id="m-cli-t">Editar Cliente</h3>
     <input type="hidden" id="c-id">
     <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="e-nomeclient" placeholder="João da Silva"></div>
+      <div class="fg"><label>Nome *</label><input id="e-nomeclient" placeholder="Ferro & Cia"></div>
       <div class="fg"><label>Telefone *</label><input id="e-tel" placeholder="(11) 99999-9999"></div>
     </div>
     <div class="fr2">
@@ -393,12 +397,12 @@
       <div class="fg"><label>Número</label><input id="e-num" placeholder="123"></div>
     </div>
     <div class="fr3">
+      <div class="fg"><label>CEP</label><input id="e-cep" placeholder="00000-000"></div>
       <div class="fg"><label>Bairro</label><input id="e-bairro" placeholder="Centro"></div>
       <div class="fg"><label>Cidade</label><input id="e-cidade" placeholder="São Paulo"></div>
-      <div class="fg"><label>CEP</label><input id="e-cep" placeholder="00000-000"></div>
     </div>
     <div class="fg"><label>Complemento</label><input id="e-comp" placeholder="Apto 12, Bloco B"></div>
-    <div class="fg"><label>Observações</label><input id="e-obs" placeholder="Alergia, preferências..."></div>
+    <div class="fg"><label>Observações</label><input id="e-obs" placeholder="Urdgência, preferências..."></div>
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('e-cliente')">Cancelar</button>
       <button class="btn btn-red"   onclick="editarCliente()">Salvar</button>
@@ -411,7 +415,7 @@
     <h3 id="e-Produto-t">Editar Produto</h3>
     <input type="hidden" id="p-id">
     <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="e-nomeproduto" placeholder="Ex: Calabresa"></div>
+      <div class="fg"><label>Nome *</label><input id="e-nomeproduto" placeholder="Ex: Barra Sextavada de Aço"></div>
     </div>
     <div class="fg"><label>Descrição</label><input id="e-desc" placeholder="Breve descrição..."></div>
     <div class="fg"><label>Disponível</label>

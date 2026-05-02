@@ -60,6 +60,7 @@ async function fazerLogin() {
     // 💾 salva sessão
     localStorage.setItem('pz_token', data.token);
     localStorage.setItem('pz_usuario', JSON.stringify(data.usuario));
+    localStorage.setItem('pz_perfil', data.usuario.perfil);
     window.location.href = '/metaltech';
 
   } catch (e) {
@@ -291,10 +292,11 @@ async function carregarDashboard() {
   document.getElementById('dash-sub').textContent = `${s}! Aqui está o resumo.`;
 
   try {
-    const [Produtos, clientes, ordens] = await Promise.all([
+    const [Produtos, clientes, ordens, atividades] = await Promise.all([
       api('GET', '/produtos'), 
       api('GET', '/clientes'),
       api('GET', '/ordens'),   
+      api('GET', '/atividades')
     ]);
 
     cProdutos   = Produtos;
@@ -329,14 +331,62 @@ async function carregarDashboard() {
       '<div class="empty"><span class="ei">📋</span>Nenhum ordem ainda</div>';
 
     const elC = document.getElementById('dash-cardapio');
-    elC.innerHTML = Produtos.filter(p => p.disponivel).slice(0, 8).map(p => `
+    elC.innerHTML = atividades.slice(0, 8).map(a => `
       <div class="mini-row">
-        <span>🛠️ ${p.nome}</span>
-        <small style="color:var(--muted)"></small>
-      </div>`).join('') ||
-      '<div class="empty"><span class="ei">⚙️</span>Nenhuma Produto</div>';
+        <span>🛠️ ${formatarAtividade(a)}</span>
+        <small style="color:var(--muted)">
+          ${a.createdAt ? new Date(a.createdAt).toLocaleString() : ''}
+        </small>
+      </div>
+    `).join('') ||
+    '<div class="empty"><span class="ei">⚙️</span>Nenhuma atividade</div>';
+
     spin.style.display = 'none';
   } catch (e) { toast('Erro dashboard: ' + e.message, 'err'); }
+}
+
+async function carregarAtividades() {
+  try {
+    const res = await fetch(`${API}/atividades`);
+    const lista = await res.json();
+    console.log(lista);
+
+    renderizarAtividades(lista);
+
+  } catch (err) {
+    console.error('Erro ao buscar atividades:', err);
+  }
+}
+
+function formatarAtividade(resultado) {
+  const { usuarioId, atividade, area, areaItem } = resultado;
+
+  
+
+  const acoes = {
+    Criou: 'criou',
+    Editou: 'editou',
+    Deletou: 'removeu'
+  };
+
+  const acao = acoes[atividade] || atividade;
+
+  return `${usuarioId} ${acao} o ${area} ${areaItem}`;
+}
+
+function renderizarAtividades(lista) {
+  const container = document.getElementById('lista-atividades');
+
+  container.innerHTML = '';
+
+  lista.forEach(item => {
+    const texto = formatarAtividade(item);
+
+    const div = document.createElement('div');
+    div.textContent = texto;
+
+    container.appendChild(div);
+  });
 }
 
 //====================================
@@ -389,18 +439,20 @@ function abrirProduto() {
 async function salvarProduto() {
   const id   = document.getElementById('p-id').value;
   const nome = document.getElementById('p-nome').value.trim();
-  if (!nome) { toast('Nome é obrigatório', 'err'); return; }
+  const usuarioId =JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id
+  if (!nome) { toast('Insira o nome do produto', 'err'); return; }
 
   const d = {
     nome,
     descricao:    document.getElementById('p-desc').value.trim(),
-    disponivel: document.getElementById('p-disp').value
+    disponivel: document.getElementById('p-disp').value,
+    usuarioId: usuarioId
   };
 
   try {
     // Rotas alteradas para produtos
     await api('POST', '/produtos', d);
-    toast(id ? 'Produto atualizada!' : 'Produto criada!');
+    toast(id ? 'Produto atualizado!' : 'Produto criado!');
     fechar('m-Produto');
     carregarProdutos();
   } catch (e) { toast('Erro: ' + e.message, 'err'); console.log(e.message)}
@@ -424,21 +476,22 @@ async function editarProduto() {
   const nome = document.getElementById('e-nomeproduto').value.trim();
   const descricao = document.getElementById('e-desc').value.trim();
   const disponivel = Number(document.getElementById('e-disp').value);
+  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id
 
   // Validações iniciais
   if (!nome) {
-    toast('Nome è obrigatório', 'err');
+    toast('Insira o nome do produto', 'err');
     return;
   }
 
   if (!id) {
-    toast('Erro: ID de cliente inválido', 'err');
+    toast('Erro: ID de produto inválido', 'err');
     return;
   }
 
   try {
     // Criação do corpo da requisição
-    let body = { nome, descricao, disponivel };
+    let body = { nome, descricao, disponivel, usuarioId };
     // Enviar a requisição para a API
     await api('PUT', `/produtos/${id}`, body);
     toast('Produto atualizado!');
@@ -456,9 +509,10 @@ async function editarProduto() {
 
 async function deletarProduto(id, nome) {
   if (!confirm(`Você tem certeza que deseja deletar o produto "${nome}"?`)) return;
+  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id
   try {
     // Rota alterada para produtos
-    await api('DELETE', '/produtos/' + id);
+    await api('DELETE', '/produtos/' + id, {usuarioId: usuarioId});
     toast('Produto deletada!');
     carregarProdutos();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
@@ -591,9 +645,41 @@ function buscarCli(valor) {
 
 function abrirCliente() {
   document.getElementById('m-cli-t').textContent = 'Novo Cliente';
+
   ['c-id','c-nome','c-tel','c-rua','c-num','c-bairro','c-cidade','c-cep','c-comp','c-obs']
-    .forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+    .forEach(id => { 
+      const e = document.getElementById(id); 
+      if (e) e.value = ''; 
+    });
+
   abrir('m-cliente');
+
+  // 👇 adiciona o listener do CEP
+  const cepInput = document.getElementById('c-cep');
+
+  if (cepInput) {
+    cepInput.addEventListener('blur', () => {
+      buscarCEPCliente(cepInput.value);
+    });
+  }
+}
+
+async function buscarCEPCliente(cep) {
+  cep = cep.replace(/\D/g, '');
+  
+  if (cep.length !== 8) return;
+
+  try {
+    const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await res.json();
+
+    document.getElementById('c-rua').value    = data.logradouro || '';
+    document.getElementById('c-bairro').value = data.bairro || '';
+    document.getElementById('c-cidade').value = data.localidade || '';
+
+  } catch (err) {
+    console.error('Erro ao buscar CEP:', err);
+  }
 }
 
 //====================================
@@ -627,7 +713,7 @@ async function editarCliente() {
   const cep = document.getElementById('e-cep').value.trim()
   const complemento = document.getElementById('e-comp').value.trim()
   const observacoes = document.getElementById('e-obs').value.trim()
-
+  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || '{}').id;
   // Validações iniciais
   if (!nome || !telefone) {
     toast('Nome e telefone são obrigatórios', 'err');
@@ -642,7 +728,7 @@ async function editarCliente() {
   try {
     const endereco = {rua, numero, bairro, cidade, cep, complemento}
     // Criação do corpo da requisição
-    let body = {nome, telefone, endereco, observacoes};
+    let body = {nome, telefone, endereco, observacoes, usuarioId};
 
     // Enviar a requisição para a API
     await api('PUT', `/clientes/${id}`, body);
@@ -659,15 +745,9 @@ async function editarCliente() {
 
 async function salvarCliente() {
   const id = document.getElementById('c-id').value.trim();
-
   const nome = document.getElementById('c-nome').value.trim();
   const tel  = document.getElementById('c-tel').value.trim();
-
-  if (!nome || !tel) {
-    toast('Nome e telefone são obrigatórios', 'err');
-    return;
-  }
-
+  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || '{}').id;
   const d = {
     nome,
     telefone: tel,
@@ -680,7 +760,13 @@ async function salvarCliente() {
       complemento: document.getElementById('c-comp').value.trim(),
     },
     observacoes: document.getElementById('c-obs').value.trim(),
+    usuarioId: usuarioId 
   };
+
+  if (!d.nome || !d.telefone || !d.endereco.rua || !d.endereco.numero || !d.endereco.bairro || !d.endereco.cidade || !d.endereco.cep) {
+    toast('Preencha todos os campos obrigatórios', 'err');
+    return;
+  }
 
   try {
     const isEdit = !!id;
@@ -705,9 +791,10 @@ async function salvarCliente() {
 //====================================
 
 async function deletarCliente(id, nome) {
+  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || '{}').id;
   if (!confirm(`Você tem certeza que deseja deletar o cliente "${nome}"?`)) return;
   try {
-    await api('DELETE', '/clientes/' + id);
+    await api('DELETE', '/clientes/' + id, { usuarioId });
     toast('Cliente deletado!');
     carregarClientes();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
@@ -747,39 +834,11 @@ async function carregarordens() {
         <tbody>
           ${ordens.map(p => `
             <tr>
-              <td>
-                <div>
-                  <strong style="color:var(--primary)">
-                    #${
-                      p.numeroOrdem
-                        ? String(p.numeroOrdem).padStart(3, '0')
-                        : '???'
-                    }
-                  </strong>
-                </div>
-
-                <small style="color:var(--muted); font-size: 11px">
-                  ${p.usuario?.nome || '—'}
-                </small>
-              </td>
-              <td>
-                <strong>${p.cliente?.nome || '—'}</strong><br>
-                <small style="color:var(--muted)">${p.cliente?.telefone || ''}</small>
-              </td>
-
-              <td style="font-size:.76rem">
-                <div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div>
-                <small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small>
-              </td>
-
+              <td><div><strong style="color:var(--primary)">#${p.numeroOrdem? String(p.numeroOrdem).padStart(3, '0'): '???'}</strong></div><small style="color:var(--muted); font-size: 11px">${p.usuario?.nome || '—'}</small></td>
+              <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${formatarTelefone(p.cliente?.telefone || '')}</small></td>
+              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
               <td>${badge(p.status)}</td>
-
-              <td style="font-size:0.75rem; line-height:1.4;">
-                ${
-                  new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()
-                  ? `
-                    <div style="margin-bottom:6px;">
-                      <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
+              <td style="font-size:0.75rem; line-height:1.4;">${new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()? `<div style="margin-bottom:6px;"><span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
                       <strong style="font-size:0.7rem; font-weight:100;">
                         ${new Date(p.createdAt).toLocaleString('pt-BR')}
                       </strong>
@@ -1031,6 +1090,7 @@ function abrirStatus(id, status) {
 async function salvarStatus() {
   const id     = document.getElementById('st-id').value;
   const status = document.getElementById('st-val').value;
+  const userId = JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id;
   try {
     // Rota alterada para ordens
     await api('PATCH', '/ordens/' + id + '/status', { status });
@@ -1045,10 +1105,11 @@ async function salvarStatus() {
 //====================================
 
 async function deletarordem(id, usuario) {
+  const userId = JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id;
   if (!confirm(`Você tem certeza que deseja deletar esta ordem criada por ${usuario}?`)) return;
   try {
     // Rota alterada para ordens
-    await api('DELETE', '/ordens/' + id);
+    await api('DELETE', '/ordens/' + id, {userId: userId});
     toast('ordem deletado!');
     carregarordens();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
@@ -1115,6 +1176,7 @@ async function salvarUsuario() {
     await api('POST', '/usuarios', {
       nome, email, senha,
       perfil: document.getElementById('u-perfil').value,
+      usuarioId: JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id
     });
     toast('Usuário criado!');
     fechar('m-usuario');
@@ -1142,8 +1204,9 @@ async function editarUsuario() {
 
   const senha = document.getElementById('e-senha').value.trim();
   const confirmarSenha = document.getElementById('e-confirmarSenha').value.trim();
+  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id;
 
-  let body = { nome, email, perfil, ativo };
+  let body = { nome, email, perfil, ativo, usuarioId };
 
   if (!nome || !email) {
     toast('Nome e email são obrigatórios', 'err');
@@ -1186,7 +1249,7 @@ async function editarUsuario() {
 async function deletarUsuario(id, nome) {
   if (!confirm(`Você tem certeza que deseja deletar o usuário "${nome}"?`)) return;
   try {
-    await api('DELETE', '/usuarios/' + id);
+    await api('DELETE', '/usuarios/' + id, { usuarioId: JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id });
     toast('Usuário deletado!');
     carregarUsuarios();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }

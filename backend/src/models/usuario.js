@@ -46,19 +46,23 @@ const Usuario = {
 
   //Criar usuarios 
 
-  async create({ nome, email, senha, perfil = 'Atendente' }) {
+  async create({ nome, email, senha, perfil = 'Atendente', usuarioId }) {
     await ready;
     const hash = await bcrypt.hash(senha, 10);
     const info = run(
       'INSERT INTO usuarios (nome, email, senha, perfil) VALUES (?, ?, ?, ?)',
       [nome.trim(), email.toLowerCase().trim(), hash, perfil]
     );
+    const atividade = run(
+      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+      [usuarioId, 'Criou', 'usuarios', nome.trim()]
+    )
     return this.findById(info.lastInsertRowid);
   },
 
 
   //Atualizar usuarios
-  async update(id, { nome, email, senha, perfil, ativo }) {
+  async update(id, { nome, email, senha, perfil, ativo, usuarioId }) {
   await ready;
 
   const atual = await get(
@@ -106,14 +110,24 @@ const Usuario = {
     ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
     id
   ]);
-
+  const atividade = run(
+      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+      [usuarioId, 'Editou', 'usuarios', nome.trim()]
+    )
+  console.log('Atividade registrada:', { usuarioId, atividade: 'Editou', area: 'usuarios', areaItem: nome.trim() });
   return await this.findById(id);
 },
 
   //Deletar usuarios
-  async delete(id) {
+  async delete(id, usuarioId) {
     await ready;
+    const usuarioExcluido = await this.findById(id);
     const info = run('DELETE FROM usuarios WHERE id = ?', [id]);
+    const atividade = run(
+      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+      [usuarioId, 'Deletou', 'usuarios', usuarioExcluido.nome.trim()]
+    );
+    console.log('Atividade registrada:', { usuarioId, atividade: 'Deletou', area: 'usuarios', areaItem: usuarioExcluido.nome.trim() });
     return info.changes > 0;
   },
 

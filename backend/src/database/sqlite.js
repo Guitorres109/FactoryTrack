@@ -91,6 +91,16 @@ const ready = (async () => {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS atividades (
+      id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      usuarioId        INTEGER REFERENCES usuarios(id),
+      atividade        TEXT    ,
+      area             TEXT    ,
+      areaItemId       INTEGER 
+    )
+  `);
+
   salvar();
 
   console.log('SQLite (sql.js) conectado:', DB_PATH);

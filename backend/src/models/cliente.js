@@ -62,7 +62,7 @@ const Cliente = {
   },
 
   // Criar cliente
-  async create({ nome, telefone, endereco = {}, observacoes = '' }) {
+  async create({ nome, telefone, endereco = {}, observacoes = '', usuarioId }) {
     await ready;
 
     const enderecoFinal =
@@ -74,11 +74,16 @@ const Cliente = {
       'INSERT INTO clientes (nome, telefone, endereco, observacoes) VALUES (?, ?, ?, ?)',
       [nome.trim(), telefone.trim(), enderecoFinal, observacoes]
     );
+    const atividade = run(
+      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+      [usuarioId, 'Criou', 'clientes', nome.trim()]
+    )
+    console.log('Atividade registrada:', { usuarioId, atividade: 'Criou', area: 'clientes', areaItem: nome.trim() });
 
     return this.findById(info.lastInsertRowid);
   },
 
-  async update(id, { nome, telefone, endereco, observacoes, ativo }) {
+  async update(id, { nome, telefone, endereco, observacoes, ativo, usuarioId }) {
   await ready;
 
   const atual = await get(
@@ -112,14 +117,25 @@ const Cliente = {
     ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
     id
   ]);
+  const atividade = run(
+      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+      [usuarioId, 'Editou', 'clientes', nome.trim()]
+    )
+  console.log('Atividade registrada:', { usuarioId, atividade: 'Editou', area: 'clientes', areaItem: nome.trim() });
 
   return await this.findById(id);
 },
 
   // Deletar
-  async delete(id) {
+  async delete(id, usuarioId) {
     await ready;
+    const clienteExcluido = await this.findById(id);
     const info = run('DELETE FROM clientes WHERE id = ?', [id]);
+    const atividade = run(
+      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+      [usuarioId, 'Deletou', 'clientes', clienteExcluido.nome.trim()]
+    );
+    console.log('Atividade registrada:', { usuarioId, atividade: 'Deletou', area: 'clientes', areaItem: clienteExcluido.nome.trim() });
     return info.changes > 0;
   },
 };
