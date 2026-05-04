@@ -347,7 +347,7 @@ async function carregarDashboard() {
           <div class="mini-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
 
             <div style="display: flex; align-items: center; gap: 10px;">
-              <img src="${img}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+              <img src="${img}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border)">
 
               <div>
                 <div class="mn">

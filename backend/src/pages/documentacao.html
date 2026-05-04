@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentação do Sistema NomeDoSistema</title>
+  <style>
+    /* Reset básico de margens e paddings */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Fonte e fundo */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    h1, h2, h3, h4 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    /* Container principal */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Cabeçalho */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      color: #007BFF;
+    }
+
+    .header h2 {
+      font-size: 22px;
+      color: #555;
+    }
+
+    /* Seções */
+    section {
+      margin-bottom: 30px;
+    }
+
+    /* Títulos de seções */
+    .section-title {
+      background-color: #007BFF;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    /* Listas */
+    ul {
+      list-style-type: none;
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    li strong {
+      color: #007BFF;
+    }
+
+    /* Tabelas */
+    .table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .table th, .table td {
+      padding: 12px 15px;
+      text-align: left;
+    }
+
+    .table th {
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    .table td {
+      background-color: #fff;
+      color: #555;
+    }
+
+    .table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .table tr:hover {
+      background-color: #e8f5fe;
+    }
+
+    /* Links */
+    a {
+      text-decoration: none;
+      color: #007BFF;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Estilos para destaque */
+    .highlight {
+      color: #007BFF;
+      font-weight: bold;
+    }
+
+    .empty {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+      font-size: 16px;
+      color: #555;
+      border-top: 1px dashed #ccc;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+      font-size: 14px;
+      color: #777;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Cabeçalho -->
+    <header class="header">
+      <h1>Meta 67</h1>
+      <h2>Documentação do Sistema FactoryTrack</h2>
+    </header>
+
+    <!-- Equipe -->
+    <section>
+      <h3 class="section-title">Equipe:</h3>
+      <ul>
+        <li><strong>Nome do líder:</strong> Guilherme Barbosa Torres</li>
+        <li>Pietro Pardim Vieira</li>
+        <li>Nicolas Stekl Tordino</li>
+        <li>João Pedro Nascimento Ferreira</li>
+      </ul>
+    </section>
+
+    <!-- Sumário -->
+    <section>
+      <h3 class="section-title">Sumário</h3>
+      <ul>
+        <li><a href="#introducao">1. INTRODUÇÃO</a></li>
+        <ul>
+          <li><a href="#objetivos">1.1. OBJETIVOS DESTE DOCUMENTO</a></li>
+          <li><a href="#siglas">1.2. DEFINIÇÕES E SIGLAS</a></li>
+          <li><a href="#escopo">1.3. ESCOPO DO PRODUTO DE SOFTWARE</a></li>
+        </ul>
+        <li><a href="#descricao">2. DESCRIÇÃO GERAL DO PRODUTO</a></li>
+      </ul>
+    </section>
+
+    <!-- 1. INTRODUÇÃO -->
+    <section id="introducao">
+      <h3>1. INTRODUÇÃO</h3>
+      
+      <section id="objetivos">
+        <h4>1.1. Objetivos deste documento</h4>
+        <p><strong>Descrever os objetivos deste documento,</strong> para explicar ao leitor a importância dele. O documento servirá como referência para planejamento, testes e manutenção, dimensionamento de equipe e definições de cargos, além de ser utilizado como um referencial para orçamento.</p>
+      </section>
+
+      <section id="siglas">
+        <h4>1.2. Definições e siglas</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Número de Ordem</th>
+              <th>Sigla</th>
+              <th>Definição</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>SGBD</td>
+              <td>Sistema de Gerenciamento de Banco de Dados</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>HTTP</td>
+              <td>Protocolo de Internet</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>RG</td>
+              <td>Registro Geral (Carteira de Identidade)</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>CPF</td>
+              <td>Cadastro de Pessoa Física</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>SC</td>
+              <td>Sistema de Cadastramento</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="escopo">
+        <h4>1.3. Escopo do produto de software</h4>
+        <p>Descrição da oportunidade ou problema a ser resolvido, objetivo, descrição resumida do projeto e restrições do sistema.</p>
+      </section>
+    </section>
+
+    <!-- 2. DESCRIÇÃO GERAL DO PRODUTO -->
+    <section id="descricao">
+      <h3>2. DESCRIÇÃO GERAL DO PRODUTO</h3>
+
+      <section>
+        <h4>2.1. Usuários e sistemas relacionados</h4>
+        <p>O sistema irá envolver os seguintes stakeholders: Líder de produção, setor administrativo e gestores. O sistema permitirá o cadastro e acompanhamento de ordens de produção.</p>
+      </section>
+
+      <section>
+        <h4>2.1.1. Descrição dos Stakeholders</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Número Identificador</th>
+              <th>Ator</th>
+              <th>Definição</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Usuário</td>
+              <td>Pessoa autorizada a usar o sistema com funções não gerenciais.</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Funcionário</td>
+              <td>Líder de produção e setor administrativo que utilizam o sistema para cadastrar, atualizar e acompanhar as ordens.</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Administrador</td>
+              <td>Responsável pelo controle geral do sistema, com acesso total.</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Manutenção</td>
+              <td>Profissionais responsáveis pela manutenção e atualizações do sistema.</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Gestor</td>
+              <td>Responsável por acompanhar resultados e analisar dados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h4>2.2. Regras de Negócio</h4>
+        <p>O sistema deve permitir o cadastro de ordens de produção, com status como “Aguardando Produção”, “Em Produção” e “Finalizado”. Acesso restrito apenas para usuários autorizados.</p>
+      </section>
+
+      <section>
+        <h4>2.4. Histórias de Usuário</h4>
+        <ul>
+          <li>Como líder de produção, quero cadastrar uma ordem de produção para registrar novos pedidos.</li>
+          <li>Como setor administrativo, quero visualizar todas as ordens e filtrá-las por status.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h4>2.5. Requisitos de Software</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Código Identificador</th>
+              <th>Nome do Requisito</th>
+              <th>Dependência(s)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>RF01</td>
+              <td>Manter ordens de produção</td>
+              <td>RF02</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h4>2.10. Mockups</h4>
+        <p>Inclua aqui imagens e explicações sobre as telas do sistema.</p>
+      </section>
+    </section>
+
+    <!-- Anexo A - Termo de Abertura do Projeto -->
+    <section>
+      <h3 class="section-title">Anexo A – Termo de Abertura do Projeto</h3>
+      <p></p>
+      <p><strong>Responsáveis pelo Projeto:</strong></p>
+      <ul>
+        <li>Pietro Pardim Vieira</li>
+        <li>João Pedro Nascimento Ferreira</li>
+        <li>Guilherme Torres Barbosa</li>
+        <li>Nicolas Stekl Tordino</li>
+      </ul>
+      <p><strong>Aprovado por:</strong> Professor: Eduardo Falabella</p>
+      <div class="empty"></div>
+      <p><strong>Desenvolvedores:</strong></p>
+      <ul>
+        <li>Pietro Pardim Vieira</li>
+        <li>João Pedro Nascimento Ferreira</li>
+        <li>Guilherme Torres Barbosa</li>
+        <li>Nicolas Stekl Tordino</li>
+      </ul>
+      <p>Data: <span class="highlight">06/04/26</span></p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2026 Meta 67 - Todos os direitos reservados.</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

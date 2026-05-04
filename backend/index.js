@@ -41,6 +41,9 @@ ready.then(() => {
   app.get("/api", (req, res) => {
     res.sendFile(path.join(__dirname, "src/pages/api.html"));
   });
+  app.get("/docs", (req, res) => {
+    res.sendFile(path.join(__dirname, "src/pages/documentacao.html"));
+  });
   
   app.get("/api/verificar", (req, res) => {
       res.json({

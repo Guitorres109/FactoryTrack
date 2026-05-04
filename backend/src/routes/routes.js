@@ -278,8 +278,8 @@ router.delete('/ordens/:id', auth, async (req, res) => {
 // ================================
 router.get('/usuarios', auth, async (req, res) => {
   try {
-    if (req.usuario?.perfil !== 'Administrador')
-      return res.status(403).json({ erro: 'Acesso restrito' });
+    // if (req.usuario?.perfil !== 'Administrador')
+    //   return res.status(403).json({ erro: 'Acesso restrito' });
 
     res.json(await Usuario.findAll());
 

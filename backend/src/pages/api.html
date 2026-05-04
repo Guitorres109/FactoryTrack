@@ -116,7 +116,7 @@
   <div class="box">
     <p>
       A <b>FactoryTrack API</b> é um backend desenvolvido em Node.js com SQLite,
-      projetado para gerenciar operações de uma pizzaria ou sistema de pedidos.
+      projetado para gerenciar operações de uma fabrica metalurgica chamada <b>MetalTech</b>.
     </p>
 
     <p>Ela permite:</p>
@@ -143,7 +143,7 @@
     <p>Após login, envie o token no header:</p>
 
     <code>
-Authorization: Bearer SEU_TOKEN_AQUI
+      Authorization: Bearer TOKEN
     </code>
   </div>
 
@@ -164,9 +164,9 @@ Authorization: Bearer SEU_TOKEN_AQUI
     <code>
 {
   "id": 1,
-  "nome": "Pizza Calabresa",
-  "descricao": "Deliciosa",
-  "disponivel": true
+  "nome": "Barra Sextavada de Aço",
+  "descricao": "Barra com seis faces, ideal para fabricação de parafusos e peças técnicas.",
+  "disponivel": 1
 }
     </code>
 
@@ -178,6 +178,7 @@ Authorization: Bearer SEU_TOKEN_AQUI
   "itens": [
     { "produto": 1, "quantidade": 2 }
   ],
+  "usuario": {...},
   "status": "recebido"
 }
     </code>
@@ -212,7 +213,7 @@ Authorization: Bearer SEU_TOKEN_AQUI
 
     <code>
 {
-  "nome": "Pizza Calabresa"
+  "nome": "Barra Sextavada de Aço"
 }
     </code>
   </div>
