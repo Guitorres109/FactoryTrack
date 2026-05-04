@@ -69,92 +69,117 @@ const Usuario = {
 
   //Atualizar usuarios
   async update(id, { nome, email, senha, perfil, ativo, usuarioId, foto }) {
-    await ready;
+      await ready;
 
-    const atual = await get(
-      'SELECT * FROM usuarios WHERE id = ?',
-      [id]
-    );
-
-    if (!atual) return null;
-
-    // 📧 Email
-    let emailFinal = atual.email;
-
-    if (email && email !== atual.email) {
-      const existente = await get(
-        'SELECT id FROM usuarios WHERE email = ? AND id != ?',
-        [email, id]
+      const atual = await get(
+        'SELECT * FROM usuarios WHERE id = ?',
+        [id]
       );
 
-      if (existente) {
-        throw new Error('E-mail já cadastrado');
-      }
+      if (!atual) return null;
 
-      emailFinal = email;
-    }
+      // 📧 EMAIL
+      let emailFinal = atual.email;
 
-    // 🔐 Senha
-    let senhaFinal = atual.senha;
-    if (senha) {
-      senhaFinal = await bcrypt.hash(senha, 10);
-    }
-
-    // 🖼️ Foto
-    let fotoFinal = atual.foto;
-
-    // 🔥 Só troca e remove antiga se veio nova
-    if (foto && foto !== atual.foto) {
-      fotoFinal = foto;
-
-      if (atual.foto && atual.foto !== 'default.png') {
-        const caminhoFoto = path.join(
-          __dirname,
-          '../database/uploads/usuarios',
-          atual.foto
+      if (email && email !== atual.email) {
+        const existente = await get(
+          'SELECT id FROM usuarios WHERE email = ? AND id != ?',
+          [email, id]
         );
 
-        if (fs.existsSync(caminhoFoto)) {
+        if (existente) {
+          throw new Error('E-mail já cadastrado');
+        }
+
+        emailFinal = email;
+      }
+
+      // 🔐 SENHA
+      let senhaFinal = atual.senha;
+
+      if (senha) {
+        senhaFinal = await bcrypt.hash(senha, 10);
+      }
+
+      // 🖼️ FOTO
+      let fotoFinal = atual.foto;
+
+      if (foto && foto !== atual.foto) {
+
+        const extensao = path.extname(foto);
+        const nomeNovo = `usuario_${atual.id}_${Date.now()}${extensao}`;
+
+        const pasta = path.join(__dirname, '../database/uploads/usuarios');
+
+        const caminhoAntigo = path.join(pasta, foto);
+        const caminhoNovo = path.join(pasta, nomeNovo);
+
+        // 🔁 renomeia arquivo novo
+        if (fs.existsSync(caminhoAntigo)) {
           try {
-            fs.unlinkSync(caminhoFoto);
+            fs.renameSync(caminhoAntigo, caminhoNovo);
           } catch (err) {
-            console.error('Erro ao remover foto:', err);
+            console.error('Erro ao renomear arquivo:', err);
+          }
+        }
+
+        fotoFinal = nomeNovo;
+
+        // 🧹 remove foto antiga
+        if (atual.foto && atual.foto !== 'default.png') {
+          const fotoAntiga = path.join(pasta, atual.foto);
+
+          if (fs.existsSync(fotoAntiga)) {
+            try {
+              fs.unlinkSync(fotoAntiga);
+            } catch (err) {
+              console.error('Erro ao remover foto:', err);
+            }
           }
         }
       }
-    }
 
-    // 🔄 Update
-    await run(`
-      UPDATE usuarios SET
-        nome       = ?,
-        email      = ?,
-        senha      = ?,
-        perfil     = ?,
-        ativo      = ?,
-        foto       = ?,
-        updated_at = datetime('now')
-      WHERE id = ?
-    `, [
-      nome ?? atual.nome,
-      emailFinal,
-      senhaFinal,
-      perfil ?? atual.perfil,
-      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
-      fotoFinal,
-      id
-    ]);
+      // 🔒 GARANTIA ANTI-UNDEFINED (ESSENCIAL)
+      const dados = {
+        nome: nome ?? atual.nome,
+        email: emailFinal,
+        senha: senhaFinal,
+        perfil: perfil ?? atual.perfil,
+        ativo: ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+        foto: fotoFinal
+      };
 
-    // 📝 Atividade
-    const nomeFinal = (nome ?? atual.nome).trim();
+      // 🔄 UPDATE SEGURO (sem undefined)
+      await run(`
+        UPDATE usuarios SET
+          nome       = ?,
+          email      = ?,
+          senha      = ?,
+          perfil     = ?,
+          ativo      = ?,
+          foto       = ?,
+          updated_at = datetime('now')
+        WHERE id = ?
+      `, [
+        dados.nome,
+        dados.email,
+        dados.senha,
+        dados.perfil,
+        dados.ativo,
+        dados.foto,
+        id
+      ]);
 
-    run(
-      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
-      [usuarioId, 'Editou', 'usuarios', nomeFinal]
-    );
+      // 📝 ATIVIDADE
+      const nomeFinal = dados.nome.trim();
 
-    return await this.findById(id);
-  },
+      run(
+        'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
+        [usuarioId, 'Editou', 'usuarios', nomeFinal]
+      );
+
+      return await this.findById(id);
+    },
 
   //Deletar usuarios
   async delete(id, usuarioId) {
@@ -170,10 +195,12 @@ const Usuario = {
         usuarioExcluido.foto
       );
       if (fs.existsSync(caminhoFoto)) {
-        try {
-          fs.unlinkSync(caminhoFoto);
-        } catch (err) {
-          console.error('Erro ao remover foto:', err);
+        if(usuarioExcluido.foto != 'default.png'){
+          try {
+            fs.unlinkSync(caminhoFoto);
+          } catch (err) {
+            console.error('Erro ao remover foto:', err);
+          }
         }
       }
     }
@@ -186,6 +213,49 @@ const Usuario = {
     );
     return info.changes > 0;
   },
+
+  async resetFoto(id) {
+      await ready;
+
+      const atual = await get(
+        'SELECT foto FROM usuarios WHERE id = ?',
+        [id]
+      );
+
+      if (!atual) return null;
+
+      // 🧹 remove arquivo antigo
+      if (atual.foto && atual.foto !== 'default.png') {
+        const caminho = path.join(
+          __dirname,
+          '../database/uploads/usuarios',
+          atual.foto
+        );
+
+        if (fs.existsSync(caminho)) {
+          try {
+            fs.unlinkSync(caminho);
+            run(
+              `UPDATE usuarios set foto = ? WHERE id = ?` , [
+                'defalt.png', id
+              ]
+            )
+          } catch (err) {
+            console.error('Erro ao remover foto:', err);
+          }
+        }
+      }
+
+      // 🔄 update seguro (SEM undefined possível)
+      await run(`
+        UPDATE usuarios
+        SET foto = 'default.png',
+            updated_at = datetime('now')
+        WHERE id = ?
+      `, [id]);
+
+      return this.findById(id);
+    },
 
   verificarSenha(senhaDigitada, hashSalvo) {
     return bcrypt.compare(senhaDigitada, hashSalvo);

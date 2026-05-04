@@ -2,7 +2,7 @@
 //rota da Api
 //====================================
 
-const API = 'http://192.168.1.4:3000/api';
+const API = 'http://10.106.208.32:3000/api';
 
 let cProdutos   = [];
 let cClientes = [];
@@ -307,42 +307,70 @@ async function carregarDashboard() {
   document.getElementById('dash-sub').textContent = `${s}! Aqui está o resumo.`;
 
   try {
-    const [Produtos, clientes, ordens, atividades] = await Promise.all([
+    const [Produtos, clientes, ordens, atividades, usuarios] = await Promise.all([
       api('GET', '/produtos'), 
       api('GET', '/clientes'),
       api('GET', '/ordens'),   
-      api('GET', '/atividades')
+      api('GET', '/atividades'),
+      api('GET', '/usuarios')
     ]);
 
     cProdutos   = Produtos;
     cClientes = clientes;
+    cUsuarios = usuarios
+    
     const emAberto = ordens.filter(o =>
       o.status === 'recebido' || o.status === 'em_producao'
     );
 
+    
     document.getElementById('s-piz').textContent = Produtos.length;
     document.getElementById('s-cli').textContent = clientes.length;
     document.getElementById('s-ped').textContent = ordens.length;
     if (emAberto.length === 1){document.getElementById('s-ped-sub').textContent = `${emAberto.length} Ordem de produção pendente`}else{document.getElementById('s-ped-sub').textContent = `${emAberto.length} Ordens de produção pendentes`}
-
+    
     const elP = document.getElementById('dash-ordens');
-    elP.innerHTML = ordens.slice(0, 8).map(p => `
-      <div class="mini-row">
-        <div>
-          <div class="mn">
-  #${
-    p.numeroOrdem
-      ? String(p.numeroOrdem).padStart(3, '0')
-      : '???'
-  } · ${p.cliente?.nome || '—'}
-</div>
-          <div class="mc">${p.usuario?.nome || '—'} · ${new Date(p.createdAt).toLocaleString('pt-BR')}</div>
-        </div>
-        <div style="text-align:right">
-          ${badge(p.status)}<br>
-          <small style="color:var(--muted)"></small>
-        </div>
-      </div>`).join('') ||
+
+    elP.innerHTML =
+      ordens.slice(0, 8).map(p => {
+
+        const usuario = cUsuarios.find(u =>
+          String(u.id) === String(p.usuarioId || p.usuario?.id)
+        );
+        console.log(usuario)
+
+        const img = usuario?.foto
+          ? `${API}/uploads/usuarios/${usuario.foto}`
+          : `${API}/uploads/usuarios/default.png`;
+
+        return `
+          <div class="mini-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img src="${img}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">
+
+              <div>
+                <div class="mn">
+                  #${p.numeroOrdem
+                    ? String(p.numeroOrdem).padStart(3, '0')
+                    : '???'
+                  } · ${p.cliente?.nome || '—'}
+                </div>
+
+                <div class="mc">
+                  ${usuario?.nome || '—'} · ${new Date(p.createdAt).toLocaleString('pt-BR')}
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align:right">
+              ${badge(p.status)}<br>
+              <small style="color:var(--muted)"></small>
+            </div>
+
+          </div>
+        `;
+      }).join('') ||
       '<div class="empty"><span class="ei">📋</span>Nenhum ordem ainda</div>';
 
     const elC = document.getElementById('dash-cardapio');
@@ -446,15 +474,18 @@ async function formatarAtividade(resultado) {
     <div class="chat-msg">
       
     
-    <div class="chat-text">
+    <div class="chat-text" style="border-left: 4px solid ${perfil === 'atendente' ? '#93c5fd' : 'var(--red)'} ;">
     <div class="chat-user">
       <img 
         src="${caminhoFoto}"
-        style="border: 1px solid ${perfil === 'atendente' ? '#93c5fd' : 'var(--red)'};"
+        style="
+          display: block;
+          margin: 0 auto;
+        "
       >
       <span class="chat-icon">${icon}</span>
     </div>
-        <b>${usuario}</b>${acao} ${artigo[tipo] || 'o'} ${tipo} ${itemFormatado}
+        ${usuario} ${acao} ${artigo[tipo] || 'o'} ${tipo} ${itemFormatado}
       </div>
 
     </div>
@@ -1396,39 +1427,42 @@ async function editarUsuario() {
 }
 
 async function removerFotoUsuario() {
-  const id = document.getElementById('u-id')?.value;
-
-  if (!id) {
-    toast('Usuário inválido', 'err');
-    return;
-  }
-
-  if (!confirm('Remover foto de perfil?')) return;
+  const usuarioId = document.getElementById("u-id").value;
 
   try {
-    const formData = new FormData();
-    formData.append('removerFoto', true);
-
-    const res = await fetch(`${API}/usuarios/${id}`, {
-      method: 'PUT',
+    if (!confirm(`Você tem certeza que deseja deletar esta foto de perfil?`)) return;
+    const res = await fetch(`${API}/usuarios/${usuarioId}/foto`, {
+      method: 'DELETE',
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('pz_token')}`
-      },
-      body: formData
+        'Authorization': `Bearer ${TOKEN}`
+      }
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || 'Erro ao remover foto');
+    // 🔥 evita quebrar quando não vem JSON
+    let data;
+    const contentType = res.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      data = await res.json();
+      toast('Foto de perfil removida com sucesso!')
+      fechar('e-usuario');
+      carregarUsuarios();
+      carregarFoto()
+    } else {
+      const text = await res.text();
+      toast(text, 'err')
+      throw new Error(`Resposta inválida do servidor: ${text.substring(0, 100)}`);
     }
 
-    toast('Foto removida!');
-    carregarUsuarios();
-    carregarFoto();
+    if (!res.ok) {
+      throw new Error(data.erro || 'Erro ao remover foto');
+    }
 
-  } catch (e) {
-    console.error(e);
-    toast('Erro: ' + e.message, 'err');
+    return data;
+
+  } catch (err) {
+    console.error('Erro ao remover foto:', err.message);
+    throw err;
   }
 }
 

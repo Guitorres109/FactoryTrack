@@ -17,7 +17,7 @@
         <!-- <img src="/assets/img/icon3" alt="logo-metaltech" style="width: 80px;"> -->
       </div>
       <div class="sb-user">
-        <img src="http://192.168.1.4:3000/api/uploads/usuarios/default.png" id="sb-foto" alt="">
+        <img src="http://10.106.208.32:3000/api/uploads/usuarios/default.png" id="sb-foto" alt="">
         <div>
           <span id="sb-nome">—</span>
           <span class="tag" id="sb-perfil">—</span>
@@ -278,6 +278,13 @@
       <div class="fg"><label>Perfil <small id="icon-obrigatorio">*</small></label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Administrador">Administrador</option></select></div>
     </div>
     <div class="fg"><label>E-mail <small id="icon-obrigatorio">*</small></label><input type="email" id="u-email" placeholder="usuario@metaltech.com"></div>
+    <div class="fg" style="position: relative;">
+      <label>Foto de perfil</label>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="file" name="imagem" id="u-foto" />
+        <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button>
+      </div>
+    </div>
     <div class="fg" style="position: relative;">
       <label>Senha <small id="icon-obrigatorio">*</small></label>
       <input id="u-senha" type="password" placeholder="Mínimo 6 caracteres"

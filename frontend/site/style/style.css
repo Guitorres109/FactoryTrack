@@ -526,10 +526,6 @@ select option { background: var(--surf2); }
   left: -5px;
 }
 
-#tbl-usuarios tr {
-  cursor: pointer;
-}
-
 #tbl-usuarios tr:hover {
   background: rgba(255,255,255,0.05);
 }

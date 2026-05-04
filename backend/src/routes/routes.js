@@ -304,6 +304,41 @@ router.get('/usuarios/:id', auth, async (req, res) => {
   }
 });
 
+router.post('/usuarios', auth, upload.single('foto'), async (req, res) => {
+  try {
+    if (req.usuario.perfil !== 'Administrador')
+      return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+
+    const { nome, email, senha, perfil, usuarioId } = req.body;
+
+    if (!nome || !email || !senha)
+      return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios' });
+
+    // 📸 pega o nome do arquivo se existir
+    let foto = null;
+    if (req.file) {
+      foto = req.file.filename;
+    }
+
+    const novoUsuario = await Usuario.create({
+      nome,
+      email,
+      senha,
+      perfil,
+      usuarioId,
+      foto
+    });
+
+    res.status(201).json(novoUsuario);
+
+  } catch (e) {
+    if (e.message?.includes('UNIQUE'))
+      return res.status(400).json({ erro: 'E-mail já cadastrado' });
+
+    res.status(500).json({ erro: e.message });
+  }
+});
+
 router.put('/usuarios/:id', auth, upload.single('foto'), async (req, res) => {
   try {
     if (req.usuario.perfil !== 'Administrador') {
@@ -322,19 +357,40 @@ router.put('/usuarios/:id', auth, upload.single('foto'), async (req, res) => {
 
     // 🔥 só altera se uma nova foto foi enviada
     if (req.file) {
-      fotoPath = req.file.filename;
+      const nomeAntigo = req.file.filename;
+      const extensao = path.extname(nomeAntigo);
 
-      // 🧹 remove foto antiga (se existir e não for default)
+      const novoNome = `${usuarioAtual.nome}_${Date.now()}${extensao}`;
+
+      const caminhoAntigo = path.join(
+        __dirname,
+        '../database/uploads/usuarios',
+        nomeAntigo
+      );
+
+      const caminhoNovo = path.join(
+        __dirname,
+        '../database/uploads/usuarios',
+        novoNome
+      );
+
+      // 🔁 renomeia o arquivo físico
+      fs.renameSync(caminhoAntigo, caminhoNovo);
+
+      // agora sim você atualiza a variável
+      fotoPath = novoNome;
+
+      // 🧹 remove foto antiga
       if (usuarioAtual.foto && usuarioAtual.foto !== 'default.png') {
-        const caminhoAntigo = path.join(
+        const caminhoFotoAntiga = path.join(
           __dirname,
           '../database/uploads/usuarios',
           usuarioAtual.foto
         );
 
-        if (fs.existsSync(caminhoAntigo)) {
+        if (fs.existsSync(caminhoFotoAntiga)) {
           try {
-            fs.unlinkSync(caminhoAntigo);
+            fs.unlinkSync(caminhoFotoAntiga);
           } catch (err) {
             console.error('Erro ao remover foto antiga:', err);
           }
@@ -363,24 +419,24 @@ router.put('/usuarios/:id', auth, upload.single('foto'), async (req, res) => {
 //Rota para atualizar ID 
 //====================================
 
-router.put('/usuarios/:id', auth, async (req, res) => {
-  try {
-    if (req.usuario.perfil !== 'Administrador') {
-      return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
-    }
+// router.put('/usuarios/:id', auth, async (req, res) => {
+//   try {
+//     if (req.usuario.perfil !== 'Administrador') {
+//       return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+//     }
 
-    const u = await Usuario.update(req.params.id, req.body);
+//     const u = await Usuario.update(req.params.id, req.body);
 
-    if (!u) {
-      return res.status(404).json({ erro: 'Usuário não encontrado' });
-    }
+//     if (!u) {
+//       return res.status(404).json({ erro: 'Usuário não encontrado' });
+//     }
 
-    res.json(u);
-  } catch (e) {
-    console.error(e); // 🔥 importante pra debug
-    res.status(500).json({ erro: e.message });
-  }
-});
+//     res.json(u);
+//   } catch (e) {
+//     console.error(e); // 🔥 importante pra debug
+//     res.status(500).json({ erro: e.message });
+//   }
+// });
 
 //====================================
 //Rota para deletar os usuarios 
@@ -394,6 +450,33 @@ router.delete('/usuarios/:id', auth, async (req, res) => {
     if (!ok) return res.status(404).json({ erro: 'Usuário não encontrado' });
     res.json({ mensagem: 'Usuário deletado' });
   } catch (e) { res.status(500).json({ erro: e.message }); }
+});
+
+router.delete('/usuarios/:id/foto', auth, async (req, res) => {
+  try {
+    // if (req.usuario.perfil !== 'Administrador') {
+    //   return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+    // }
+
+    const result = await Usuario.resetFoto(req.params.id);
+
+    if (!result) {
+      return res.status(404).json({ erro: 'Usuário não encontrado' });
+    }
+
+    if(result === 'defalt.png'){
+      return res.status(404).json({erro: 'Este usuario não possui foto de perfil'})
+    }
+
+    res.json({
+      mensagem: 'Foto removida com sucesso',
+      usuario: result
+    });
+
+  } catch (e) {
+    console.error('ERRO COMPLETO:', e);
+    res.status(500).json({ erro: e.message });
+  }
 });
 
 // ================================
