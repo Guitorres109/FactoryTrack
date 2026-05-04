@@ -3,6 +3,23 @@ const jwt      = require('jsonwebtoken');
 const router   = express.Router();
 const auth     = require('../middlewares/auth');
 const { Op } = require('sequelize');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// 📁 configuração de armazenamento
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../database/uploads/usuarios'));
+  },
+  filename: (req, file, cb) => {
+    const nomeUnico = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, nomeUnico + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
 
 const Usuario  = require('../models/usuario');
 const Produto  = require('../models/produto');
@@ -44,7 +61,8 @@ router.post('/auth/login', async (req, res) => {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
-        perfil: usuario.perfil
+        perfil: usuario.perfil,
+        foto: usuario.foto
       }
     });
 
@@ -270,16 +288,73 @@ router.get('/usuarios', auth, async (req, res) => {
   }
 });
 
-router.post('/usuarios', auth, async (req, res) => {
+router.get('/usuarios/:id', auth, async (req, res) => {
   try {
-    if (req.usuario.perfil !== 'Administrador')
-      return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
-    const { nome, email, senha, perfil, usuarioId  } = req.body;
-    if (!nome || !email || !senha)
-      return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios' });
-    res.status(201).json(await Usuario.create({ nome, email, senha, perfil, usuarioId }));
+    // if (req.usuario?.perfil !== 'Administrador')
+    //   return res.status(403).json({ erro: 'Acesso restrito' });
+
+    const usuario = await Usuario.findById(req.params.id);
+    if (!usuario) {
+      return res.status(404).json({ erro: 'Usuário não encontrado' });
+    }
+
+    res.json(usuario);
   } catch (e) {
-    if (e.message?.includes('UNIQUE')) return res.status(400).json({ erro: 'E-mail já cadastrado' });
+    res.status(500).json({ erro: e.message });
+  }
+});
+
+router.put('/usuarios/:id', auth, upload.single('foto'), async (req, res) => {
+  try {
+    if (req.usuario.perfil !== 'Administrador') {
+      return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
+    }
+
+    const { nome, email, senha, perfil, usuarioId } = req.body;
+
+    const usuarioAtual = await Usuario.findById(req.params.id);
+    if (!usuarioAtual) {
+      return res.status(404).json({ erro: 'Usuário não encontrado' });
+    }
+
+    // 🖼️ mantém a foto atual por padrão
+    let fotoPath = usuarioAtual.foto;
+
+    // 🔥 só altera se uma nova foto foi enviada
+    if (req.file) {
+      fotoPath = req.file.filename;
+
+      // 🧹 remove foto antiga (se existir e não for default)
+      if (usuarioAtual.foto && usuarioAtual.foto !== 'default.png') {
+        const caminhoAntigo = path.join(
+          __dirname,
+          '../database/uploads/usuarios',
+          usuarioAtual.foto
+        );
+
+        if (fs.existsSync(caminhoAntigo)) {
+          try {
+            fs.unlinkSync(caminhoAntigo);
+          } catch (err) {
+            console.error('Erro ao remover foto antiga:', err);
+          }
+        }
+      }
+    }
+
+    const u = await Usuario.update(req.params.id, {
+      nome,
+      email,
+      senha,
+      perfil,
+      usuarioId,
+      foto: fotoPath
+    });
+
+    res.json(u);
+
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ erro: e.message });
   }
 });

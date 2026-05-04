@@ -4,6 +4,7 @@ const os = require('os');
 const express = require('express');   //importa o express
 const cors    = require('cors');  //importa o cors
 const path    = require('path');   //importa o path
+const multer = require('multer');
 
 const app  = express();  //Adiciona o express a uma variavel
 const PORT = process.env.PORT || 3000;   //porta
@@ -48,6 +49,8 @@ ready.then(() => {
   });
 
   app.use('/api', routes);  //define /api/(rota) para requisições da API
+
+  app.use('/api/uploads', require('express').static(path.join(__dirname, 'src/database/uploads')));
 
 
   app.listen(PORT, () => {  

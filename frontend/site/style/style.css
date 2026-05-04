@@ -84,13 +84,30 @@ body.logado #app        { display: flex; }
   color: var(--primary);
 }
 
+#sb-foto {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .sb-user {
   display: flex;
   align-items: center;
+  flex-direction: row;
   gap: 6px;
   margin-top: 6px;
   font-size: 0.72rem;
   color: var(--muted);
+  align-items: flex-start;
+}
+
+.sb-user div{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 5px;
 }
 
 .sb-user .tag {
@@ -248,6 +265,58 @@ body.logado #app        { display: flex; }
   justify-content: space-between;
   align-items: center;
 }
+#dash-cardapio {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+#dash-cardapio .mini-row {
+  display: flex;
+  align-items: flex-start;
+  border: none;
+  gap: 5px;
+}
+
+/* container da foto */
+.chat-user {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+/* foto */
+.chat-user img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* 🔥 ícone sobreposto */
+.chat-icon {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  background: #1f1f1f;
+  border-radius: 50%;
+  font-size: 10px;
+  padding: 2px;
+  line-height: 1;
+}
+
+/* balão/texto */
+.chat-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  background: #2a2a2a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+  font-size: 0.8rem;
+}
 
 .card-head h3 { font-size: 0.85rem; font-weight: 600; }
 .card-body    { padding: 12px 16px; }
@@ -356,6 +425,114 @@ select option { background: var(--surf2); }
 .fr2 { display: grid; grid-template-columns: 1fr 1fr;     gap: 10px; }
 .fr3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 
+.card-usuario {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  width: 260px;
+  min-height: 280px;
+
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+
+  padding: 16px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 10px;
+
+  /* estado inicial */
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+
+  transition: 
+    opacity 0.18s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+
+  z-index: 1000;
+
+  backdrop-filter: blur(8px);
+}
+
+/* visível */
+.card-usuario.show {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* hover */
+.card-usuario:hover {
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+}
+
+/* imagem */
+.card-usuario img {
+  width: 95px;
+  height: 95px;
+
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 3px solid var(--border);
+}
+
+/* título */
+.card-usuario h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  text-align: left;
+}
+
+/* grupos */
+.card-usuario .fg {
+  width: 100%;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+/* tag */
+.card-usuario .tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  background: rgba(59,130,246,.18);
+  color: #93c5fd;
+  border: 1px solid var(--border);
+}
+
+.card-usuario::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--surf);
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  transform: rotate(45deg);
+  top: 10px;
+  left: -5px;
+}
+
+#tbl-usuarios tr {
+  cursor: pointer;
+}
+
+#tbl-usuarios tr:hover {
+  background: rgba(255,255,255,0.05);
+}
 .modal-bg {
   display: none;
   position: fixed;

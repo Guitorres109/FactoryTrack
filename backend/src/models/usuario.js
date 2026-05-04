@@ -1,6 +1,7 @@
-
 const { ready, query, run, get } = require('../database/sqlite');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
+const path = require('path');
 
 function formatarUsuario(row) {
   if (!row) return null;
@@ -11,6 +12,7 @@ function formatarUsuario(row) {
     email:     row.email,
     perfil:    row.perfil,
     ativo:     row.ativo === 1,
+    foto:      row.foto,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -22,7 +24,7 @@ const Usuario = {
   async findAll() {
     await ready;
     const rows = query(`
-      SELECT id, nome, email, perfil, ativo, created_at, updated_at
+      SELECT id, nome, email, perfil, ativo, foto, created_at, updated_at
       FROM usuarios ORDER BY created_at DESC
     `);
     return rows.map(formatarUsuario);
@@ -38,7 +40,7 @@ const Usuario = {
   async findById(id) {
     await ready;
     const row = get(`
-      SELECT id, nome, email, perfil, ativo, created_at, updated_at
+      SELECT id, nome, email, perfil, ativo, foto, created_at, updated_at
       FROM usuarios WHERE id = ?
     `, [id]);
     return formatarUsuario(row);
@@ -46,88 +48,142 @@ const Usuario = {
 
   //Criar usuarios 
 
-  async create({ nome, email, senha, perfil = 'Atendente', usuarioId }) {
+  async create({ nome, email, senha, perfil = 'Atendente', usuarioId, foto }) {
     await ready;
+
     const hash = await bcrypt.hash(senha, 10);
+
     const info = run(
-      'INSERT INTO usuarios (nome, email, senha, perfil) VALUES (?, ?, ?, ?)',
-      [nome.trim(), email.toLowerCase().trim(), hash, perfil]
+      'INSERT INTO usuarios (nome, email, senha, perfil, foto) VALUES (?, ?, ?, ?, ?)',
+      [nome.trim(), email.toLowerCase().trim(), hash, perfil, foto]
     );
-    const atividade = run(
+
+    run(
       'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
       [usuarioId, 'Criou', 'usuarios', nome.trim()]
-    )
+    );
+
     return this.findById(info.lastInsertRowid);
   },
 
 
   //Atualizar usuarios
-  async update(id, { nome, email, senha, perfil, ativo, usuarioId }) {
-  await ready;
+  async update(id, { nome, email, senha, perfil, ativo, usuarioId, foto }) {
+    await ready;
 
-  const atual = await get(
-    'SELECT * FROM usuarios WHERE id = ?',
-    [id]
-  );
-
-  if (!atual) return null;
-
-  let emailFinal = atual.email;
-
-  // Só verifica duplicidade se o email foi alterado
-  if (email && email !== atual.email) {
-    const existente = await get(
-      'SELECT id FROM usuarios WHERE email = ? AND id != ?',
-      [email, id]
+    const atual = await get(
+      'SELECT * FROM usuarios WHERE id = ?',
+      [id]
     );
 
-    // Se NÃO existir outro usuário com o email, permite atualizar
-    if (!existente) {
+    if (!atual) return null;
+
+    // 📧 Email
+    let emailFinal = atual.email;
+
+    if (email && email !== atual.email) {
+      const existente = await get(
+        'SELECT id FROM usuarios WHERE email = ? AND id != ?',
+        [email, id]
+      );
+
+      if (existente) {
+        throw new Error('E-mail já cadastrado');
+      }
+
       emailFinal = email;
     }
-    // Se existir, mantém o email antigo (não atualiza)
-  }
 
-  let senhaFinal = atual.senha;
-  if (senha) {
-    senhaFinal = await bcrypt.hash(senha, 10);
-  }
+    // 🔐 Senha
+    let senhaFinal = atual.senha;
+    if (senha) {
+      senhaFinal = await bcrypt.hash(senha, 10);
+    }
 
-  await run(`
-    UPDATE usuarios SET
-      nome       = ?,
-      email      = ?,
-      senha      = ?,
-      perfil     = ?,
-      ativo      = ?,
-      updated_at = datetime('now')
-    WHERE id = ?
-  `, [
-    nome   ?? atual.nome,
-    emailFinal,
-    senhaFinal,
-    perfil ?? atual.perfil,
-    ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
-    id
-  ]);
-  const atividade = run(
+    // 🖼️ Foto
+    let fotoFinal = atual.foto;
+
+    // 🔥 Só troca e remove antiga se veio nova
+    if (foto && foto !== atual.foto) {
+      fotoFinal = foto;
+
+      if (atual.foto && atual.foto !== 'default.png') {
+        const caminhoFoto = path.join(
+          __dirname,
+          '../database/uploads/usuarios',
+          atual.foto
+        );
+
+        if (fs.existsSync(caminhoFoto)) {
+          try {
+            fs.unlinkSync(caminhoFoto);
+          } catch (err) {
+            console.error('Erro ao remover foto:', err);
+          }
+        }
+      }
+    }
+
+    // 🔄 Update
+    await run(`
+      UPDATE usuarios SET
+        nome       = ?,
+        email      = ?,
+        senha      = ?,
+        perfil     = ?,
+        ativo      = ?,
+        foto       = ?,
+        updated_at = datetime('now')
+      WHERE id = ?
+    `, [
+      nome ?? atual.nome,
+      emailFinal,
+      senhaFinal,
+      perfil ?? atual.perfil,
+      ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+      fotoFinal,
+      id
+    ]);
+
+    // 📝 Atividade
+    const nomeFinal = (nome ?? atual.nome).trim();
+
+    run(
       'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
-      [usuarioId, 'Editou', 'usuarios', nome.trim()]
-    )
-  console.log('Atividade registrada:', { usuarioId, atividade: 'Editou', area: 'usuarios', areaItem: nome.trim() });
-  return await this.findById(id);
-},
+      [usuarioId, 'Editou', 'usuarios', nomeFinal]
+    );
+
+    return await this.findById(id);
+  },
 
   //Deletar usuarios
   async delete(id, usuarioId) {
     await ready;
+
     const usuarioExcluido = await this.findById(id);
+
+    // 🖼️ Remove a foto do disco (se existir)
+    if (usuarioExcluido?.foto) {
+      const caminhoFoto = path.join(
+        __dirname,
+        '../database/uploads/usuarios',
+        usuarioExcluido.foto
+      );
+      if (fs.existsSync(caminhoFoto)) {
+        try {
+          fs.unlinkSync(caminhoFoto);
+        } catch (err) {
+          console.error('Erro ao remover foto:', err);
+        }
+      }
+    }
+
     const info = run('DELETE FROM usuarios WHERE id = ?', [id]);
-    const atividade = run(
+
+    run(
       'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
       [usuarioId, 'Deletou', 'usuarios', usuarioExcluido.nome.trim()]
     );
-    console.log('Atividade registrada:', { usuarioId, atividade: 'Deletou', area: 'usuarios', areaItem: usuarioExcluido.nome.trim() });
     return info.changes > 0;
   },
 

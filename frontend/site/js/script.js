@@ -59,6 +59,7 @@ async function fazerLogin() {
 
     // 💾 salva sessão
     localStorage.setItem('pz_token', data.token);
+    console.log(data.usuario);
     localStorage.setItem('pz_usuario', JSON.stringify(data.usuario));
     localStorage.setItem('pz_perfil', data.usuario.perfil);
     window.location.href = '/metaltech';
@@ -167,11 +168,25 @@ async function api(method, url, body) {
   return data;
 }
 
+async function carregarFoto() {
+  try {
+    const id = USUARIO_LOGADO.id;
+    const data = await api('GET', `/usuarios/${id}`);
+
+    const foto = data?.foto; // 👈 ajuste conforme retorno da sua API
+    const caminhoFoto = foto ? `${API}/uploads/usuarios/${foto}` : `${API}/uploads/usuarios/default.png`;
+    document.getElementById('sb-foto').src = caminhoFoto;
+
+  } catch (err) {
+    console.error('Erro ao carregar foto:', err);
+  }
+}
 //====================================
 //Enviar perfil de usuario para usuarios e de ADM para Administradores
 //====================================
 
 function aplicarPerfil(usuario) {
+  carregarFoto()
   document.getElementById('sb-nome').textContent   = usuario.nome;
   document.getElementById('sb-perfil').textContent = usuario.perfil;
   const sb_perfil = document.getElementById('sb-perfil')
@@ -331,15 +346,29 @@ async function carregarDashboard() {
       '<div class="empty"><span class="ei">📋</span>Nenhum ordem ainda</div>';
 
     const elC = document.getElementById('dash-cardapio');
-    elC.innerHTML = atividades.slice(0, 8).map(a => `
-      <div class="mini-row">
-        <span>🛠️ ${formatarAtividade(a)}</span>
-        <small style="color:var(--muted)">
-          ${a.createdAt ? new Date(a.createdAt).toLocaleString() : ''}
-        </small>
-      </div>
-    `).join('') ||
-    '<div class="empty"><span class="ei">⚙️</span>Nenhuma atividade</div>';
+
+  if (!atividades.length) {
+    elC.innerHTML = '<div class="empty"><span class="ei">⚙️</span>Nenhuma atividade</div>';
+    return;
+  }
+
+  const itens = await Promise.all(
+    atividades.slice(0, 8).map(async (a) => {
+      const texto = await formatarAtividade(a);
+
+      return `
+        <div class="mini-row">
+          <span style="display:inline-flex; align-items:center; gap:5px;">
+            ${texto}
+          </span>
+          <small style="color:var(--muted)">
+            ${a.createdAt ? new Date(a.createdAt).toLocaleString() : ''}
+          </small>
+        </div>
+      `;
+    })
+  );
+  elC.innerHTML = itens.join('');
 
     spin.style.display = 'none';
   } catch (e) { toast('Erro dashboard: ' + e.message, 'err'); }
@@ -348,8 +377,9 @@ async function carregarDashboard() {
 async function carregarAtividades() {
   try {
     const res = await fetch(`${API}/atividades`);
-    const lista = await res.json();
-    console.log(lista);
+    let lista = await res.json();
+
+    lista = lista.reverse();
 
     renderizarAtividades(lista);
 
@@ -358,10 +388,23 @@ async function carregarAtividades() {
   }
 }
 
-function formatarAtividade(resultado) {
-  const { usuarioId, atividade, area, areaItem } = resultado;
+async function formatarAtividade(resultado) {
+  const { usuario, atividade, area, areaItem, usuarioId } = resultado;
 
-  
+  let caminhoFoto = `${API}/uploads/usuarios/default.png`;
+  let perfil = 'Atendente';
+
+  try {
+    const data = await api('GET', `/usuarios/${usuarioId}`);
+    perfil = (data?.perfil || '').toLowerCase();
+    const foto = data?.foto || data?.usuario?.foto;
+
+    if (foto) {
+      caminhoFoto = `${API}/uploads/usuarios/${foto}`;
+    }
+  } catch (err) {
+    console.error('Erro ao buscar foto:', err);
+  }
 
   const acoes = {
     Criou: 'criou',
@@ -369,21 +412,69 @@ function formatarAtividade(resultado) {
     Deletou: 'removeu'
   };
 
-  const acao = acoes[atividade] || atividade;
+  const icons = {
+    Criou: '➕',
+    Editou: '✏️',
+    Deletou: '🗑️'
+  };
 
-  return `${usuarioId} ${acao} o ${area} ${areaItem}`;
+  const atividades = {
+    clientes: 'cliente',
+    produtos: 'produto',
+    ordens: 'ordem',
+    usuarios: 'usuário',
+  };
+
+  const artigo = {
+    cliente: 'o',
+    produto: 'o',
+    ordem: 'a',
+    usuário: 'o'
+  };
+
+  let itemFormatado = areaItem;
+
+  if (area === 'ordens' && areaItem != null) {
+    itemFormatado = `#${String(areaItem).padStart(3, '0')}`;
+  }
+
+  const acao = acoes[atividade] || atividade;
+  const tipo = atividades[area] || area;
+  const icon = icons[atividade] || '';
+
+  return `
+    <div class="chat-msg">
+      
+    
+    <div class="chat-text">
+    <div class="chat-user">
+      <img 
+        src="${caminhoFoto}"
+        style="border: 1px solid ${perfil === 'atendente' ? '#93c5fd' : 'var(--red)'};"
+      >
+      <span class="chat-icon">${icon}</span>
+    </div>
+        <b>${usuario}</b>${acao} ${artigo[tipo] || 'o'} ${tipo} ${itemFormatado}
+      </div>
+
+    </div>
+  `;
 }
 
-function renderizarAtividades(lista) {
+async function renderizarAtividades(lista) {
   const container = document.getElementById('lista-atividades');
 
   container.innerHTML = '';
 
-  lista.forEach(item => {
-    const texto = formatarAtividade(item);
+  const atividadesHTML = await Promise.all(
+    lista.map(item => formatarAtividade(item))
+  );
 
+  atividadesHTML.forEach(texto => {
     const div = document.createElement('div');
-    div.textContent = texto;
+
+    // ⚠️ importante: usar innerHTML (porque tem <img>)
+    div.innerHTML = texto;
 
     container.appendChild(div);
   });
@@ -1134,15 +1225,26 @@ async function carregarUsuarios() {
         <tbody>
           ${us.map(u => `
             <tr>
-              <input type="hidden" id= "u-id">
-              <input type="hidden" id= "e-ativo" value= ${u.ativo}>
-              <td><strong>${u.nome}</strong></td>
+            <input type="hidden" id="u-id" value="${u.id || u._id}">
+              <td style="display:flex;align-items:center;gap:10px">
+                <img src="${u.foto ? `${API}/uploads/usuarios/${u.foto}` : `${API}/uploads/usuarios/default.png`}" 
+                    style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                <div><strong>${u.nome}</strong></div>
+              </td>
               <td>${u.email}</td>
               <td><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
               <td><span class="badge ${u.ativo ? 'b-on' : 'b-off'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
-              <td style="font-size:.73rem;color:var(--muted)">${new Date(u.createdAt).toLocaleDateString('pt-BR')}</td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-danger btn-sm" onclick="abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}', '${u.ativo}')"">✏️</button><button class="btn btn-danger btn-sm" onclick="deletarUsuario('${u._id}','${u.nome}')">🗑️</button></td>
-            </tr>`).join('')}
+              <td style="font-size:.73rem;color:var(--muted)">
+                ${new Date(u.createdAt).toLocaleDateString('pt-BR')}
+              </td>
+              <td>
+                <div style="display:flex;gap:5px">
+                  <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}', '${u.ativo}', '${u.foto}')">✏️</button>
+                  <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deletarUsuario('${u._id}','${u.nome}')">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
         </tbody>
       </table>`;
   } catch (e) {
@@ -1169,29 +1271,61 @@ async function salvarUsuario() {
   const email = document.getElementById('u-email').value.trim();
   const senha = document.getElementById('u-senha').value;
   const confirmarSenha = document.getElementById('u-confirmarSenha').value;
-  if (!nome || !email || !senha ) { toast('Preencha todos os campos', 'err'); return; }
-  if (senha != confirmarSenha){ toast('As senhas não correspondem', 'err'); return}
+  const foto_perfil = document.getElementById('u-foto').files[0];
+  const perfil = document.getElementById('u-perfil').value;
+
+  const usuarioStorage = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
+
+  if (!nome || !email || !senha) {
+    toast('Preencha todos os campos obrigatórios', 'err');
+    return;
+  }
+
+  if (senha !== confirmarSenha) {
+    toast('As senhas não correspondem', 'err');
+    return;
+  }
 
   try {
-    await api('POST', '/usuarios', {
-      nome, email, senha,
-      perfil: document.getElementById('u-perfil').value,
-      usuarioId: JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id
+    const formData = new FormData();
+
+    formData.append('nome', nome);
+    formData.append('email', email);
+    formData.append('senha', senha);
+    formData.append('perfil', perfil);
+    formData.append('usuarioId', usuarioStorage?.id || usuarioStorage?._id);
+
+    if (foto_perfil) {
+      formData.append('foto', foto_perfil); 
+    }
+
+    const token = localStorage.getItem('pz_token'); // ou onde você salva
+
+    await fetch(`${API}/usuarios`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
     });
+
     toast('Usuário criado!');
     fechar('m-usuario');
     carregarUsuarios();
-  } catch (e) { toast('Erro: ' + e.message, 'err'); }
+    USUARIO_LOGADO.foto = `${API}/uploads/usuarios/${foto_perfil ? foto_perfil.name : 'default.png'}`;
+  } catch (e) {
+    toast('Erro: ' + e.message, 'err');
+  }
 }
 
-function abrirEdicaoUsuario(id, nome, email, perfil, ativo) {
+function abrirEdicaoUsuario(id, nome, email, perfil, ativo, foto) {
   abrir('e-usuario'); // abre modal
   document.getElementById("u-id").value = id;
   document.getElementById('e-nome').value = nome;
   document.getElementById('e-email').value = email;
   document.getElementById('e-perfil').value = perfil;
   document.getElementById('u-senha').value = ''; // senha sempre vazia
-  document.getElementById('u-ativo').value = ativo || true
+  document.getElementById('u-ativo').value = ativo || true;
 }
 
 async function editarUsuario() {
@@ -1200,13 +1334,15 @@ async function editarUsuario() {
   const email = document.getElementById('e-email').value.trim();
   const perfil = document.getElementById('e-perfil').value;
   const ativoValue = document.getElementById('u-ativo').value;
+  const foto_perfil = document.getElementById('e-foto').files[0];
+
   const ativo = ativoValue === "true" ? 1 : 0;
 
   const senha = document.getElementById('e-senha').value.trim();
   const confirmarSenha = document.getElementById('e-confirmarSenha').value.trim();
-  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id;
 
-  let body = { nome, email, perfil, ativo, usuarioId };
+  const usuarioStorage = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
+  const usuarioId = usuarioStorage?.id || usuarioStorage?._id;
 
   if (!nome || !email) {
     toast('Nome e email são obrigatórios', 'err');
@@ -1218,27 +1354,81 @@ async function editarUsuario() {
     return;
   }
 
+  if (senha && senha !== confirmarSenha) {
+    toast('Erro: As senhas não correspondem', 'err');
+    return;
+  }
+
   try {
+    const formData = new FormData();
+
+    formData.append('nome', nome);
+    formData.append('email', email);
+    formData.append('perfil', perfil);
+    formData.append('ativo', ativo);
+    formData.append('usuarioId', usuarioId);
+
     if (senha) {
-      if (senha !== confirmarSenha) {
-        toast('Erro: As senhas não correspondem', 'err');
-        return;
-      }
-      body.senha = senha;
+      formData.append('senha', senha);
     }
 
-    await api('PUT', `/usuarios/${id}`, body);
+    if (foto_perfil) {
+      formData.append('foto', foto_perfil); // 🔥 aqui é o arquivo real
+    }
+
+    await fetch(`${API}/usuarios/${id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('pz_token')}`
+      },
+      body: formData
+    });
+    console.log({formData});
+
     toast('Usuário atualizado!');
     fechar('e-usuario');
     carregarUsuarios();
+    carregarFoto()
+  } catch (e) {
+    console.error(e);
+    toast('Erro: ' + e.message, 'err');
+  }
+}
+
+async function removerFotoUsuario() {
+  const id = document.getElementById('u-id')?.value;
+
+  if (!id) {
+    toast('Usuário inválido', 'err');
+    return;
+  }
+
+  if (!confirm('Remover foto de perfil?')) return;
+
+  try {
+    const formData = new FormData();
+    formData.append('removerFoto', true);
+
+    const res = await fetch(`${API}/usuarios/${id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('pz_token')}`
+      },
+      body: formData
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erro ao remover foto');
+    }
+
+    toast('Foto removida!');
+    carregarUsuarios();
+    carregarFoto();
 
   } catch (e) {
     console.error(e);
-    if (e.message.includes('Email já está em uso')) {
-      toast('Este email já está sendo usado por outro usuário', 'err');
-    } else {
-      toast('Erro: ' + e.message, 'err');
-    }
+    toast('Erro: ' + e.message, 'err');
   }
 }
 
