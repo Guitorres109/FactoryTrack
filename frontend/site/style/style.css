@@ -428,7 +428,17 @@ body.logado #app        { display: flex; }
    ===================================================== */
 .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-table { width: 100%; border-collapse: collapse; font-size: 0.81rem; }
+.tbl-wrap { 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch; 
+  width: 100%;
+}
+
+table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  font-size: 0.81rem; 
+}
 
 thead th {
   padding: 9px 13px;
@@ -442,10 +452,18 @@ thead th {
   font-weight: 700;
 }
 
-tbody tr { border-bottom: 1px solid var(--border); transition: background var(--transition); }
+tbody tr { 
+  border-bottom: 1px solid var(--border); 
+  transition: background var(--transition); 
+}
+
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: rgba(255,255,255,.04); }
-td { padding: 11px 13px; vertical-align: middle; }
+
+td { 
+  padding: 11px 13px; 
+  vertical-align: middle; 
+}
 
 /* =====================================================
    BADGES
@@ -491,7 +509,7 @@ td { padding: 11px 13px; vertical-align: middle; }
   letter-spacing: .1px;
 }
 
-.btn-red     { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(232,55,42,.35); }
+.btn-red     { background: var(--primary); color: #fff; box-shadow: 0 2px 8px var(--secundary); }
 .btn-red:hover { background: var(--secundary); box-shadow: 0 4px 16px rgba(232,55,42,.5); transform: translateY(-1px); }
 .btn-blue    { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,.3); }
 .btn-blue:hover { filter: brightness(.9); transform: translateY(-1px); }
@@ -1072,4 +1090,58 @@ select option { background: var(--surf2); }
   #sidebar { width: 240px; }
   :root { --sidebar-w: 240px; }
   .stats-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  /* Oculta o cabeçalho original, pois os nomes das colunas irão para dentro das células */
+  table thead {
+    display: none;
+  }
+
+  /* Transforma a tabela em blocos para que as células caiam umas sobre as outras */
+  table, table tbody, table tr, table td {
+    display: block;
+    width: 100%;
+  }
+
+  /* Estiliza cada Linha (TR) como se fosse um "Card" isolado */
+  tbody tr {
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px; /* Arredondamento do card */
+    background: rgba(255, 255, 255, 0.02); /* Leve destaque */
+  }
+
+  /* Devolve a borda inferior ao último card (que tinha sido tirada no base) */
+  tbody tr:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Flexbox no TD para jogar o "Rótulo" na esquerda e o "Valor" na direita */
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06); /* Linha divisória dentro do card */
+  }
+
+  /* Tira a borda do último item dentro do card */
+  td:last-child {
+    border-bottom: none;
+  }
+
+  /* Cria o Rótulo da coluna dinamicamente usando o atributo data-label */
+  td::before {
+    content: attr(data-label);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: left;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
 }
