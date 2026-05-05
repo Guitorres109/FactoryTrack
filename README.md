@@ -254,7 +254,7 @@ npx expo start
 factorytrack/
 │
 ├── backend/
-├── web/
+├── frontend/
 ├── mobile/
 └── README.md
 ```
@@ -265,7 +265,7 @@ factorytrack/
 
 
 Pietro Pardim Vieira
-* GitHub: [https://github.com/seu-usuario](https://github.com/pietroxz777)
+* GitHub: https://github.com/pietroxz777
 
 Nicolas Stekl Tordino
 * GitHub: https://github.com/nttordino
