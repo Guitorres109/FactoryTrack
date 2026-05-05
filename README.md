@@ -112,9 +112,8 @@ Criar um sistema integrado que permita:
 
 ### Front-end Web
 
-* React / Vue / Angular
 * HTML5 + CSS3
-* JavaScript / TypeScript
+* JavaScript
 
 ### Mobile
 
@@ -122,12 +121,12 @@ Criar um sistema integrado que permita:
 
 ### Back-end
 
-* Node.js / Java / C# / Python
-* Express / Spring Boot / .NET
+* Node.js
+* Express
 
 ### Banco de Dados
 
-* MySQL / PostgreSQL / MongoDB
+* SQLite
 
 ---
 
