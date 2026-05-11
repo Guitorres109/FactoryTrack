@@ -51,19 +51,106 @@ const Usuario = {
   async create({ nome, email, senha, perfil = 'Atendente', usuarioId, foto }) {
     await ready;
 
+    // =====================================================
+    // SENHA
+    // =====================================================
+
     const hash = await bcrypt.hash(senha, 10);
 
+    // =====================================================
+    // INSERT INICIAL
+    // =====================================================
+
     const info = run(
-      'INSERT INTO usuarios (nome, email, senha, perfil, foto) VALUES (?, ?, ?, ?, ?)',
-      [nome.trim(), email.toLowerCase().trim(), hash, perfil, foto]
+      `
+        INSERT INTO usuarios
+        (nome, email, senha, perfil)
+        VALUES (?, ?, ?, ?)
+      `,
+      [
+        nome.trim(),
+        email.toLowerCase().trim(),
+        hash,
+        perfil
+      ]
     );
 
+    // ID REAL DO BANCO
+    const novoId = info.lastInsertRowid;
+
+    let fotoFinal = null;
+
+    // =====================================================
+    // FOTO
+    // =====================================================
+
+    if (foto) {
+
+      const extensao = path.extname(foto);
+
+      const nomeNovo =
+        `usuario_${novoId}_${Date.now()}${extensao}`;
+
+      const pasta = path.join(
+        __dirname,
+        '../database/uploads/usuarios'
+      );
+
+      const caminhoAntigo = path.join(pasta, foto);
+
+      const caminhoNovo = path.join(pasta, nomeNovo);
+
+      // cria pasta
+      if (!fs.existsSync(pasta)) {
+        fs.mkdirSync(pasta, { recursive: true });
+      }
+
+      // renomeia
+      if (fs.existsSync(caminhoAntigo)) {
+
+        try {
+
+          fs.renameSync(caminhoAntigo, caminhoNovo);
+
+          fotoFinal = nomeNovo;
+
+          // atualiza foto no banco
+          run(
+            `
+              UPDATE usuarios
+              SET foto = ?
+              WHERE id = ?
+            `,
+            [fotoFinal, novoId]
+          );
+
+        } catch (err) {
+
+          console.error(
+            'Erro ao renomear foto:',
+            err
+          );
+
+        }
+
+      }
+
+    }
     run(
-      'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
-      [usuarioId, 'Criou', 'usuarios', nome.trim()]
+      `
+        INSERT INTO atividades
+        (usuarioId, atividade, area, areaItem)
+        VALUES (?, ?, ?, ?)
+      `,
+      [
+        usuarioId,
+        'Criou',
+        'usuarios',
+        nome.trim()
+      ]
     );
 
-    return this.findById(info.lastInsertRowid);
+    return this.findById(novoId);
   },
 
 

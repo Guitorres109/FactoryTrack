@@ -31,6 +31,12 @@ async function verificar(){
 }
 verificar()
 
+function verificarLogin() {
+  if (!TOKEN){
+    window.location.href = '/'
+  }
+}
+
 async function fazerLogin() {
   const email = document.getElementById('l-email').value.trim(); 
   const senha = document.getElementById('l-senha').value;
