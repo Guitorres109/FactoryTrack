@@ -510,7 +510,7 @@ td {
 }
 
 .btn-red     { background: var(--primary); color: #fff; box-shadow: 0 2px 8px var(--secundary); }
-.btn-red:hover { background: var(--secundary); box-shadow: 0 4px 16px rgba(232,55,42,.5); transform: translateY(-1px); }
+.btn-red:hover { background: var(--secundary); box-shadow: 0 4px 16px var(--secundary); transform: translateY(-1px); }
 .btn-blue    { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(59,130,246,.3); }
 .btn-blue:hover { filter: brightness(.9); transform: translateY(-1px); }
 .btn-green   { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(41,199,111,.3); }

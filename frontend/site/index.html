@@ -274,19 +274,28 @@
 
 <div id="m-usuario" class="modal-bg">
   <div class="modal">
+    <div class="fg">
+      <div style="margin-top: 10px;">
+        <img 
+          id="preview-foto"
+          src="http://10.106.208.32:3000/api/uploads/usuarios/default.png"
+          style="
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            display: block;
+          "
+        >
+      </div>
+    </div>
     <h3>Novo Usuário</h3>
     <div class="fr2">
       <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="u-nome" placeholder="Nome Completo"></div>
       <div class="fg"><label>Perfil <small id="icon-obrigatorio">*</small></label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Administrador">Administrador</option></select></div>
     </div>
     <div class="fg"><label>E-mail <small id="icon-obrigatorio">*</small></label><input type="email" id="u-email" placeholder="usuario@metaltech.com"></div>
-    <div class="fg" style="position: relative;">
-      <label>Foto de perfil</label>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="file" name="imagem" id="u-foto" />
-        <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button>
-      </div>
-    </div>
     <div class="fg" style="position: relative;">
       <label>Senha <small id="icon-obrigatorio">*</small></label>
       <input id="u-senha" type="password" placeholder="Mínimo 6 caracteres"
@@ -321,6 +330,14 @@
         👁️
       </button>
     </div>
+    <div class="fg" style="position: relative;">
+      <label>Foto de perfil</label>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="file" name="imagem" id="u-foto" onchange="preview_foto('criar')"/>
+        <!-- <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button> -->
+      </div>
+    </div>
+    
     <div class="modal-foot">
       <button class="btn btn-ghost" onclick="fechar('m-usuario')">Cancelar</button>
       <button class="btn btn-ghost" onclick="salvarUsuario()">Salvar</button>
@@ -330,6 +347,22 @@
 
 <div id="e-usuario" class="modal-bg">
   <div class="modal">
+    <div class="fg">
+      <div style="margin-top: 10px;">
+        <img 
+          id="preview-foto-edit"
+          src=""
+          style="
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            display: block;
+          "
+        >
+      </div>
+    </div>
     <h3>Editar Usuário</h3>
     <div class="fr2">
       <div class="fg">
@@ -351,7 +384,7 @@
     <div class="fg" style="position: relative;">
       <label>Foto de perfil</label>
       <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="file" name="imagem" id="e-foto" />
+        <input type="file" name="imagem" id="e-foto" onchange="preview_foto('editar')"/>
         <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button>
       </div>
     </div>

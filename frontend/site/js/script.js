@@ -343,7 +343,6 @@ async function carregarDashboard() {
         const usuario = cUsuarios.find(u =>
           String(u.id) === String(p.usuarioId || p.usuario?.id)
         );
-        console.log(usuario)
 
         const img = usuario?.foto
           ? `${API}/uploads/usuarios/${usuario.foto}`
@@ -1303,6 +1302,40 @@ function abrirUsuario() {
 //função de salvar usuarios
 //====================================
 
+function preview_foto(funcao) {
+
+  let preview_foto;
+  let input_foto;
+  let foto_perfil;
+
+  if (funcao === 'criar') {
+    preview_foto = document.getElementById('preview-foto');
+    input_foto = document.getElementById('u-foto');
+    foto_perfil = input_foto.files[0];
+  }
+
+  
+  else if (funcao === 'editar') {
+    preview_foto = document.getElementById('preview-foto-edit');
+    input_foto = document.getElementById('e-foto');
+    foto_perfil = input_foto.files[0];
+  }
+
+  // Se removeu a imagem
+  if (!foto_perfil) {
+    preview_foto.src = 'http://10.106.208.32:3000/api/uploads/usuarios/default.png';
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    preview_foto.src = e.target.result;
+  };
+
+  reader.readAsDataURL(foto_perfil);
+}
+
 async function salvarUsuario() {
   const nome  = document.getElementById('u-nome').value.trim();
   const email = document.getElementById('u-email').value.trim();
@@ -1363,6 +1396,8 @@ function abrirEdicaoUsuario(id, nome, email, perfil, ativo, foto) {
   document.getElementById('e-perfil').value = perfil;
   document.getElementById('u-senha').value = ''; // senha sempre vazia
   document.getElementById('u-ativo').value = ativo || true;
+  const foto_perfil = document.getElementById('preview-foto-edit');
+  foto_perfil.src = `${API}/uploads/usuarios/${foto || 'default.png'}`
 }
 
 async function editarUsuario() {
