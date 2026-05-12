@@ -19,6 +19,34 @@ const telaLogin = document.getElementById("tela-login")
 //função de fazer login
 //====================================
 
+const socket = io('http://10.106.208.32:3000')
+
+  socket.on("sync", (data) => {
+    console.log("Sync recebido:", data);
+
+    switch (data.entity) {
+      case "produtos":
+        carregarProdutos();
+        carregarDashboard()
+        break;
+
+      case "clientes":
+        carregarClientes();
+        carregarDashboard()
+        break;
+
+      case "ordens":
+        carregarordens();
+        carregarDashboard()
+        break;
+
+      case "usuarios":
+        carregarUsuarios();
+        carregarDashboard()
+        break;
+    }
+  });
+
 async function verificar(){
   try{
     const res = await fetch(API + '/verificar');

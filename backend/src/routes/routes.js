@@ -118,6 +118,9 @@ router.post('/produtos', auth, async (req, res) => {
       return res.status(400).json({ erro: 'Nome é obrigatório' });
 
     const novo = await Produto.create(req.body);
+
+    global.sync('produtos'); // 🔥
+
     res.status(201).json(novo);
 
   } catch (e) {
@@ -129,6 +132,9 @@ router.put('/produtos/:id', auth, async (req, res) => {
   try {
     const p = await Produto.update(req.params.id, req.body);
     if (!p) return res.status(404).json({ erro: 'Produto não encontrado' });
+
+    global.sync('produtos'); // 🔥
+
     res.json(p);
   } catch (e) {
     res.status(500).json({ erro: e.message });
@@ -139,6 +145,9 @@ router.delete('/produtos/:id', auth, async (req, res) => {
   try {
     const ok = await Produto.delete(req.params.id, req.body.usuarioId);
     if (!ok) return res.status(404).json({ erro: 'Produto não encontrado' });
+
+    global.sync('produtos'); // 🔥
+
     res.json({ mensagem: 'Produto deletado' });
   } catch (e) {
     res.status(500).json({ erro: e.message });
@@ -173,8 +182,10 @@ router.post('/clientes', auth, async (req, res) => {
       return res.status(400).json({ erro: 'Nome e telefone são obrigatórios' });
 
     const novo = await Cliente.create(req.body);
-    res.status(201).json(novo);
 
+    global.sync('clientes'); // 🔥
+
+    res.status(201).json(novo);
   } catch (e) {
     res.status(500).json({ erro: e.message });
   }
@@ -184,6 +195,9 @@ router.put('/clientes/:id', auth, async (req, res) => {
   try {
     const c = await Cliente.update(req.params.id, req.body);
     if (!c) return res.status(404).json({ erro: 'Cliente não encontrado' });
+
+    global.sync('clientes'); // 🔥
+
     res.json(c);
   } catch (e) {
     res.status(500).json({ erro: e.message });
@@ -194,6 +208,9 @@ router.delete('/clientes/:id', auth, async (req, res) => {
   try {
     const ok = await Cliente.delete(req.params.id, req.body.usuarioId);
     if (!ok) return res.status(404).json({ erro: 'Cliente não encontrado' });
+
+    global.sync('clientes'); // 🔥
+
     res.json({ mensagem: 'Cliente deletado' });
   } catch (e) {
     res.status(500).json({ erro: e.message });
@@ -234,6 +251,8 @@ router.post('/ordens', auth, async (req, res) => {
       userId
     });
 
+    global.sync('ordens'); // 🔥
+
     res.status(201).json(novo);
 
   } catch (e) {
@@ -254,6 +273,7 @@ router.patch('/ordens/:id/status', auth, async (req, res) => {
 
     if (!p) return res.status(404).json({ erro: 'Ordem não encontrada' });
 
+    global.sync('ordens'); // 🔥
     res.json(p);
 
   } catch (e) {
@@ -263,10 +283,11 @@ router.patch('/ordens/:id/status', auth, async (req, res) => {
 
 router.delete('/ordens/:id', auth, async (req, res) => {
   try {
-    console.log(req.body)
-    console.log(req.body.userId);
     const ok = await Ordem.delete(req.params.id, req.body.userId);
     if (!ok) return res.status(404).json({ erro: 'Ordem não encontrada' });
+
+    global.sync('ordens'); // 🔥
+
     res.json({ mensagem: 'Ordem deletada' });
   } catch (e) {
     res.status(500).json({ erro: e.message });
@@ -328,7 +349,7 @@ router.post('/usuarios', auth, upload.single('foto'), async (req, res) => {
       usuarioId,
       foto
     });
-
+    global.sync('usuarios'); // 🔥
     res.status(201).json(novoUsuario);
 
   } catch (e) {
@@ -406,7 +427,7 @@ router.put('/usuarios/:id', auth, upload.single('foto'), async (req, res) => {
       usuarioId,
       foto: fotoPath
     });
-
+    global.sync('usuarios'); // 🔥
     res.json(u);
 
   } catch (e) {
@@ -448,6 +469,7 @@ router.delete('/usuarios/:id', auth, async (req, res) => {
       return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
     const ok = await Usuario.delete(req.params.id, req.body.usuarioId);
     if (!ok) return res.status(404).json({ erro: 'Usuário não encontrado' });
+    global.sync('usuarios'); // 🔥
     res.json({ mensagem: 'Usuário deletado' });
   } catch (e) { res.status(500).json({ erro: e.message }); }
 });
@@ -467,7 +489,7 @@ router.delete('/usuarios/:id/foto', auth, async (req, res) => {
     if(result === 'defalt.png'){
       return res.status(404).json({erro: 'Este usuario não possui foto de perfil'})
     }
-
+    global.sync('usuarios');
     res.json({
       mensagem: 'Foto removida com sucesso',
       usuario: result
