@@ -145,7 +145,6 @@ const Ordem = {
         'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
         [userId, 'Criou', 'ordens', numeroOrdem]
       )
-      console.log('Atividade registrada:', { usuarioId: userId, atividade: 'Criou', area: 'ordens', areaItem: numeroOrdem });
 
   const ordemId = infoOrdem.lastInsertRowid;
 
@@ -203,9 +202,8 @@ const Ordem = {
     const info = run('DELETE FROM ordens WHERE id = ?', [id]);
     const atividade = run(
         'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
-        [userId, 'Editou', 'ordens', ordem.numeroOrdem]
+        [userId, 'deletou', 'ordens', ordem.numeroOrdem]
       )
-      console.log('Atividade registrada:', { usuarioId: userId, atividade: 'Deletou', area: 'ordens', areaItem: ordem.numeroOrdem });
 
     return info.changes > 0;
   },

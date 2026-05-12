@@ -19,44 +19,97 @@ const telaLogin = document.getElementById("tela-login")
 //função de fazer login
 //====================================
 
-const socket = io('http://10.106.208.32:3000')
+const socket = io('http://10.106.208.32:3000');
 
-  socket.on("sync", (data) => {
-    console.log("Sync recebido:", data);
-
-    switch (data.entity) {
-      case "produtos":
-        carregarProdutos();
-        carregarDashboard()
-        break;
-
-      case "clientes":
-        carregarClientes();
-        carregarDashboard()
-        break;
-
-      case "ordens":
-        carregarordens();
-        carregarDashboard()
-        break;
-
-      case "usuarios":
-        carregarUsuarios();
-        carregarDashboard()
-        break;
-    }
-  });
-
-async function verificar(){
-  try{
-    const res = await fetch(API + '/verificar');
-    const data = await res.json();
-    console.log(data.message)
-  } catch(e){
-    console.log('Servidor Inativo')
-    alert('Erro de conexão com o Servidor')
-  }
+if (Notification.permission !== 'granted') {
+  Notification.requestPermission();
 }
+
+socket.on("sync", (data) => {
+
+  // ✅ DEFINE AS VARIÁVEIS
+  let titulo = 'Sistema atualizado';
+  let mensagem = '';
+
+  switch (data.entity) {
+
+    case "produtos":
+      mensagem = 'Produtos foram atualizados';
+      carregarProdutos();
+      break;
+
+    case "clientes":
+      mensagem = 'Clientes foram atualizados';
+      carregarClientes();
+      break;
+
+    case "ordens":
+      mensagem = 'Ordens foram atualizadas';
+      carregarordens();
+      break;
+
+    case "usuarios":
+      mensagem = 'Usuários foram atualizados';
+      carregarUsuarios();
+      break;
+
+    default:
+      mensagem = 'Dados sincronizados';
+  }
+
+  carregarDashboard();
+
+  if (Notification.permission === 'granted') {
+
+    const notificacao = new Notification(titulo, {
+      body: mensagem,
+      icon: '/icon.png'
+    });
+
+    notificacao.onclick = () => {
+      window.focus();
+    };
+  }
+  const n = new Notification(titulo, {
+    body: mensagem,
+    icon: '/icon.png'
+  });
+  
+  n.onclick = () => {
+    window.focus();
+    window.location.href = '/dashboard';
+  };
+  
+});
+
+
+async function verificar() {
+    const tela_erro = document.getElementById('tela-erro');
+    const tela_login = document.getElementById('tela-login');
+    const app = document.getElementById('app');
+
+    try {
+      const res = await fetch(API + '/verificar');
+
+      if (!res.ok) {
+        throw new Error("Servidor offline");
+      }
+
+      const data = await res.json();
+      console.log(data.message);
+
+      app.style.display = 'block';
+      tela_login.style.display = 'none';
+      tela_erro.style.display = 'none';
+
+    } catch (e) {
+      console.log('Erro:', e.message);
+
+      app.style.display = 'none';
+      tela_login.style.display = 'none';
+      tela_erro.style.display = 'block';
+    }
+  }
 verificar()
 
 function verificarLogin() {
@@ -70,6 +123,8 @@ async function fazerLogin() {
   const senha = document.getElementById('l-senha').value;
   const btn   = document.getElementById('btn-login');
   const erro  = document.getElementById('login-erro');
+  const tela_erro = document.getElementById('tela-erro')
+  const tela_login = document.getElementById('tela-login')
 
   if (!email || !senha) {
     erro.style.display = 'block';
@@ -93,7 +148,6 @@ async function fazerLogin() {
 
     // 💾 salva sessão
     localStorage.setItem('pz_token', data.token);
-    console.log(data.usuario);
     localStorage.setItem('pz_usuario', JSON.stringify(data.usuario));
     localStorage.setItem('pz_perfil', data.usuario.perfil);
     window.location.href = '/metaltech';
@@ -103,6 +157,8 @@ async function fazerLogin() {
 
     if (e.message === 'Failed to fetch') {
       erro.textContent = 'Erro de conexão com o servidor';
+      tela_login.style.display = 'none'
+      tela_erro.style.display = 'block'
     } else {
       erro.textContent = e.message;
     }
@@ -1483,7 +1539,6 @@ async function editarUsuario() {
       },
       body: formData
     });
-    console.log({formData});
 
     toast('Usuário atualizado!');
     fechar('e-usuario');

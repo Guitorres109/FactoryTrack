@@ -50,7 +50,6 @@ const Produtos = {
             'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
             [usuarioId, 'Criou', 'produtos', nome.trim()]
           )
-          console.log('Atividade registrada:', { usuarioId: usuarioId, atividade: 'Criou', area: 'produtos', areaItem: nome.trim() });
 
       return this.findById(info.lastInsertRowid);
     },
@@ -78,7 +77,6 @@ const Produtos = {
             'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
             [usuarioId, 'Editou', 'produtos', nome.trim()]
           )
-          console.log('Atividade registrada:', { usuarioId: usuarioId, atividade: 'Editou', area: 'produtos', areaItem: nome.trim() });
     
 
     return this.findById(id);
@@ -94,7 +92,6 @@ const Produtos = {
             'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
             [usuarioId, 'Deletou', 'produtos', produto.nome]
           )
-          console.log('Atividade registrada:', { usuarioId: usuarioId, atividade: 'Deletou', area: 'produtos', areaItem: produto.nome });
     return info.changes > 0;
   },
 };

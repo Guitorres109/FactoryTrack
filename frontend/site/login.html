@@ -48,6 +48,21 @@
       Se ouver algum problema de login entre em contato com o suporte em <strong style="color:var(--text)">meta67@gmail.com</strong></p>
   </div>
 </div>
+<div id="tela-erro" style="display: none">
+  <div class="login-box">
+    <div class="login-logo">
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <img src="/assets/img/icon1" alt="" style="width: 200px;">
+      </div>
+      <p>O servidor esta inativo no momento, tente novamente mais tarde.</p>
+    </div>
+  </div>
+</div>
 <script src="/js/script.js" defer></script>
+<script defer>
+  document.addEventListener('DOMContentLoaded', () => {
+    verificar();
+  });
+</script>
 </body>
 </html>

@@ -19,6 +19,10 @@ app.get("/metaltech", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/index.html"));
 });
 
+app.get("/erro", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/inativo.html"));
+});
+
 app.get("/assets/img/icon1", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/assets/img/icon1.svg"));
 });

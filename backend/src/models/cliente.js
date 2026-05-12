@@ -78,7 +78,6 @@ const Cliente = {
       'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
       [usuarioId, 'Criou', 'clientes', nome.trim()]
     )
-    console.log('Atividade registrada:', { usuarioId, atividade: 'Criou', area: 'clientes', areaItem: nome.trim() });
 
     return this.findById(info.lastInsertRowid);
   },
@@ -121,7 +120,6 @@ const Cliente = {
       'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
       [usuarioId, 'Editou', 'clientes', nome.trim()]
     )
-  console.log('Atividade registrada:', { usuarioId, atividade: 'Editou', area: 'clientes', areaItem: nome.trim() });
 
   return await this.findById(id);
 },
@@ -135,7 +133,6 @@ const Cliente = {
       'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
       [usuarioId, 'Deletou', 'clientes', clienteExcluido.nome.trim()]
     );
-    console.log('Atividade registrada:', { usuarioId, atividade: 'Deletou', area: 'clientes', areaItem: clienteExcluido.nome.trim() });
     return info.changes > 0;
   },
 };
