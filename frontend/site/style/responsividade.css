@@ -257,6 +257,7 @@
 
   #sb-perfil {
     font-size: 0;
+    width: 100%;
   }
 
   #conteudo {
@@ -335,3 +336,281 @@
 /* ================================================
    DESKTOP  ≥ 1025px  (padrão — sem media query)
    ================================================ */
+
+   @media (max-width: 1024px) {
+  .dash-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+  #conteudo { padding: 0; }
+}
+
+/* ── SIDEBAR COLAPSADA ≤ 860px ── */
+@media (max-width: 860px) {
+  #sidebar {
+    width: var(--sidebar-collapsed);
+  }
+
+  #sidebar .sb-logo h1,
+  #sidebar .sb-user,
+  #sidebar .nav-btn span:not(.ic),
+  #sidebar .sb-group,
+  #sidebar #menu-usuarios {
+    opacity: 0;
+    width: 0;
+    font-size: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  #sidebar .sb-footer span { display: none; }
+  #sidebar .sb-logo { padding: 14px 8px; }
+  #sb-perfil { font-size: 0; }
+
+  #conteudo { margin-left: var(--sidebar-collapsed); }
+
+  .dash-grid, .fr2, .fr3 { grid-template-columns: 1fr; }
+  .pg-body { padding: 14px 16px; }
+  .pg-header { padding: 18px 16px 0; }
+}
+
+/* ── MOBILE LARGO 481–768px ── */
+@media (min-width: 481px) and (max-width: 768px) {
+  #sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-w);
+  }
+
+  #sidebar.aberto {
+    transform: translateX(0);
+    /* restaura textos */
+    width: var(--sidebar-w);
+  }
+
+  #sidebar.aberto .sb-logo h1,
+  #sidebar.aberto .sb-user,
+  #sidebar.aberto .nav-btn span:not(.ic),
+  #sidebar.aberto .sb-group {
+    opacity: 1;
+    width: auto;
+    font-size: revert;
+    overflow: visible;
+    pointer-events: auto;
+  }
+
+  #sidebar.aberto .sb-footer span { display: inline; }
+  #sidebar.aberto .sb-footer { display: flex; gap: 30px; }
+
+  #btn-menu { display: flex; }
+
+  #conteudo {
+    margin-left: 0;
+    padding-top: 60px; /* espaço pro hamburguer */
+  }
+
+  .pg-header { padding: 16px 16px 0; }
+  .pg-body   { padding: 14px 16px 24px; }
+
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .dash-grid, .fr2, .fr3 { grid-template-columns: 1fr; }
+
+  /* Tabela — card stacking */
+  .tbl-wrap { overflow: visible; }
+
+  table, thead, tbody, th, td, tr { display: block; width: 100%; }
+  thead { display: none; }
+
+  tbody tr {
+    background: var(--surf);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    box-shadow: var(--shadow-card);
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 4px;
+    border: none;
+    font-size: 0.8rem;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-size: 0.63rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  .btn, .btn-red { width: 100%; justify-content: center; }
+
+  .item-row { grid-template-columns: 1fr; gap: 6px; }
+  .modal-foot { flex-direction: column; }
+  .modal-foot .btn { width: 100%; }
+}
+
+/* ── MOBILE PEQUENO ≤ 480px ── */
+@media (max-width: 480px) {
+  #sidebar {
+    transform: translateX(-100%);
+    width: 100%;
+    max-width: 280px;
+  }
+
+  #sidebar.aberto { transform: translateX(0); }
+
+  #sidebar.aberto .sb-logo h1,
+  #sidebar.aberto .sb-user,
+  #sidebar.aberto .nav-btn span:not(.ic),
+  #sidebar.aberto .sb-group {
+    opacity: 1;
+    width: auto;
+    font-size: revert;
+    overflow: visible;
+    pointer-events: auto;
+  }
+
+  #sidebar.aberto .sb-footer span { display: inline; gap: 30px }
+
+  #btn-menu { display: flex; }
+
+  #conteudo { margin-left: 0; padding-top: 62px; }
+
+  .pg-header {
+    padding: 14px 14px 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .pg-header h2 { font-size: 1.2rem; }
+  .pg-body { padding: 12px 14px 24px; }
+
+  .login-box {
+    padding: 32px 20px;
+    border-radius: 16px;
+  }
+
+  .login-logo h1 { font-size: 1.35rem; }
+
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat .val  { font-size: 1.5rem; }
+
+  .dash-grid, .fr2, .fr3 { grid-template-columns: 1fr; }
+
+  /* Tabela card stacking */
+  .tbl-wrap { overflow: visible; }
+  table, thead, tbody, th, td, tr { display: block; width: 100%; }
+  thead { display: none; }
+
+  tbody tr {
+    background: var(--surf);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    box-shadow: var(--shadow-card);
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 4px;
+    border: none;
+    font-size: 0.78rem;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  .btn, .btn-red { width: 100%; justify-content: center; }
+
+  .modal { padding: 18px 16px; border-radius: 14px; }
+  .modal h3 { font-size: 0.98rem; }
+  .modal-foot { flex-direction: column; gap: 8px; }
+  .modal-foot .btn { width: 100%; }
+
+  .item-row { grid-template-columns: 1fr; gap: 6px; }
+
+  /* Toast ajustado */
+  #toast { bottom: 16px; right: 16px; left: 16px; text-align: center; }
+
+  /* Card usuário — full width em mobile */
+  .card-usuario { width: calc(100vw - 32px); left: 16px !important; }
+  .card-usuario::after { display: none; }
+  #sidebar.aberto .sb-footer { display: flex; gap: 30px; }
+}
+
+/* ── DESKTOP largo ≥ 1280px ── */
+@media (min-width: 1280px) {
+  #sidebar { width: 240px; }
+  :root { --sidebar-w: 240px; }
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  /* Oculta o cabeçalho original, pois os nomes das colunas irão para dentro das células */
+  table thead {
+    display: none;
+  }
+
+  /* Transforma a tabela em blocos para que as células caiam umas sobre as outras */
+  table, table tbody, table tr, table td {
+    display: block;
+    width: 100%;
+  }
+
+  /* Estiliza cada Linha (TR) como se fosse um "Card" isolado */
+  tbody tr {
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px; /* Arredondamento do card */
+    background: rgba(255, 255, 255, 0.02); /* Leve destaque */
+  }
+
+  /* Devolve a borda inferior ao último card (que tinha sido tirada no base) */
+  tbody tr:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Flexbox no TD para jogar o "Rótulo" na esquerda e o "Valor" na direita */
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06); /* Linha divisória dentro do card */
+  }
+
+  /* Tira a borda do último item dentro do card */
+  td:last-child {
+    border-bottom: none;
+  }
+
+  /* Cria o Rótulo da coluna dinamicamente usando o atributo data-label */
+  td::before {
+    content: attr(data-label);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: left;
+    margin-right: 15px;
+    flex-shrink: 0;
+  }
+}

@@ -98,10 +98,6 @@ async function verificar() {
       const data = await res.json();
       console.log(data.message);
 
-      app.style.display = 'block';
-      tela_login.style.display = 'none';
-      tela_erro.style.display = 'none';
-
     } catch (e) {
       console.log('Erro:', e.message);
 
@@ -200,6 +196,40 @@ function toast(msg, tipo = 'ok') {
   el.textContent = msg;
   el.className   = `show ${tipo}`;
   setTimeout(() => el.className = '', 3000);
+}
+
+function enableSidebarSwipe() {
+  const sidebar = document.getElementById('sidebar');
+
+  if (!sidebar) return;
+
+  let startX = 0;
+  let endX = 0;
+
+  function handleSwipe() {
+    const diff = endX - startX;
+
+    // 👉 abre (arrasta da esquerda para direita)
+    if (diff > 80 && startX < 50) {
+      sidebar.classList.add('aberto');
+    }
+
+    // 👈 fecha (arrasta da direita para esquerda)
+    if (diff < -80) {
+      sidebar.classList.remove('aberto');
+    }
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    if (window.innerWidth > 768) return;
+    startX = e.touches[0].clientX;
+  });
+
+  document.addEventListener('touchend', (e) => {
+    if (window.innerWidth > 768) return;
+    endX = e.changedTouches[0].clientX;
+    handleSwipe();
+  });
 }
 
 function abrir(id)  {document.getElementById(id).classList.add('open'); if (id === 'm-Produto'){document.getElementById('p-disp').value = true}}
@@ -1040,7 +1070,7 @@ async function carregarordens() {
           <th>Itens</th>
           <th>Status</th>
           <th>Data</th>
-          ${!isAtendente ? '<th>Ações</th>' : ''}
+          ${!isAtendente ? '<th>Ações</th>' : '<th>Status</th>'}
         </thead>
         <tbody>
           ${ordens.map(p => `
@@ -1072,10 +1102,10 @@ async function carregarordens() {
                   `
                 }
               </td>
+              <td class="td-acoes">
+                <div style="display:flex;gap:5px">
+                  <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
               ${!isAtendente ? `
-                <td class="td-acoes">
-                  <div style="display:flex;gap:5px">
-                    <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
                     <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}', '${p.usuario?.nome || '—'}')">🗑️</button>
                   </div>
                 </td>
@@ -1122,7 +1152,7 @@ function aplicarFiltroOrdens(status) {
     <table>
       <thead>
         <tr>
-          <th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th>${!isAtendente ? '<th>Ações</th>' : ''}
+          <th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th>${!isAtendente ? '<th>Ações</th>' : 'Status'}
         </tr>
       </thead>
       <tbody>
@@ -1180,11 +1210,10 @@ function aplicarFiltroOrdens(status) {
                     `
                 }
               </td>
-
+              <td class="td-acoes">
+                <div style="display:flex;gap:5px">
+                  <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
               ${!isAtendente ? `
-                <td class="td-acoes">
-                  <div style="display:flex;gap:5px">
-                    <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
                     <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
                   </div>
                 </td>

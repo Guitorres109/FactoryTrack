@@ -202,7 +202,7 @@ const Ordem = {
     const info = run('DELETE FROM ordens WHERE id = ?', [id]);
     const atividade = run(
         'INSERT INTO atividades (usuarioId, atividade, area, areaItem) VALUES (?, ?, ?, ?)',
-        [userId, 'deletou', 'ordens', ordem.numeroOrdem]
+        [userId, 'Deletou', 'ordens', ordem.numeroOrdem]
       )
 
     return info.changes > 0;
