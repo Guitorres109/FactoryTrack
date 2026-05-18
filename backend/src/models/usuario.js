@@ -232,7 +232,7 @@ const Usuario = {
         email: emailFinal,
         senha: senhaFinal,
         perfil: perfil ?? atual.perfil,
-        ativo: ativo !== undefined ? (ativo ? 1 : 0) : atual.ativo,
+        ativo: ativo,
         foto: fotoFinal
       };
 

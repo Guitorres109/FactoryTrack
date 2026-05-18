@@ -1,5 +1,6 @@
 import * as services from '/js/services/index.js';
 
+let cClientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
 let clientesCache = [];
 
 export async function carregarClientes(busca = '') {
@@ -142,7 +143,7 @@ export function abrirCliente() {
   }
 }
 
-async function buscarCEPCliente(cep) {
+export async function buscarCEPCliente(cep) {
   cep = cep.replace(/\D/g, '');
   
   if (cep.length !== 8) return;

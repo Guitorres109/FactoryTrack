@@ -4,7 +4,7 @@ let cProdutos
 let cClientes
 let cUsuarios
 
-function toggleSenha(id) {
+export function toggleSenha(id) {
   const input = document.getElementById(id);
   input.type = input.type === 'password' ? 'text' : 'password';
 }
@@ -115,8 +115,7 @@ export function ir(pg, btn) {
     if (btn) btn.classList.add('ativo');
 
     carregarordens(); // mantém seu padrão atual
-
-    abrirOrdem()
+    abrirOrdem();     // chama a função
 
     return;
   }
@@ -129,14 +128,14 @@ export function ir(pg, btn) {
 
   const loaders = {
     dashboard: carregarDashboard,
-    ordens: services.carregarordens(),
-    Produtos: services.carregarProdutos(),
-    clientes: services.carregarClientes(),
-    usuarios: services.carregarUsuarios(),
+    ordens: services.carregarordens,     // <-- sem parênteses
+    Produtos: services.carregarProdutos,
+    clientes: services.carregarClientes,
+    usuarios: services.carregarUsuarios,
   };
 
   if (loaders[pg]) {
-    loaders[pg]();
+    loaders[pg](); // chama só aqui
   }
 }
 

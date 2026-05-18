@@ -366,7 +366,7 @@ router.put('/usuarios/:id', auth, upload.single('foto'), async (req, res) => {
       return res.status(403).json({ erro: 'Acesso restrito a Administradores' });
     }
 
-    const { nome, email, senha, perfil, usuarioId } = req.body;
+    const { nome, email, senha, perfil, ativo, usuarioId } = req.body;
 
     const usuarioAtual = await Usuario.findById(req.params.id);
     if (!usuarioAtual) {
@@ -424,6 +424,7 @@ router.put('/usuarios/:id', auth, upload.single('foto'), async (req, res) => {
       email,
       senha,
       perfil,
+      ativo,
       usuarioId,
       foto: fotoPath
     });

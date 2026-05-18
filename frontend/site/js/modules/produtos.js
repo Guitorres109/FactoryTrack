@@ -1,4 +1,6 @@
 import * as services from '/js/services/index.js';
+let cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+
 
 export async function carregarProdutos() {
   const el = document.getElementById('tbl-Produtos');
@@ -30,7 +32,7 @@ export async function carregarProdutos() {
   }
 }
 
-function abrirProduto() {
+export function abrirProduto() {
   document.getElementById('m-Produto-t').textContent = 'Novo Produto';
   document.getElementById('p-disp').value = '1';
   abrir('m-Produto');
@@ -43,7 +45,7 @@ function abrirProduto() {
 //função de salvar Produtos no DB
 //====================================
 
-async function salvarProduto() {
+export async function salvarProduto() {
   const id   = document.getElementById('p-id').value;
   const nome = document.getElementById('p-nome').value.trim();
   const usuarioId =JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id
@@ -66,7 +68,7 @@ async function salvarProduto() {
 }
 
 
-function abrirEdicaoProduto(p) {
+export function abrirEdicaoProduto(p) {
   abrir("e-produto")
   document.getElementById('p-id').value = p.id || p._id
   document.getElementById('e-nomeproduto').value = p.nome;
@@ -78,7 +80,7 @@ function abrirEdicaoProduto(p) {
   }
 }
 
-async function editarProduto() {
+export async function editarProduto() {
   const id = document.getElementById('p-id').value;
   const nome = document.getElementById('e-nomeproduto').value.trim();
   const descricao = document.getElementById('e-desc').value.trim();
@@ -114,7 +116,7 @@ async function editarProduto() {
 //função de deletar Produtos do cardapio
 //====================================
 
-async function deletarProduto(id, nome) {
+export async function deletarProduto(id, nome) {
   if (!confirm(`Você tem certeza que deseja deletar o produto "${nome}"?`)) return;
   const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id
   try {

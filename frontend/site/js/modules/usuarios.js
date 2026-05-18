@@ -4,7 +4,7 @@ export async function carregarUsuarios() {
   const el = document.getElementById('tbl-usuarios');
   el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
   try {
-    const us = await api('GET', '/usuarios');
+    const us = await services.api('GET', '/usuarios');
     if (!us.length) {
       el.innerHTML = '<div class="empty"><span class="ei">🔐</span>Nenhum usuário</div>';
       return;
@@ -17,7 +17,7 @@ export async function carregarUsuarios() {
             <tr>
             <input type="hidden" id="u-id" value="${u.id || u._id}">
               <td style="display:flex;align-items:center;gap:10px">
-                <img src="${u.foto ? `${API}/uploads/usuarios/${u.foto}` : `${API}/uploads/usuarios/default.png`}" 
+                <img src="${u.foto ? `${services.API}/uploads/usuarios/${u.foto}` : `${services.API}/uploads/usuarios/default.png`}" 
                     style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
                 <div><strong>${u.nome}</strong></div>
               </td>
@@ -46,17 +46,17 @@ export async function carregarUsuarios() {
 //função de abrir usuarios
 //====================================
 
-function abrirUsuario() {
+export function abrirUsuario() {
   ['u-nome','u-email','u-senha'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('u-perfil').value = 'Atendente';
-  abrir('m-usuario');
+  services.abrir('m-usuario');
 }
 
 //====================================
 //função de salvar usuarios
 //====================================
 
-function preview_foto(funcao) {
+export function preview_foto(funcao) {
 
   let preview_foto;
   let input_foto;
@@ -90,7 +90,8 @@ function preview_foto(funcao) {
   reader.readAsDataURL(foto_perfil);
 }
 
-async function salvarUsuario() {
+export async function salvarUsuario() {
+
   const nome  = document.getElementById('u-nome').value.trim();
   const email = document.getElementById('u-email').value.trim();
   const senha = document.getElementById('u-senha').value;
@@ -101,12 +102,18 @@ async function salvarUsuario() {
   const usuarioStorage = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
 
   if (!nome || !email || !senha) {
-    toast('Preencha todos os campos obrigatórios', 'err');
+    services.toast('Preencha todos os campos obrigatórios', 'err');
     return;
   }
 
+  const usuarios = JSON.parse(sessionStorage.getItem('Usuarios') || '[]');
+  if (usuarios.some(u => u.email === email)) {
+    services.toast('Este email já esta sendo usado!', 'err');
+    return
+   }
+
   if (senha !== confirmarSenha) {
-    toast('As senhas não correspondem', 'err');
+    services.toast('As senhas não correspondem', 'err');
     return;
   }
 
@@ -125,7 +132,7 @@ async function salvarUsuario() {
 
     const token = localStorage.getItem('pz_token'); // ou onde você salva
 
-    await fetch(`${API}/usuarios`, {
+    await fetch(`${services.API}/usuarios`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`
@@ -133,16 +140,16 @@ async function salvarUsuario() {
       body: formData
     });
 
-    toast('Usuário criado!');
-    fechar('m-usuario');
+    services.toast('Usuário criado!');
+    services.fechar('m-usuario');
     carregarUsuarios();
-    USUARIO_LOGADO.foto = `${API}/uploads/usuarios/${foto_perfil ? foto_perfil.name : 'default.png'}`;
+    USUARIO_LOGADO.foto = `${services.API}/uploads/usuarios/${foto_perfil ? foto_perfil.name : 'default.png'}`;
   } catch (e) {
-    toast('Erro: ' + e.message, 'err');
+    services.toast('Erro: ' + e.message, 'err');
   }
 }
 
-function abrirEdicaoUsuario(id, nome, email, perfil, ativo, foto) {
+export function abrirEdicaoUsuario(id, nome, email, perfil, ativo, foto) {
   abrir('e-usuario'); // abre modal
   document.getElementById("u-id").value = id;
   document.getElementById('e-nome').value = nome;
@@ -151,10 +158,10 @@ function abrirEdicaoUsuario(id, nome, email, perfil, ativo, foto) {
   document.getElementById('u-senha').value = ''; // senha sempre vazia
   document.getElementById('u-ativo').value = ativo || true;
   const foto_perfil = document.getElementById('preview-foto-edit');
-  foto_perfil.src = `${API}/uploads/usuarios/${foto || 'default.png'}`
+  foto_perfil.src = `${services.API}/uploads/usuarios/${foto || 'default.png'}`
 }
 
-async function editarUsuario() {
+export async function editarUsuario() {
   const id = document.getElementById('u-id').value;
   const nome = document.getElementById('e-nome').value.trim();
   const email = document.getElementById('e-email').value.trim();
@@ -171,17 +178,17 @@ async function editarUsuario() {
   const usuarioId = usuarioStorage?.id || usuarioStorage?._id;
 
   if (!nome || !email) {
-    toast('Nome e email são obrigatórios', 'err');
+    services.toast('Nome e email são obrigatórios', 'err');
     return;
   }
 
   if (!id) {
-    toast('Erro: ID de usuário inválido', 'err');
+    services.toast('Erro: ID de usuário inválido', 'err');
     return;
   }
 
   if (senha && senha !== confirmarSenha) {
-    toast('Erro: As senhas não correspondem', 'err');
+    services.toast('Erro: As senhas não correspondem', 'err');
     return;
   }
 
@@ -202,7 +209,7 @@ async function editarUsuario() {
       formData.append('foto', foto_perfil); // 🔥 aqui é o arquivo real
     }
 
-    await fetch(`${API}/usuarios/${id}`, {
+    await fetch(`${services.API}/usuarios/${id}`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('pz_token')}`
@@ -210,22 +217,22 @@ async function editarUsuario() {
       body: formData
     });
 
-    toast('Usuário atualizado!');
-    fechar('e-usuario');
-    carregarUsuarios();
-    carregarFoto()
+    services.toast('Usuário atualizado!');
+    services.fechar('e-usuario');
+    services.carregarUsuarios();
+    services.carregarFoto()
   } catch (e) {
     console.error(e);
-    toast('Erro: ' + e.message, 'err');
+    services.toast('Erro: ' + e.message, 'err');
   }
 }
 
-async function removerFotoUsuario() {
+export async function removerFotoUsuario() {
   const usuarioId = document.getElementById("u-id").value;
 
   try {
     if (!confirm(`Você tem certeza que deseja deletar esta foto de perfil?`)) return;
-    const res = await fetch(`${API}/usuarios/${usuarioId}/foto`, {
+    const res = await fetch(`${services.API}/usuarios/${usuarioId}/foto`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${TOKEN}`
@@ -238,13 +245,13 @@ async function removerFotoUsuario() {
 
     if (contentType && contentType.includes("application/json")) {
       data = await res.json();
-      toast('Foto de perfil removida com sucesso!')
-      fechar('e-usuario');
-      carregarUsuarios();
-      carregarFoto()
+      services.toast('Foto de perfil removida com sucesso!')
+      services.fechar('e-usuario');
+      services.carregarUsuarios();
+      services.carregarFoto()
     } else {
       const text = await res.text();
-      toast(text, 'err')
+      services.toast(text, 'err')
       throw new Error(`Resposta inválida do servidor: ${text.substring(0, 100)}`);
     }
 
@@ -264,11 +271,11 @@ async function removerFotoUsuario() {
 //função de deletar usuarios
 //====================================
 
-async function deletarUsuario(id, nome) {
+export async function deletarUsuario(id, nome) {
   if (!confirm(`Você tem certeza que deseja deletar o usuário "${nome}"?`)) return;
   try {
-    await api('DELETE', '/usuarios/' + id, { usuarioId: JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id });
-    toast('Usuário deletado!');
-    carregarUsuarios();
-  } catch (e) { toast('Erro: ' + e.message, 'err'); }
+    await services.api('DELETE', '/usuarios/' + id, { usuarioId: JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id });
+    services.toast('Usuário deletado!');
+    services.carregarUsuarios();
+  } catch (e) { services.toast('Erro: ' + e.message, 'err'); }
 }

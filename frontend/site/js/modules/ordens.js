@@ -1,5 +1,8 @@
 import * as services from '/js/services/index.js';
 
+const cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+const cClientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
+
 export async function carregarordens() {
   const el = document.getElementById('tbl-ordens');
   el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
@@ -187,26 +190,37 @@ function aplicarFiltroOrdens(status) {
 export async function abrirOrdem() {
   try {
     // Rota alterada para produtos
-    if (!cProdutos.length)   cProdutos   = await services.api('GET', '/produtos');
-    if (!cClientes.length) cClientes = await services.api('GET', '/clientes');
-  } catch (e) { toast('Erro ao carregar dados', 'err'); return; }
+    if (!cProdutos.length) {
+      cProdutos = await services.api('GET', '/produtos');
+    }
+    if (!cClientes.length) {
+      cClientes = await services.api('GET', '/clientes');
+    }
+  } catch (e) {
+    toast('Erro ao carregar dados', 'err');
+    console.error(e);
+    return;
+  }
 
+  // Usar services.cache.cClientes, não cClientes
   document.getElementById('ped-cli').innerHTML =
     '<option value="">— Selecione o cliente —</option>' +
-    cClientes.map(c => `<option value="${c._id}">${c.nome} · ${c.telefone}</option>`).join('');
+    cClientes
+      .map(c => `<option value="${c._id}">${c.nome} · ${c.telefone}</option>`)
+      .join('');
 
   document.getElementById('itens-lista').innerHTML = '';
-  document.getElementById('ped-obs').value   = '';
+  document.getElementById('ped-obs').value = '';
 
   addItem();
-  abrir('m-ordem');
+  services.abrir('m-ordem');
 }
 
 //====================================
 //função de adicionar item
 //====================================
 
-function addItem() {
+export function addItem() {
   const d = document.createElement('div');
   d.className = 'item-row';
   const opts = cProdutos
@@ -221,7 +235,7 @@ function addItem() {
   document.getElementById('itens-lista').appendChild(d);
 }
 
-function recalc() {
+export function recalc() {
   let sub = 0;
   document.querySelectorAll('#itens-lista .item-row').forEach(row => {
     const sel = row.querySelector('.ip');
@@ -234,7 +248,7 @@ function recalc() {
 //função de salvar ordem
 //====================================
 
-async function salvarordem() {
+export async function salvarordem() {
   const cliId = document.getElementById('ped-cli').value;
   if (!cliId) { toast('Selecione um cliente', 'err'); return; }
   const usuario = JSON.parse(localStorage.getItem('pz_usuario'));
@@ -272,7 +286,7 @@ async function salvarordem() {
 //função de abrir status de ordem
 //====================================
 
-function abrirStatus(id, status) {
+export function abrirStatus(id, status) {
   document.getElementById('st-id').value  = id;
   document.getElementById('st-val').value = status;
   abrir('m-status');
@@ -282,7 +296,7 @@ function abrirStatus(id, status) {
 //função de salavr status de ordem
 //====================================
 
-async function salvarStatus() {
+export async function salvarStatus() {
   const id     = document.getElementById('st-id').value;
   const status = document.getElementById('st-val').value;
   const userId = JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id;
@@ -299,7 +313,7 @@ async function salvarStatus() {
 //função de deletar ordem
 //====================================
 
-async function deletarordem(id, usuario) {
+export async function deletarordem(id, usuario) {
   const userId = JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id;
   if (!confirm(`Você tem certeza que deseja deletar esta ordem criada por ${usuario}?`)) return;
   try {

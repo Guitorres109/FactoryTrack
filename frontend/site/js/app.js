@@ -1,12 +1,21 @@
 import * as services from '/js/services/index.js';
-import { ir } from '/js/ui/ui.js';
-import { abrirOrdem } from '/js/modules/ordens.js';
 
-window.ir = ir;
-export let cache = {
-    cProdutos: [], 
-    cClientes: []
-};
+Object.assign(window, services);
+
+const usuario = JSON.parse(localStorage.getItem('pz_usuario') || 'null');
+
+const cProdutos = await services.api('GET', '/produtos');
+const cClientes = await services.api('GET', '/clientes');
+
+let cUsuarios = null;
+if (usuario?.perfil === 'Administrador') {
+  cUsuarios = await services.api('GET', '/usuarios');
+}
+sessionStorage.setItem('Produtos', JSON.stringify(cProdutos));
+sessionStorage.setItem('Clientes', JSON.stringify(cClientes));
+if (cUsuarios) {
+  sessionStorage.setItem('Usuarios', JSON.stringify(cUsuarios));
+}
 
 const socket = io('http://10.106.208.32:3000');
 
