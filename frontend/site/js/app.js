@@ -1,5 +1,8 @@
-import * as services from '/services/index.js';
+import * as services from '/js/services/index.js';
+import { ir } from '/js/ui/ui.js';
+import { abrirOrdem } from '/js/modules/ordens.js';
 
+window.ir = ir;
 export let cache = {
     cProdutos: [], 
     cClientes: []
@@ -75,7 +78,7 @@ export async function verificar() {
     const app = document.getElementById('app');
 
     try {
-      const res = await fetch(API + '/verificar');
+      const res = await fetch(services.API + '/verificar');
 
       if (!res.ok) {
         throw new Error("Servidor offline");
@@ -95,7 +98,12 @@ export async function verificar() {
 verificar()
 
 export function verificarLogin() {
-  if (!TOKEN){
+  if (!services.TOKEN){
     window.location.href = '/'
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    verificarLogin();
+    services.enableSidebarSwipe();
+});

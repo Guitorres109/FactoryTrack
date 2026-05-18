@@ -1,4 +1,4 @@
-import * as services from '/services/index.js';
+import * as services from '/js/services/index.js';
 
 export async function carregarUsuarios() {
   const el = document.getElementById('tbl-usuarios');

@@ -1,3 +1,4 @@
+import * as services from '/js/services/index.js';
 export const API = 'http://10.106.208.32:3000/api';
 
 export async function api(method, url, body) {
@@ -5,7 +6,7 @@ export async function api(method, url, body) {
     method,
     headers: {
       'Content-Type':  'application/json',
-      'Authorization': `Bearer ${TOKEN}`,
+      'Authorization': `Bearer ${services.TOKEN}`,
     },
   };
   if (body) opts.body = JSON.stringify(body);

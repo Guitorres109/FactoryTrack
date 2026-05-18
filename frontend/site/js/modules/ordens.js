@@ -1,11 +1,11 @@
-import * as services from '/services/index.js';
+import * as services from '/js/services/index.js';
 
 export async function carregarordens() {
   const el = document.getElementById('tbl-ordens');
   el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
   try {
     // Rota alterada para ordens
-    const ordens = await api('GET', '/ordens');
+    const ordens = await services.api('GET', '/ordens');
     ordensCache = ordens;
 
     if (!ordens.length) {
@@ -31,9 +31,9 @@ export async function carregarordens() {
           ${ordens.map(p => `
             <tr>
               <td><div><strong style="color:var(--primary)">#${p.numeroOrdem? String(p.numeroOrdem).padStart(3, '0'): '???'}</strong></div><small style="color:var(--muted); font-size: 11px">${p.usuario?.nome || '—'}</small></td>
-              <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${formatarTelefone(p.cliente?.telefone || '')}</small></td>
+              <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${services.formatarTelefone(p.cliente?.telefone || '')}</small></td>
               <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
-              <td>${badge(p.status)}</td>
+              <td>${services.badge(p.status)}</td>
               <td style="font-size:0.75rem; line-height:1.4;">${new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()? `<div style="margin-bottom:6px;"><span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
                       <strong style="font-size:0.7rem; font-weight:100;">
                         ${new Date(p.createdAt).toLocaleString('pt-BR')}
@@ -130,7 +130,7 @@ function aplicarFiltroOrdens(status) {
               </td>
               <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
               <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
-              <td>${badge(p.status)}</td>
+              <td>${services.badge(p.status)}</td>
               <td style="font-size:0.75rem; line-height:1.4;">
                 ${
                   new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()
@@ -187,8 +187,8 @@ function aplicarFiltroOrdens(status) {
 export async function abrirOrdem() {
   try {
     // Rota alterada para produtos
-    if (!cProdutos.length)   cProdutos   = await api('GET', '/produtos');
-    if (!cClientes.length) cClientes = await api('GET', '/clientes');
+    if (!cProdutos.length)   cProdutos   = await services.api('GET', '/produtos');
+    if (!cClientes.length) cClientes = await services.api('GET', '/clientes');
   } catch (e) { toast('Erro ao carregar dados', 'err'); return; }
 
   document.getElementById('ped-cli').innerHTML =
@@ -256,7 +256,7 @@ async function salvarordem() {
 
   try {
     // Rota alterada para ordens
-    await api('POST', '/ordens', {
+    await services.api('POST', '/ordens', {
       cliente:        cliId,
       itens,
       observacoes:    document.getElementById('ped-obs').value,
@@ -288,7 +288,7 @@ async function salvarStatus() {
   const userId = JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id;
   try {
     // Rota alterada para ordens
-    await api('PATCH', '/ordens/' + id + '/status', { status });
+    await services.api('PATCH', '/ordens/' + id + '/status', { status });
     toast('Status atualizado!');
     fechar('m-status');
     carregarordens();
@@ -304,7 +304,7 @@ async function deletarordem(id, usuario) {
   if (!confirm(`Você tem certeza que deseja deletar esta ordem criada por ${usuario}?`)) return;
   try {
     // Rota alterada para ordens
-    await api('DELETE', '/ordens/' + id, {userId: userId});
+    await services.api('DELETE', '/ordens/' + id, {userId: userId});
     toast('ordem deletado!');
     carregarordens();
   } catch (e) { toast('Erro: ' + e.message, 'err'); }

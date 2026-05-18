@@ -1,18 +1,22 @@
-import * as services from '/services/index.js';
+import * as services from '/js/services/index.js';
+
+let cProdutos
+let cClientes
+let cUsuarios
 
 function toggleSenha(id) {
   const input = document.getElementById(id);
   input.type = input.type === 'password' ? 'text' : 'password';
 }
 
-function toast(msg, tipo = 'ok') {
+export function toast(msg, tipo = 'ok') {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className   = `show ${tipo}`;
   setTimeout(() => el.className = '', 3000);
 }
 
-function enableSidebarSwipe() {
+export function enableSidebarSwipe() {
   const sidebar = document.getElementById('sidebar');
 
   if (!sidebar) return;
@@ -46,8 +50,8 @@ function enableSidebarSwipe() {
   });
 }
 
-function abrir(id)  {document.getElementById(id).classList.add('open'); if (id === 'm-Produto'){document.getElementById('p-disp').value = true}}
-function fechar(id) { document.getElementById(id).classList.remove('open'); }
+export function abrir(id)  {document.getElementById(id).classList.add('open'); if (id === 'm-Produto'){document.getElementById('p-disp').value = true}}
+export function fechar(id) { document.getElementById(id).classList.remove('open'); }
 
 document.querySelectorAll('.modal-bg').forEach(bg =>
   bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); })
@@ -57,7 +61,7 @@ function R$(v) {
   return 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
 }
 
-function badge(s) {
+export function badge(s) {
   const r = {
     recebido:     '📥 Recebido',
     em_producao:  '⚒️ Em Produção',
@@ -67,7 +71,7 @@ function badge(s) {
   return `<span class="badge b-${s}">${r[s] || s}</span>`;
 }
 
-function badgeDisponivel(v) {
+export function badgeDisponivel(v) {
   const r = {
     1: '🟢 Disponível',
     0: '🔴 Indisponível'
@@ -76,13 +80,13 @@ function badgeDisponivel(v) {
   return `<span class="badge b-${v}">${r[v] ?? v}</span>`;
 }
 
-async function carregarFoto() {
+export async function carregarFoto() {
   try {
-    const id = USUARIO_LOGADO.id;
-    const data = await api('GET', `/usuarios/${id}`);
+    const id = services.USUARIO_LOGADO.id;
+    const data = await services.api('GET', `/usuarios/${id}`);
 
     const foto = data?.foto; // 👈 ajuste conforme retorno da sua API
-    const caminhoFoto = foto ? `${API}/uploads/usuarios/${foto}` : `${API}/uploads/usuarios/default.png`;
+    const caminhoFoto = foto ? `${services.API}/uploads/usuarios/${foto}` : `${services.API}/uploads/usuarios/default.png`;
     document.getElementById('sb-foto').src = caminhoFoto;
 
   } catch (err) {
@@ -90,7 +94,7 @@ async function carregarFoto() {
   }
 }
 
-function ir(pg, btn) {
+export function ir(pg, btn) {
   const perfil = document.getElementById('sb-perfil').textContent;
 
   // 🔒 Restrição de acesso
@@ -125,10 +129,10 @@ function ir(pg, btn) {
 
   const loaders = {
     dashboard: carregarDashboard,
-    ordens: carregarordens,
-    Produtos: carregarProdutos,
-    clientes: carregarClientes,
-    usuarios: carregarUsuarios,
+    ordens: services.carregarordens(),
+    Produtos: services.carregarProdutos(),
+    clientes: services.carregarClientes(),
+    usuarios: services.carregarUsuarios(),
   };
 
   if (loaders[pg]) {
@@ -136,7 +140,7 @@ function ir(pg, btn) {
   }
 }
 
-async function carregarDashboard() {
+export async function carregarDashboard() {
   const spin = document.getElementById('spin-dashboard');
   spin.style.display = 'block';
   const h = new Date().getHours();
@@ -145,11 +149,11 @@ async function carregarDashboard() {
 
   try {
     const [Produtos, clientes, ordens, atividades, usuarios] = await Promise.all([
-      api('GET', '/produtos'), 
-      api('GET', '/clientes'),
-      api('GET', '/ordens'),   
-      api('GET', '/atividades'),
-      api('GET', '/usuarios')
+      services.api('GET', '/produtos'), 
+      services.api('GET', '/clientes'),
+      services.api('GET', '/ordens'),   
+      services.api('GET', '/atividades'),
+      services.api('GET', '/usuarios')
     ]);
 
     cProdutos   = Produtos;
@@ -176,8 +180,8 @@ async function carregarDashboard() {
         );
 
         const img = usuario?.foto
-          ? `${API}/uploads/usuarios/${usuario.foto}`
-          : `${API}/uploads/usuarios/default.png`;
+          ? `${services.API}/uploads/usuarios/${usuario.foto}`
+          : `${services.API}/uploads/usuarios/default.png`;
 
         return `
           <div class="mini-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
@@ -238,9 +242,9 @@ async function carregarDashboard() {
   } catch (e) { toast('Erro dashboard: ' + e.message, 'err'); }
 }
 
-async function carregarAtividades() {
+export async function carregarAtividades() {
   try {
-    const res = await fetch(`${API}/atividades`);
+    const res = await fetch(`${services.API}/atividades`);
     let lista = await res.json();
 
     lista = lista.reverse();
@@ -255,16 +259,16 @@ async function carregarAtividades() {
 async function formatarAtividade(resultado) {
   const { usuario, atividade, area, areaItem, usuarioId } = resultado;
 
-  let caminhoFoto = `${API}/uploads/usuarios/default.png`;
+  let caminhoFoto = `${services.API}/uploads/usuarios/default.png`;
   let perfil = 'Atendente';
 
   try {
-    const data = await api('GET', `/usuarios/${usuarioId}`);
+    const data = await services.api('GET', `/usuarios/${usuarioId}`);
     perfil = (data?.perfil || '').toLowerCase();
     const foto = data?.foto || data?.usuario?.foto;
 
     if (foto) {
-      caminhoFoto = `${API}/uploads/usuarios/${foto}`;
+      caminhoFoto = `${services.API}/uploads/usuarios/${foto}`;
     }
   } catch (err) {
     console.error('Erro ao buscar foto:', err);

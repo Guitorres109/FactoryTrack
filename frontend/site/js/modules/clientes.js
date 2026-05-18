@@ -1,4 +1,4 @@
-import * as services from '/services/index.js';
+import * as services from '/js/services/index.js';
 
 let clientesCache = [];
 
@@ -15,7 +15,7 @@ export async function carregarClientes(busca = '') {
 
     const url = `/clientes${busca ? `?busca=${encodeURIComponent(busca.trim())}` : ''}`;
 
-    const resposta = await api('GET', url);
+    const resposta = await services.api('GET', url);
 
     clientesCache = Array.isArray(resposta) ? resposta : [];
 
@@ -71,7 +71,7 @@ export function renderClientes(lista) {
   `;
 }
 
-function formatarTelefone(tel) {
+export function formatarTelefone(tel) {
   if (!tel) return '—';
 
   // remove tudo que não for número

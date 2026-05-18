@@ -1,6 +1,6 @@
-import * as services from '/services/index.js';
+import * as services from '/js/services/index.js';
 
-export let TOKEN          = localStorage.getItem('pz_token') || '';
+export let TOKEN = localStorage.getItem('pz_token') || '';
 export let USUARIO_LOGADO = JSON.parse(localStorage.getItem('pz_usuario') || 'null');
 const telaLogin = document.getElementById("tela-login")
 
@@ -68,12 +68,12 @@ export function sair() {
 }
 
 if (TOKEN && USUARIO_LOGADO) {
-  aplicarPerfil(USUARIO_LOGADO);
+  services.aplicarPerfil(USUARIO_LOGADO);
   document.body.classList.add('logado');
 }
 
 export function aplicarPerfil(usuario) {
-  carregarFoto()
+  services.carregarFoto()
   document.getElementById('sb-nome').textContent   = usuario.nome;
   document.getElementById('sb-perfil').textContent = usuario.perfil;
   const sb_perfil = document.getElementById('sb-perfil')
@@ -129,5 +129,5 @@ export function aplicarPerfil(usuario) {
   show('stat-fat', novaOrdem, 'block');
   show('stat-cli', novaOrdem, 'block');
 
-  ir('dashboard', document.querySelector('[onclick*="dashboard"]'))
+  services.ir('dashboard', document.querySelector('[onclick*="dashboard"]'))
 }
