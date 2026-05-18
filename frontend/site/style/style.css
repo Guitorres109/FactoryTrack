@@ -248,7 +248,7 @@ body.logado #app        { display: flex; }
 
 .sb-user .tag {
   background: rgba(201,168,76,.14);
-  color: var(--primary);
+  color: var(--red);
   padding: 2px 8px;
   border-radius: 20px;
   font-size: 0.62rem;
@@ -580,7 +580,7 @@ td { padding: 11px 14px; vertical-align: middle; }
 
 .btn-red {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secundary) 100%);
-  color: #0b0a08;
+  color: var(--text);
   box-shadow: 0 3px 12px rgba(201,168,76,.28);
 }
 .btn-red:hover {

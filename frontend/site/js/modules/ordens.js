@@ -79,7 +79,7 @@ export async function carregarordens() {
 }
 
 let ordensCache = [];
-function aplicarFiltroOrdens(status) {
+export function aplicarFiltroOrdens(status) {
   const el = document.getElementById('tbl-ordens');
   const usuario = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
   const perfil = usuario?.perfil || '';

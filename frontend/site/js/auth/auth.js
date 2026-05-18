@@ -1,4 +1,7 @@
 import * as services from '/js/services/index.js';
+import { toggleSenha } from '/js/ui/ui.js'
+window.fazerLogin = fazerLogin;
+window.toggleSenha = toggleSenha;
 
 export let TOKEN = localStorage.getItem('pz_token') || '';
 export let USUARIO_LOGADO = JSON.parse(localStorage.getItem('pz_usuario') || 'null');
@@ -23,7 +26,7 @@ export async function fazerLogin() {
   erro.style.display = 'none';
 
   try {
-    const res  = await fetch(API + '/auth/login', {
+    const res  = await fetch(services.API + '/auth/login', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, senha }),

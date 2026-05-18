@@ -5,3 +5,11 @@ export * from '/js/modules/ordens.js'
 export * from '/js/modules/produtos.js'
 export * from '/js/modules/usuarios.js'
 export * from '/js/ui/ui.js'
+
+const tópicos = [
+    'Sobre Nós',
+    'Interface do Sistema',
+    'Arquitetura do Nosso CSS Responsivo',
+    'App Mobile',
+    'Análise do codigo em geral'
+]

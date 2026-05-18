@@ -106,13 +106,13 @@ export async function verificar() {
   }
 verificar()
 
-export function verificarLogin() {
-  if (!services.TOKEN){
-    window.location.href = '/'
-  }
-}
+// export function verificarLogin() {
+//   if (!services.TOKEN){
+//     window.location.href = '/'
+//   }
+// }
 
-document.addEventListener('DOMContentLoaded', () => {
-    verificarLogin();
-    services.enableSidebarSwipe();
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//     verificarLogin();
+//     services.enableSidebarSwipe();
+// });
