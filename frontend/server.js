@@ -50,6 +50,42 @@ app.get("/js/script.js", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/js/script.js"));
 });
 
+app.get("/js/app.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/app.js"));
+});
+
+app.get("/js/api/api.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/api/api.js"));
+});
+
+app.get("/js/auth/auth.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/auth/auth.js"));
+});
+
+app.get("/js/modules/clientes.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/modules/clientes.js"));
+});
+
+app.get("/js/modules/ordens.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/modules/ordens.js"));
+});
+
+app.get("/js/modules/produtos.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/modules/produtos.js"));
+});
+
+app.get("/js/modules/usuarios.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/modules/usuarios.js"));
+});
+
+app.get("/js/services/index.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/services/index.js"));
+});
+
+app.get("/js/ui/ui.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/ui/ui.js"));
+});
+
 function obterIP() {
   // Obtém as interfaces de rede
   const interfaces = os.networkInterfaces();

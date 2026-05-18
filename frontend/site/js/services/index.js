@@ -1,0 +1,7 @@
+export * from '/api/api'
+export * from '/auth/auth'
+export * from '/modules/clientes'
+export * from '/modules/ordens'
+export * from '/modules/produtos'
+export * from '/modules/usuarios'
+export * from '/ui/ui'
