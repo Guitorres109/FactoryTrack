@@ -1,5 +1,7 @@
 import * as services from '/js/services/index.js';
-export const API = 'http://10.106.208.32:3000/api';
+
+export const LINK = 'http://10.106.208.32:3000'
+export const API = `${LINK}/api`;
 
 export async function api(method, url, body) {
   const opts = {

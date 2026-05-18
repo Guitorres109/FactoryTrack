@@ -8,6 +8,7 @@ const path = require('path');
 
 const { Server } = require('socket.io');
 
+
 const auth = require('./src/middlewares/auth');
 
 const app = express();

@@ -61,8 +61,11 @@
           <p id="dash-sub">Resumo do sistema</p>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-          <div class="spin" id="spin-dashboard" style="display: none;"></div>
-          <button class="btn btn-ghost btn-sm" onclick="carregarDashboard()">↻ Atualizar</button>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="spin" id="spin-dashboard" style="display: none;"></div>
+            <button class="btn btn-ghost btn-sm" onclick="carregarDashboard()">↻ Atualizar</button>
+          </div>
+          <button id="btn-toggle-theme"></button>
         </div>
       </div>
       <div class="pg-body">
@@ -506,5 +509,23 @@
     }
     requestAnimationFrame(raf);
 </script>
+<script type="module">
+  // Importa todas as funções/exportações do módulo services
+  import * as services from '/js/services/index.js';
+
+  // Executa apenas quando o DOM estiver totalmente carregado
+  document.addEventListener('DOMContentLoaded', () => {
+    // Habilita swipe da sidebar, se existir
+    if (services.enableSidebarSwipe) {
+      services.enableSidebarSwipe();
+    } else {
+      console.warn('Função enableSidebarSwipe não encontrada em services.');
+    }
+  });
+</script>
+<script type="module">
+    import { initDarkModeToggle } from '/js/ui/ui.js';
+    initDarkModeToggle('#btn-toggle-theme');
+  </script>
 </body>
 </html>

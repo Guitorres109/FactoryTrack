@@ -16,6 +16,70 @@ export function toast(msg, tipo = 'ok') {
   setTimeout(() => el.className = '', 3000);
 }
 
+// theme.js
+export function toggleTheme() {
+  const html = document.documentElement;
+  const currentTheme = html.getAttribute('data-theme');
+
+  if (currentTheme === 'light') {
+    html.removeAttribute('data-theme');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    html.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+  }
+}
+
+// Aplica o tema salvo ao carregar a página
+export function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+}
+
+// Função para criar toggle animado do tema
+export function initDarkModeToggle(buttonSelector) {
+  const btn = document.querySelector(buttonSelector);
+  if (!btn) return;
+
+  // Cria a estrutura do switch
+  btn.classList.add('toggle-btn');
+  const thumb = document.createElement('div');
+  thumb.classList.add('thumb');
+  btn.textContent = ''; // limpa texto original
+  btn.appendChild(thumb);
+
+  function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    updateThumbIcon();
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isLight = html.getAttribute('data-theme') === 'light';
+
+    if (isLight) {
+      html.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      html.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+    }
+
+    updateThumbIcon();
+  }
+
+  function updateThumbIcon() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    thumb.textContent = isLight ? '☀️' : '🌙';
+  }
+
+  btn.addEventListener('click', toggleTheme);
+  initTheme();
+}
+
 export function enableSidebarSwipe() {
   const sidebar = document.getElementById('sidebar');
 

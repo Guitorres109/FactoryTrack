@@ -21,7 +21,7 @@
   #sidebar #menu-usuarios {
     opacity: 0;
     width: 0;
-    font-size: 0;
+    font-size: 15px;
     overflow: hidden;
     pointer-events: none;
   }

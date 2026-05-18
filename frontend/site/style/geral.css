@@ -16,6 +16,16 @@
   --muted:   #777;
   --r:       10px;
 }
+[data-theme="light"] {
+  --primary: #2a7abd;
+  --secundary: #1d5074;
+  --bg: #f0f0f0;
+  --surf: #ffffff;
+  --surf2: #f5f5f5;
+  --border: #dcdcdc;
+  --text: #0f0f0f;
+  --muted: #555;
+}
 
 
 
@@ -32,4 +42,37 @@ body {
 #icon-obrigatorio{
   color: var(--red);
   font-size: 10px;
+}
+
+/* Botão estilo switch */
+.toggle-btn {
+  position: relative;
+  width: 60px;
+  height: 30px;
+  background-color: var(--surf2);
+  border-radius: 30px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Bolinha dentro do switch */
+.toggle-btn .thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 26px;
+  height: 26px;
+  background-color: var(--text);
+  border-radius: 50%;
+  transition: left 0.3s, background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* Quando tema claro */
+[data-theme="light"] .toggle-btn .thumb {
+  left: 32px;
 }

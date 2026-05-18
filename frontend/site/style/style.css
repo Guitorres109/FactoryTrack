@@ -286,7 +286,7 @@ body.logado #app        { display: flex; }
   padding: 9px 11px;
   border-radius: var(--r-sm);
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--muted);
   transition: all var(--transition);
@@ -294,7 +294,7 @@ body.logado #app        { display: flex; }
   background: none;
   width: 100%;
   text-align: left;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Cormorant Garamond', serif;
   white-space: nowrap;
   overflow: hidden;
 }
