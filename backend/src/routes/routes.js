@@ -19,6 +19,16 @@ const storage = multer.diskStorage({
   }
 });
 
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // máximo 100 requests por IP
+  message: {
+    error: "Muitas requisições, tente novamente mais tarde."
+  }
+});
+
 const upload = multer({ storage });
 
 const Usuario  = require('../models/usuario');
@@ -30,7 +40,7 @@ const Atividades = require('../models/atividades');
 // ================================
 // LOGIN
 // ================================
-router.post('/auth/login', async (req, res) => {
+router.post('/auth/login', limiter, async (req, res) => {
   try {
     const { email, senha } = req.body;
     const autenticar = (await Usuario.findByEmail(email))?.ativo;
@@ -54,6 +64,10 @@ router.post('/auth/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     );
+    function formatIp(ip) {
+      if (ip.startsWith("::ffff:")) return ip.split(":").pop();
+      return ip;
+    }
 
     res.json({
       token,
@@ -65,6 +79,14 @@ router.post('/auth/login', async (req, res) => {
         foto: usuario.foto
       }
     });
+    console.log(' ')
+      console.table([{
+      Evento: "Login Realizado",
+      Id: usuario.id,
+      Nome: usuario.nome,
+      IP: formatIp(req.ip),
+      Data: new Date().toLocaleString()
+    }]);
 
   } catch (e) {
     res.status(500).json({ erro: e.message });

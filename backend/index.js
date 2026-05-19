@@ -5,22 +5,24 @@ const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
+const helmet = require("helmet");
 const { Server } = require('socket.io');
-
-
-const auth = require('./src/middlewares/auth');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+const { ready } = require('./src/database/sqlite');
+const routes = require('./src/routes/routes');
 let IP = null;
 
 app.use(cors());
+app.use(helmet());
 app.use(express.json());
-
-const { ready } = require('./src/database/sqlite');
-const routes = require('./src/routes/routes');
+app.use((req, res, next) => {
+  const ua = req.get("User-Agent") || "";
+  if (ua.includes("curl") || ua.includes("python-requests")) {
+    return res.status(403).json({ error: "Acesso bloqueado por firewall" });
+  }
+  next();
+});
 
 function obterIP() {
   const interfaces = os.networkInterfaces();
@@ -72,7 +74,7 @@ ready.then(() => {
   // =========================
   // ROTAS
   // =========================
-  app.get("/api", (req, res) => {
+  app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "src/pages/api.html"));
   });
 
@@ -89,11 +91,9 @@ ready.then(() => {
 
   app.use('/api', routes);
 
-  app.use(
-    '/api/uploads',
-    require('express').static(
-      path.join(__dirname, 'src/database/uploads')
-    )
+  app.use("/api/uploads",
+    helmet.crossOriginResourcePolicy({ policy: "cross-origin" }),
+    express.static(path.join(__dirname, "src/database/uploads"))
   );
 
   // =========================

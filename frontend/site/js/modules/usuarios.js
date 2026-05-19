@@ -77,7 +77,7 @@ export function preview_foto(funcao) {
 
   // Se removeu a imagem
   if (!foto_perfil) {
-    preview_foto.src = 'http://10.106.208.32:3000/api/uploads/usuarios/default.png';
+    preview_foto.src = `${services.API}/api/uploads/usuarios/default.png;`
     return;
   }
 

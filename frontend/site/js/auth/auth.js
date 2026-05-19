@@ -26,6 +26,7 @@ export async function fazerLogin() {
   erro.style.display = 'none';
 
   try {
+    console.log(services.API)
     const res  = await fetch(services.API + '/auth/login', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -67,6 +68,10 @@ export function sair() {
   USUARIO_LOGADO = null;
   localStorage.removeItem('pz_token');
   localStorage.removeItem('pz_usuario');
+  localStorage.removeItem('pz_perfil');
+  sessionStorage.removeItem('Clientes');
+  sessionStorage.removeItem('Produtos');
+  sessionStorage.removeItem('Usuarios');
   window.location.href = '/';
 }
 
