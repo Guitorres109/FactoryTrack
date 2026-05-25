@@ -1,7 +1,7 @@
 import * as services from '/js/services/index.js';
 
-const cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
-const cClientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
+let cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+let cClientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
 
 export async function carregarordens() {
   const el = document.getElementById('tbl-ordens');
@@ -32,7 +32,10 @@ export async function carregarordens() {
         </thead>
         <tbody>
           ${ordens.map(p => `
-            <tr>
+            <tr 
+              onclick="window.location.href='/metaltech/ordem?id=${p.id}'"
+              style="cursor:pointer"
+            >
               <td><div><strong style="color:var(--primary)">#${p.numeroOrdem? String(p.numeroOrdem).padStart(3, '0'): '???'}</strong></div><small style="color:var(--muted); font-size: 11px">${p.usuario?.nome || '—'}</small></td>
               <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${services.formatarTelefone(p.cliente?.telefone || '')}</small></td>
               <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>

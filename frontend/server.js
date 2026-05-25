@@ -12,11 +12,15 @@ app.use(cors());
 
 // 🌐 Rotas HTML
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "./site/login.html"));
+    res.sendFile(path.join(__dirname, "./site/index.html"));
 });
 
 app.get("/metaltech", (req, res) => {
-    res.sendFile(path.join(__dirname, "./site/index.html"));
+    res.sendFile(path.join(__dirname, "./site/pages/factorytrack.html"));
+});
+
+app.get("/metaltech/ordem", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/pages/ordem.html"));
 });
 
 app.get("/erro", (req, res) => {

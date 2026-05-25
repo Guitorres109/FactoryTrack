@@ -975,3 +975,312 @@ select option { background: var(--surf2); color: var(--text); }
   color: var(--primary);
   font-family: 'JetBrains Mono', monospace;
 }
+
+/* scrollbar */
+
+::-webkit-scrollbar{
+  width:5px;
+  height:5px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:rgba(201,168,76,.22);
+  border-radius:999px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background:rgba(201,168,76,.4);
+}
+
+/* =====================================================
+   LAYOUT
+   ===================================================== */
+
+.container{
+  width:100%;
+  max-width:1150px;
+  margin:auto;
+  padding:40px 22px 80px;
+}
+
+/* =====================================================
+   VOLTAR
+   ===================================================== */
+
+.voltar{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+
+  margin-bottom:24px;
+
+  text-decoration:none;
+
+  color:var(--muted);
+
+  background:rgba(201,168,76,.06);
+
+  border:1px solid var(--border);
+
+  padding:10px 16px;
+
+  border-radius:999px;
+
+  font-size:.78rem;
+  font-weight:700;
+  letter-spacing:.2px;
+
+  transition:all var(--transition);
+}
+
+.voltar:hover{
+  color:var(--text);
+
+  border-color:rgba(201,168,76,.28);
+
+  background:rgba(201,168,76,.1);
+
+  transform:translateY(-1px);
+}
+
+/* =====================================================
+   CONTEUDO
+   ===================================================== */
+
+#conteudo{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+/* =====================================================
+   CARD
+   ===================================================== */
+
+.card{
+  position:relative;
+
+  background:var(--surf);
+
+  border:1px solid var(--border);
+
+  border-radius:var(--r);
+
+  padding:26px;
+
+  overflow:hidden;
+
+  box-shadow:var(--shadow-card);
+
+  animation:fadeUp .35s cubic-bezier(.4,0,.2,1);
+}
+
+.card::before{
+  content:'';
+
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+
+  height:1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(201,168,76,.42),
+      transparent
+    );
+}
+
+.card:hover{
+  border-color:rgba(201,168,76,.22);
+}
+
+/* =====================================================
+   TITULOS
+   ===================================================== */
+
+.card h1{
+  font-family:'Cormorant Garamond', serif;
+
+  font-size:2.2rem;
+  font-weight:600;
+
+  color:var(--primary);
+
+  margin-bottom:24px;
+
+  letter-spacing:.2px;
+}
+
+.card h2{
+  font-family:'Cormorant Garamond', serif;
+
+  font-size:1.55rem;
+  font-weight:600;
+
+  color:var(--primary);
+
+  margin-bottom:18px;
+
+  letter-spacing:.2px;
+}
+
+/* =====================================================
+   GRID INFO
+   ===================================================== */
+
+.grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+  gap:20px 16px;
+}
+
+.label{
+  display:block;
+
+  margin-bottom:6px;
+
+  font-size:.63rem;
+
+  color:rgba(201,168,76,.5);
+
+  text-transform:uppercase;
+
+  letter-spacing:1.4px;
+
+  font-weight:800;
+}
+
+.value{
+  font-size:.95rem;
+
+  color:var(--text);
+
+  line-height:1.5;
+
+  font-weight:600;
+
+  word-break:break-word;
+}
+
+/* =====================================================
+   BADGES
+   ===================================================== */
+
+/* =====================================================
+   ITENS
+   ===================================================== */
+
+.itens{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.item{
+  background:rgba(201,168,76,.045);
+
+  border:1px solid rgba(201,168,76,.08);
+
+  border-radius:12px;
+
+  padding:14px 16px;
+
+  transition:all var(--transition);
+}
+
+.item:hover{
+  background:rgba(201,168,76,.08);
+
+  border-color:rgba(201,168,76,.18);
+
+  transform:translateY(-2px);
+}
+
+.item strong{
+  font-size:.9rem;
+  font-weight:700;
+
+  color:var(--text);
+}
+
+/* =====================================================
+   TEXTO
+   ===================================================== */
+
+.card p{
+  font-size:.9rem;
+
+  color:var(--muted);
+
+  line-height:1.75;
+
+  font-weight:500;
+}
+
+/* =====================================================
+   EMPTY
+   ===================================================== */
+
+.empty{
+  text-align:center;
+}
+
+.empty h2{
+  margin-bottom:10px;
+}
+
+/* =====================================================
+   ANIMATIONS
+   ===================================================== */
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(16px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* =====================================================
+   RESPONSIVO
+   ===================================================== */
+
+@media(max-width:700px){
+
+  .container{
+    padding:20px 14px 60px;
+  }
+
+  .card{
+    padding:20px;
+    border-radius:14px;
+  }
+
+  .card h1{
+    font-size:1.8rem;
+  }
+
+  .card h2{
+    font-size:1.3rem;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .value{
+    font-size:.88rem;
+  }
+
+}

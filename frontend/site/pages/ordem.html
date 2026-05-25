@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detalhes da Ordem</title>
+  <link rel="stylesheet" href="/style/style.css">
+    <link rel="stylesheet" href="/style/responsividade.css">
+    <link rel="stylesheet" href="/style/geral.css">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <a href="/metaltech" class="voltar">← Voltar</a>
+
+    <div id="conteudo"></div>
+
+  </div>
+  <script type="module">
+
+  /*
+    URL:
+    /ordem?id=88
+  */
+
+  const params = new URLSearchParams(window.location.search)
+  const id = Number(params.get('id'))
+
+  const conteudo = document.getElementById('conteudo')
+
+  async function carregarOrdem(){
+
+    try{
+
+      /*
+        Busca do sessionStorage
+        Exemplo:
+        sessionStorage.setItem('ordens', JSON.stringify([...]))
+      */
+
+      const ordensStorage = sessionStorage.getItem('Ordens')
+
+      if(!ordensStorage){
+        throw new Error('Nenhuma ordem encontrada no sessionStorage')
+      }
+
+      const ordens = JSON.parse(ordensStorage)
+
+      /*
+        Busca pela ordem clicada
+      */
+
+      const p = ordens.find(ordem => 
+        Number(ordem.id) === id ||
+        Number(ordem._id) === id
+      )
+
+      if(!p){
+        throw new Error('Ordem não encontrada')
+      }
+
+      renderizar(p)
+
+    }catch(err){
+
+      conteudo.innerHTML = `
+        <div class="card empty">
+          <h2>Ordem não encontrada</h2>
+          <p>${err.message}</p>
+        </div>
+      `
+
+      console.error(err)
+    }
+
+  }
+
+  function renderizar(p){
+
+    conteudo.innerHTML = `
+    
+      <div class="card">
+
+        <h1>
+          Ordem #${p.numeroOrdem 
+            ? String(p.numeroOrdem).padStart(3,'0') 
+            : '???'}
+        </h1>
+
+        <div class="grid">
+
+          <div>
+            <span class="label">Cliente</span>
+            <div class="value">${p.cliente?.nome || '—'}</div>
+          </div>
+
+          <div>
+            <span class="label">Telefone</span>
+            <div class="value">${p.cliente?.telefone || '—'}</div>
+          </div>
+
+          <div>
+            <span class="label">Atendente</span>
+            <div class="value">${p.usuario?.nome || '—'}</div>
+          </div>
+
+          <div>
+            <span class="label">Status</span>
+            <div class="value">
+              <span class="badge">${formatarStatus(p.status)}</span>
+            </div>
+          </div>
+
+          <div>
+            <span class="label">Criado em</span>
+            <div class="value">
+              ${formatarData(p.createdAt)}
+            </div>
+          </div>
+
+          <div>
+            <span class="label">Última alteração</span>
+            <div class="value">
+              ${formatarData(p.updatedAt)}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Itens do Pedido</h2>
+
+        <div class="itens">
+
+          ${p.itens?.map(item => `
+            
+            <div class="item">
+
+              <strong>
+                ${item.quantidade}x ${item.nomeProduto}
+              </strong>
+
+            </div>
+
+          `).join('') || '<p>Nenhum item</p>'}
+
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Observações</h2>
+
+        <p>
+          ${p.observacoes || 'Nenhuma observação'}
+        </p>
+
+      </div>
+
+    `
+  }
+
+  function formatarData(data){
+
+    if(!data) return '—'
+
+    return new Date(data).toLocaleString('pt-BR')
+  }
+
+  function formatarStatus(status){
+
+    const statusMap = {
+      recebido: 'Recebido',
+      em_producao: 'Em produção',
+      entregue: 'Entregue',
+      cancelado: 'Cancelado'
+    }
+
+    return statusMap[status] || status
+  }
+
+  carregarOrdem()
+
+</script>
+
+</body>
+</html>     

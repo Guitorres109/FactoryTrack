@@ -6,6 +6,7 @@ const usuario = JSON.parse(localStorage.getItem('pz_usuario') || 'null');
 
 const cProdutos = await services.api('GET', '/produtos');
 const cClientes = await services.api('GET', '/clientes');
+const cOrdens = await services.api('GET', '/ordens');
 
 let cUsuarios = null;
 if (usuario?.perfil === 'Administrador') {
@@ -13,6 +14,7 @@ if (usuario?.perfil === 'Administrador') {
 }
 sessionStorage.setItem('Produtos', JSON.stringify(cProdutos));
 sessionStorage.setItem('Clientes', JSON.stringify(cClientes));
+sessionStorage.setItem('Ordens', JSON.stringify(cOrdens));
 if (cUsuarios) {
   sessionStorage.setItem('Usuarios', JSON.stringify(cUsuarios));
 }

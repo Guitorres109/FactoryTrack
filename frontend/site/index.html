@@ -3,307 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MetalTech | Sistema de Gestão</title>
+    <title>Login | MetalTech</title>
     <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/responsividade.css">
     <link rel="stylesheet" href="/style/geral.css">
     <link rel="icon" href="/assets/img/icon2">
-    <meta name="theme-color" content="#0f172a">
 </head>
 <body>
-    <div id="app">
-  <aside id="sidebar">
-    <div class="sb-logo">
+  <div id="tela-login">
+  <div class="login-box">
+    <div class="login-logo">
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <!-- <img src="/assets/img/icon3" alt="logo-metaltech" style="width: 80px;"> -->
+        <img src="/assets/img/icon1" alt="" style="width: 200px;">
       </div>
-      <div class="sb-user">
-        <img src="http://10.106.208.32:3000/api/uploads/usuarios/default.png" id="sb-foto" alt="">
-        <div>
-          <span id="sb-nome">—</span>
-          <span class="tag" id="sb-perfil">—</span>
-        </div>
-      </div>
+      <p>Sistema de Gestão · Faça login para continuar</p>
     </div>
-    <nav class="sb-nav">
-      <div class="sb-group">Geral</div>
-      <button class="nav-btn ativo" onclick="ir('dashboard',this)">
-        <span class="ic">📊</span><span>Dashboard</span>
-      </button>
-      <button class="nav-btn" onclick="ir('ordens',this)">
-        <span class="ic">📋</span><span>Ordens</span>
-      </button>
-      <div class="sb-group">Cadastros</div>
-      <button class="nav-btn" onclick="ir('Produtos',this)">
-        <span class="ic">⚙️</span><span id="nav-Produtos-label">Produtos</span>
-      </button>
-      <button class="nav-btn" onclick="ir('clientes',this)">
-        <span class="ic">👥</span><span>Clientes</span>
-      </button>
-      <div class="sb-group" id="menu-usuarios" style="display:none">Sistema</div>
-      <button class="nav-btn" id="btn-usuarios" onclick="ir('usuarios',this)"
-        style="display:none">
-        <span class="ic">🔐</span><span>Usuários</span>
-      </button>
-      <div class="sb-group" id="sb-group-garcom" style="display:none">Mesas</div>
-    </nav>
-    <div class="sb-footer">
-      <span>v6.7</span>
-      <button class="btn-logout" onclick="sair()">Sair</button>
-    </div>
-  </aside>
-
-  <div id="conteudo">
-    <section id="pg-dashboard" class="secao ativa">
-      <div class="pg-header">
-        <div>
-          <h2>Dashboard</h2>
-          <p id="dash-sub">Resumo do sistema</p>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="spin" id="spin-dashboard" style="display: none;"></div>
-            <button class="btn btn-ghost btn-sm" onclick="carregarDashboard()">↻ Atualizar</button>
-          </div>
-          <button id="btn-toggle-theme"></button>
-        </div>
-      </div>
-      <div class="pg-body">
-        <div class="stats-grid">
-          <div class="stat cr">
-            <span class="ico">📋</span>
-            <div class="lbl">Ordens</div>
-            <div class="val" id="s-ped">—</div>
-            <div class="sub" id="s-ped-sub">carregando</div>
-          </div>
-          <div class="stat cg" id="stat-cli">
-            <span class="ico">👥</span>
-            <div class="lbl">Clientes</div>
-            <div class="val" id="s-cli">—</div>
-            <div class="sub">cadastrados</div>
-          </div>
-          <div class="stat cb">
-            <span class="ico">🧰</span>
-            <div class="lbl">Produtos</div>
-            <div class="val" id="s-piz">—</div>
-            <div class="sub">cadastrados</div>
-          </div>
-        </div>
-        <div class="dash-grid">
-          <div class="card">
-            <div class="card-head">
-              <h3>Ordens de produção Recentes</h3>
-              <button id="btn-sm" class="btn btn-red btn-sm"
-                onclick="ir('ordens-novo', document.querySelector('[onclick*=ordens]'))">
-                + Novo
-              </button>
-            </div>
-            <div class="card-body" id="dash-ordens">
-              <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-head"><h3>Atividades Recentes 📩</h3></div>
-            <div class="card-body" id="dash-cardapio">
-              <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="pg-ordens" class="secao">
-      <div class="pg-header">
-        <div><h2>Ordens de Produção</h2><p id="p-ordens">Acompanhe e gerencie suas Ordens de produção</p></div>
-        <button id="novaOrdem" class="btn btn-ghost" onclick="abrirOrdem()">+ Nova ordem</button>
-      </div>
-      <div class="pg-body">
-        <select style="width: 200px; margin-bottom: 10px;"
-          onchange="aplicarFiltroOrdens(this.value)">
-          <option value="todas">Todas</option>
-          <option value="recebido">Aguardando Produção</option>
-          <option value="em_producao">Em Produção</option>
-          <option value="entregue">Finalizado</option>
-        </select>
-        <div class="card">
-          <div class="card-body tbl-wrap" id="tbl-ordens">
-            <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="pg-Produtos" class="secao">
-      <div class="pg-header">
-        <div>
-          <h2 id="pg-Produtos-titulo">Produtos</h2>
-          <p id="pg-Produtos-sub">Gerencie seus produtos</p>
-        </div>
-        <button class="btn btn-ghost" id="btn-nova-Produto" onclick="abrirProduto()">+ Novo Produto</button>
-      </div>
-      <div class="pg-body">
-        <div class="card">
-          <div class="card-body tbl-wrap" id="tbl-Produtos">
-            <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="pg-clientes" class="secao">
-      <div class="pg-header">
-        <div><h2>Clientes</h2><p>Cadastre e busque clientes</p></div>
-        <button class="btn btn-ghost" onclick="abrirCliente()">+ Novo Cliente</button>
-      </div>
-      <div class="pg-body">
-        <div style="margin-bottom:12px">
-          <input id="busca-cli" placeholder="🔍  Buscar por nome..."
-            style="max-width:270px" oninput="buscarCli(this.value)">
-        </div>
-        <div class="card">
-          <div class="card-body tbl-wrap" id="tbl-clientes">
-            <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="pg-usuarios" class="secao">
-      <div class="pg-header">
-        <div><h2>Usuários</h2><p>Atendentes e administradores</p></div>
-        <button class="btn btn-ghost" onclick="abrirUsuario()">+ Novo Usuário</button>
-      </div>
-      <div class="pg-body">
-        <div class="card">
-          <div class="card-body tbl-wrap" id="tbl-usuarios">
-            <div class="spin-wrap"><div class="spin"></div> Carregando...</div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <div class="card-usuario" id="card-usuario"></div>
-
-
-<div id="m-Produto" class="modal-bg">
-  <div class="modal">
-    <h3 id="m-Produto-t">Novo Produto</h3>
-    <input type="hidden" id="p-id">
-    <div class="fr2">
-      <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="p-nome" placeholder="Ex: Barra Sextavada de Aço" onkeydown="if(event.key==='Enter') salvarProduto()"></div>
-    </div>
-    <div class="fg"><label>Descrição</label><input type="text" id="p-desc" placeholder="Breve descrição..." onkeydown="if(event.key==='Enter') salvarProduto()"></div>
-    <div class="fg"><label>Disponível</label>
-      <select id="p-disp">
-        <option value="true">✅ Sim</option>
-        <option value="false">❌ Não</option>
-      </select>
-    </div>
-    <div class="fg"><small id="icon-obrigatorio">* Indica um item obrigatório</small></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-Produto')">Cancelar</button>
-      <button class="btn btn-red"   onclick="salvarProduto()" onkeydown="if(event.key==='Enter') salvarProduto()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<div id="m-cliente" class="modal-bg">
-  <div class="modal">
-    <h3 id="m-cli-t">Novo Cliente</h3>
-    <input type="hidden" id="c-id">
-    <div class="fr2">
-      <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="c-nome" placeholder="Ferro & Cia"></div>
-      <div class="fg"><label>Telefone <small id="icon-obrigatorio">*</small></label><input type="number" id="c-tel" placeholder="(11) 99999-9999" maxlength="11"></div>
-    </div>
-    <div class="fr2">
-      <div class="fg"><label>Rua <small id="icon-obrigatorio">*</small></label><input type="text" id="c-rua" placeholder="Rua das Flores"><small style="color:var(--muted); font-size: 8px;">(Busca por CEP)</small></div>
-      <div class="fg"><label>Número <small id="icon-obrigatorio">*</small></label><input type="number" id="c-num" placeholder="123"></div>
-    </div>
-    <div class="fr3">
-      <div class="fg"><label>CEP <small id="icon-obrigatorio">*</small></label><input type="text" id="c-cep" placeholder="00000-000"></div>
-      <div class="fg"><label>Bairro <small id="icon-obrigatorio">*</small></label><input type="text" id="c-bairro" placeholder="Centro"><small style="color:var(--muted); font-size: 8px;">(Busca por CEP)</small></div>
-      <div class="fg"><div></div><label>Cidade <small id="icon-obrigatorio">*</small></label><input type="text" id="c-cidade" placeholder="São Paulo"><small style="color:var(--muted); font-size: 8px; ">(Busca por CEP)</small></div>
-    </div>
-    <div class="fg"><label>Complemento</label><input type="text" id="c-comp" placeholder="Apto 12, Bloco B"></div>
-    <div class="fg"><label>Observações</label><input type="text" id="c-obs" placeholder="Urgência, preferências..."></div>
-    <div class="fg"><small id="icon-obrigatorio">* Indica um item obrigatório</small></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-cliente')">Cancelar</button>
-      <button class="btn btn-red"   onclick="salvarCliente()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<div id="m-ordem" class="modal-bg">
-  <div class="modal lg">
-    <h3>Nova Ordem</h3>
-    <div class="fg"><label>Cliente <small id="icon-obrigatorio">*</small></label><select id="ped-cli"></select></div>
-    <div class="div"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-      <label style="margin-bottom:0;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.3px">Itens do ordem</label>
-      <button class="btn btn-ghost btn-sm" onclick="addItem()">+ Produto</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 68px 58px 68px 30px;gap:6px;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;padding:0 1px">
-      <span>Produto <small id="icon-obrigatorio">*</small></span><span>Qtd <small id="icon-obrigatorio">*</small></span>
-    </div>
-    <div id="itens-lista"></div>
-    <div class="fg"><label>Observações</label><textarea id="ped-obs" rows="2" placeholder="Observações"></textarea></div>
-    <div class="fg"><small id="icon-obrigatorio">* Indica um item obrigatório</small></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-ordem')">Cancelar</button>
-      <button class="btn btn-red"   onclick="salvarordem()">Confirmar ordem</button>
-    </div>
-  </div>
-</div>
-
-<div id="m-status" class="modal-bg">
-  <div class="modal" style="max-width:330px">
-    <h3>Atualizar Status</h3>
-    <input type="hidden" id="st-id">
-    <div class="fg"><label>Novo Status</label>
-      <select id="st-val">
-        <option value="recebido">📥 Recebido</option>
-        <option value="em_producao">⚒️ Em Produção</option>
-        <option value="entregue">✅ Entregue</option>
-        <option value="cancelado">❌ Cancelado</option>
-      </select>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-status')">Cancelar</button>
-      <button class="btn btn-blue"  onclick="salvarStatus()">Atualizar</button>
-    </div>
-  </div>
-</div>
-
-<div id="m-usuario" class="modal-bg">
-  <div class="modal">
+    <div class="login-erro" id="login-erro"></div>
     <div class="fg">
-      <div style="margin-top: 10px;">
-        <img 
-          id="preview-foto"
-          src="http://10.106.208.32:3000/api/uploads/usuarios/default.png"
-          style="
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #ccc;
-            display: block;
-          "
-        >
-      </div>
+      <label>E-mail</label>
+      <input id="l-email" type="email" placeholder="metaltech@email.com"
+        onkeydown="if(event.key==='Enter') fazerLogin()">
     </div>
-    <h3>Novo Usuário</h3>
-    <div class="fr2">
-      <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="u-nome" placeholder="Nome Completo"></div>
-      <div class="fg"><label>Perfil <small id="icon-obrigatorio">*</small></label><select id="u-perfil"><option value="Atendente">Atendente</option><option value="Administrador">Administrador</option></select></div>
-    </div>
-    <div class="fg"><label>E-mail <small id="icon-obrigatorio">*</small></label><input type="email" id="u-email" placeholder="usuario@metaltech.com"></div>
     <div class="fg" style="position: relative;">
-      <label>Senha <small id="icon-obrigatorio">*</small></label>
-      <input id="u-senha" type="password" placeholder="Mínimo 6 caracteres"
+      <label>Senha</label>
+      <input id="l-senha" type="password" placeholder="••••••"
+        onkeydown="if(event.key==='Enter') fazerLogin()"
         style="padding-right: 40px;"
       >
-      <button type="button" onclick="toggleSenha('u-senha')"
+      <button type="button" onclick="toggleSenha('l-senha')"
         style="
           position: absolute;
           right: 10px;
@@ -315,178 +42,12 @@
         👁️
       </button>
     </div>
-    <div class="fg" style="position: relative;">
-      <label>Confirmar Senha <small id="icon-obrigatorio">*</small></label>
-      <input id="u-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6"
-        style="padding-right: 40px;"
-      >
-      <button type="button" onclick="toggleSenha('u-confirmarSenha')"
-        style="
-          position: absolute;
-          right: 10px;
-          top: 25px;
-          background: none;
-          border: none;
-          cursor: pointer;
-        ">
-        👁️
-      </button>
-    </div>
-    <div class="fg" style="position: relative;">
-      <label>Foto de perfil</label>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="file" name="imagem" id="u-foto" onchange="preview_foto('criar')"/>
-        <!-- <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button> -->
-      </div>
-    </div>
-    
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('m-usuario')">Cancelar</button>
-      <button class="btn btn-ghost" onclick="salvarUsuario()">Salvar</button>
-    </div>
+    <button class="btn btn-red" id="btn-login"
+      style="width:100%;padding:10px;margin-top:4px" onclick="fazerLogin()">Entrar</button>
+    <p style="text-align:center;font-size:.69rem;color:var(--muted);margin-top:14px">
+      Se ouver algum problema de login entre em contato com o suporte em <strong style="color:var(--text)">meta67@gmail.com</strong></p>
   </div>
 </div>
-
-<div id="e-usuario" class="modal-bg">
-  <div class="modal">
-    <div class="fg">
-      <div style="margin-top: 10px;">
-        <img 
-          id="preview-foto-edit"
-          src=""
-          style="
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #ccc;
-            display: block;
-          "
-        >
-      </div>
-    </div>
-    <h3>Editar Usuário</h3>
-    <div class="fr2">
-      <div class="fg">
-        <label>Nome</label>
-        <input id="e-nome" placeholder="Nome completo">
-      </div>
-      <div class="fg">
-        <label>Perfil</label>
-        <select id="e-perfil">
-          <option value="Atendente">Atendente</option>
-          <option value="Administrador">Administrador</option>
-        </select>
-      </div>
-    </div>
-    <div class="fg">
-      <label>E-mail *</label>
-      <input id="e-email" type="email" placeholder="usuario@Produtoria.com">
-    </div>
-    <div class="fg" style="position: relative;">
-      <label>Foto de perfil</label>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <input type="file" name="imagem" id="e-foto" onchange="preview_foto('editar')"/>
-        <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button>
-      </div>
-    </div>
-    <div class="fg" style="position: relative;">
-      <label>Nova Senha</label>
-      <input id="e-senha" type="password" placeholder="Mínimo 6 caracteres"
-        style="padding-right: 40px;"
-      >
-      <button type="button" onclick="toggleSenha('e-senha')"
-        style="
-          position: absolute;
-          right: 10px;
-          top: 25px;
-          background: none;
-          border: none;
-          cursor: pointer;
-        ">
-        👁️
-      </button>
-    </div>
-    <div class="fg" style="position: relative;">
-      <label>Confirmar Senha</label>
-      <input id="e-confirmarSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6"
-        style="padding-right: 40px;"
-      >
-      <button type="button" onclick="toggleSenha('e-confirmarSenha')"
-        style="
-          position: absolute;
-          right: 10px;
-          top: 25px;
-          background: none;
-          border: none;
-          cursor: pointer;
-        ">
-        👁️
-      </button>
-    </div>
-    <div class="fg">
-      <label>Ativo</label>
-      <select id="u-ativo">
-        <option value="true">✅ Sim</option>
-        <option value="false">❌ Não</option>
-      </select>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('e-usuario')">Cancelar</button>
-      <button class="btn btn-ghost" onclick="editarUsuario()">Editar</button>
-    </div>
-  </div>
-</div>
-
-<div id="e-cliente" class="modal-bg">
-  <div class="modal">
-    <h3 id="m-cli-t">Editar Cliente</h3>
-    <input type="hidden" id="c-id">
-    <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="e-nomeclient" placeholder="Ferro & Cia"></div>
-      <div class="fg"><label>Telefone *</label><input id="e-tel" placeholder="(11) 99999-9999"></div>
-    </div>
-    <div class="fr2">
-      <div class="fg"><label>Rua</label><input id="e-rua" placeholder="Rua das Flores"></div>
-      <div class="fg"><label>Número</label><input id="e-num" placeholder="123"></div>
-    </div>
-    <div class="fr3">
-      <div class="fg"><label>CEP</label><input id="e-cep" placeholder="00000-000"></div>
-      <div class="fg"><label>Bairro</label><input id="e-bairro" placeholder="Centro"></div>
-      <div class="fg"><label>Cidade</label><input id="e-cidade" placeholder="São Paulo"></div>
-    </div>
-    <div class="fg"><label>Complemento</label><input id="e-comp" placeholder="Apto 12, Bloco B"></div>
-    <div class="fg"><label>Observações</label><input id="e-obs" placeholder="Urdgência, preferências..."></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('e-cliente')">Cancelar</button>
-      <button class="btn btn-red"   onclick="editarCliente()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<div id="e-produto" class="modal-bg">
-  <div class="modal">
-    <h3 id="e-Produto-t">Editar Produto</h3>
-    <input type="hidden" id="p-id">
-    <div class="fr2">
-      <div class="fg"><label>Nome *</label><input id="e-nomeproduto" placeholder="Ex: Barra Sextavada de Aço"></div>
-    </div>
-    <div class="fg"><label>Descrição</label><input id="e-desc" placeholder="Breve descrição..."></div>
-    <div class="fg"><label>Disponível</label>
-      <select id="e-disp">
-        <option value="1">✅ Sim</option>
-        <option value="0">❌ Não</option>
-      </select>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="fechar('e-produto')">Cancelar</button>
-      <button class="btn btn-red"   onclick="editarProduto()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast"></div>
-
 <div id="tela-erro" style="display: none">
   <div class="login-box">
     <div class="login-logo">
@@ -497,35 +58,6 @@
     </div>
   </div>
 </div>
-
-<script type="module" src="/js/app.js" defer></script>
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script src="https://unpkg.com/@studio-freight/lenis"></script>
-<script>
-    const lenis = new Lenis();
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-    requestAnimationFrame(raf);
-</script>
-<script type="module">
-  // Importa todas as funções/exportações do módulo services
-  import * as services from '/js/services/index.js';
-
-  // Executa apenas quando o DOM estiver totalmente carregado
-  document.addEventListener('DOMContentLoaded', () => {
-    // Habilita swipe da sidebar, se existir
-    if (services.enableSidebarSwipe) {
-      services.enableSidebarSwipe();
-    } else {
-      console.warn('Função enableSidebarSwipe não encontrada em services.');
-    }
-  });
-</script>
-<script type="module">
-    import { initDarkModeToggle } from '/js/ui/ui.js';
-    initDarkModeToggle('#btn-toggle-theme');
-  </script>
+<script type="module" src="/js/auth/auth.js" defer></script>
 </body>
 </html>
