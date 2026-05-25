@@ -27,6 +27,10 @@ app.get("/metaltech/usuario", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/pages/usuario.html"));
 });
 
+app.get("/metaltech/cliente", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/pages/cliente.html"));
+});
+
 app.get("/erro", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/inativo.html"));
 });

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MetalTech | Cliente</title>
+
+  <link rel="stylesheet" href="/style/style.css">
+  <link rel="stylesheet" href="/style/responsividade.css">
+  <link rel="stylesheet" href="/style/geral.css">
+
+  <meta name="theme-color" content="#0f172a">
+</head>
+
+<body>
+
+<div class="container">
+
+  <a href="/metaltech" class="voltar">
+    ← Voltar
+  </a>
+
+  <div id="conteudo"></div>
+
+</div>
+
+<script type="module">
+
+/*
+  URL:
+  /cliente?id=51
+*/
+
+const params = new URLSearchParams(window.location.search)
+
+const id = Number(params.get('id'))
+
+const conteudo = document.getElementById('conteudo')
+
+async function carregarCliente(){
+
+  try{
+
+    /*
+      Busca no sessionStorage
+    */
+
+    const clientesStorage = sessionStorage.getItem('Clientes')
+
+    if(!clientesStorage){
+      throw new Error('Nenhum cliente encontrado')
+    }
+
+    const clientes = JSON.parse(clientesStorage)
+
+    /*
+      Busca do cliente
+    */
+
+    const cliente = clientes.find(c =>
+      Number(c.id) === id ||
+      Number(c._id) === id
+    )
+
+    if(!cliente){
+      throw new Error('Cliente não encontrado')
+    }
+
+    renderizar(cliente)
+
+  }catch(err){
+
+    conteudo.innerHTML = `
+    
+      <div class="card empty">
+
+        <h2>Cliente não encontrado</h2>
+
+        <p>${err.message}</p>
+
+      </div>
+
+    `
+
+    console.error(err)
+
+  }
+
+}
+
+function renderizar(c){
+
+  conteudo.innerHTML = `
+
+    <div class="card">
+
+      <h1>
+        ${c.nome || 'Cliente'}
+      </h1>
+
+      <div class="grid">
+
+        <div>
+          <span class="label">ID</span>
+          <div class="value">
+            #${String(c.id || c._id).padStart(3,'0')}
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Telefone</span>
+          <div class="value">
+            ${c.telefone || '—'}
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Status</span>
+          <div class="value">
+            <span class="b">
+              ${c.ativo ? 'Ativo' : 'Inativo'}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Criado em</span>
+          <div class="value">
+            ${formatarData(c.createdAt)}
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Atualizado em</span>
+          <div class="value">
+            ${formatarData(c.updatedAt)}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <h2>Endereço</h2>
+
+      <div class="grid">
+
+        <div>
+          <span class="label">Rua</span>
+          <div class="value">
+            ${c.endereco?.rua || '—'}
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Número</span>
+          <div class="value">
+            ${c.endereco?.numero || '—'}
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Bairro</span>
+          <div class="value">
+            ${c.endereco?.bairro || '—'}
+          </div>
+        </div>
+
+        <div>
+          <span class="label">Cidade</span>
+          <div class="value">
+            ${c.endereco?.cidade || '—'}
+          </div>
+        </div>
+
+        <div>
+          <span class="label">CEP</span>
+          <div class="value">
+            ${c.endereco?.cep || '—'}
+          </div>
+        </div>
+        
+        <div>
+            <span class="label">Complemento</span>
+            <div class="value">
+                ${c.endereco?.complemento || '—'}
+                </div>
+                </div>
+                
+                </div>
+                
+                </div>
+                <div>${gerarMapa(c.endereco)}</div>
+
+    <div class="card">
+
+      <h2>Observações</h2>
+
+      <p>
+        ${c.observacoes || 'Nenhuma observação'}
+      </p>
+
+    </div>
+
+  `
+}
+
+function gerarMapa(endereco){
+
+  if(!endereco) return ''
+
+  const local = `
+    ${endereco.rua || ''}
+    ${endereco.numero || ''}
+    ${endereco.bairro || ''}
+    ${endereco.cidade || ''}
+    ${endereco.cep || ''}
+  `
+
+  const url = `
+    https://maps.google.com/maps?q=
+    ${encodeURIComponent(local)}
+    &t=
+    &z=15
+    &ie=UTF8
+    &iwloc=
+    &output=embed
+  `
+
+  return `
+  
+    <iframe
+      width="100%"
+      height="350"
+      frameborder="0"
+      style="border:0; border-radius:16px;"
+      loading="lazy"
+      allowfullscreen
+      src="${url}">
+    </iframe>
+
+  `
+}
+
+function formatarData(data){
+
+  if(!data) return '—'
+
+  return new Date(data).toLocaleString('pt-BR')
+}
+
+carregarCliente()
+
+</script>
+
+</body>
+</html>

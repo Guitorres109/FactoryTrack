@@ -58,7 +58,10 @@ export function renderClientes(lista) {
             : '—';
 
           return `
-            <tr>
+            <tr 
+              onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'"
+              style="cursor:pointer"
+            >
               <td><strong>${c.nome || '—'}</strong></td>
               <td>${formatarTelefone(c.telefone)}</td>
               <td style="font-size:.76rem;color:var(--muted)">${endereco}</td>
