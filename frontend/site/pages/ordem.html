@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Detalhes da Ordem</title>
-  <link rel="stylesheet" href="/style/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetalTech | Ordem</title>
+    <link rel="stylesheet" href="/style/style.css">
     <link rel="stylesheet" href="/style/responsividade.css">
     <link rel="stylesheet" href="/style/geral.css">
+    <link rel="icon" href="/assets/img/icon2">
+    <meta name="theme-color" content="#0f172a">
 </head>
-
 <body>
 
   <div class="container">
@@ -84,7 +85,7 @@
       <div class="card">
 
         <h1>
-          Ordem #${p.numeroOrdem 
+          #${p.numeroOrdem 
             ? String(p.numeroOrdem).padStart(3,'0') 
             : '???'}
         </h1>
@@ -109,7 +110,7 @@
           <div>
             <span class="label">Status</span>
             <div class="value">
-              <span class="badge">${formatarStatus(p.status)}</span>
+              <span class="b">${formatarStatus(p.status)}</span>
             </div>
           </div>
 

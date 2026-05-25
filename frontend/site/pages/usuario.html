@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MetalTech | Usuário</title>
+
+  <link rel="stylesheet" href="/style/style.css">
+  <link rel="stylesheet" href="/style/responsividade.css">
+  <link rel="stylesheet" href="/style/geral.css">
+
+  <link rel="icon" href="/assets/img/icon2">
+
+  <meta name="theme-color" content="#0f172a">
+</head>
+
+<body>
+
+  <div class="container">
+
+    <a href="/metaltech" class="voltar">
+      ← Voltar
+    </a>
+
+    <div id="conteudo"></div>
+
+  </div>
+
+  <script type="module">
+
+    /*
+      URL:
+      /usuario?id=53
+    */
+
+    const params = new URLSearchParams(window.location.search)
+
+    const id = Number(params.get('id'))
+
+    const conteudo = document.getElementById('conteudo')
+
+    async function carregarUsuario(){
+
+      try{
+
+        /*
+          Busca do sessionStorage
+        */
+
+        const usuariosStorage = sessionStorage.getItem('Usuarios')
+
+        if(!usuariosStorage){
+          throw new Error('Nenhum usuário encontrado')
+        }
+
+        const usuarios = JSON.parse(usuariosStorage)
+
+        /*
+          Busca usuário
+        */
+
+        const u = usuarios.find(usuario =>
+          Number(usuario.id) === id ||
+          Number(usuario._id) === id
+        )
+
+        if(!u){
+          throw new Error('Usuário não encontrado')
+        }
+
+        renderizar(u)
+
+      }catch(err){
+
+        conteudo.innerHTML = `
+        
+          <div class="card empty">
+
+            <h2>Usuário não encontrado</h2>
+
+            <p>${err.message}</p>
+
+          </div>
+
+        `
+
+        console.error(err)
+      }
+
+    }
+
+    function renderizar(u){
+
+  conteudo.innerHTML = `
+
+    <div class="user-card">
+
+      <div class="user-banner"></div>
+
+      <div class="user-content">
+
+        <div class="user-photo-wrap">
+
+          <img
+            src="http://10.106.208.32:3000/api/uploads/usuarios/${u.foto}"
+            alt="${u.nome}"
+            class="user-photo"
+          >
+
+          <span class="user-status ${u.ativo ? 'on' : 'off'}"></span>
+
+        </div>
+
+        <div class="user-header">
+
+          <h1>${u.nome}</h1>
+
+          <p>${u.email || 'Sem e-mail'}</p>
+
+          <div class="user-badges">
+
+            <span class="badge">
+              ${u.perfil || 'Usuário'}
+            </span>
+
+            <span class="badge ${u.ativo ? 'b-on' : 'b-off'}">
+              ${u.ativo ? 'Ativo' : 'Inativo'}
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="user-grid">
+
+          <div class="info-card">
+            <span>Perfil</span>
+            <strong>${u.perfil || '—'}</strong>
+          </div>
+
+          <div class="info-card">
+            <span>Status</span>
+            <strong>
+              ${u.ativo ? 'Ativo' : 'Inativo'}
+            </strong>
+          </div>
+
+          <div class="info-card">
+            <span>Criado em</span>
+            <strong>
+              ${formatarData(u.createdAt)}
+            </strong>
+          </div>
+
+          <div class="info-card full">
+            <span>Última alteração</span>
+            <strong>
+              ${formatarData(u.updatedAt)}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  `
+}
+
+    function formatarData(data){
+
+      if(!data) return '—'
+
+      return new Date(data).toLocaleString('pt-BR')
+    }
+
+    carregarUsuario()
+
+  </script>
+
+</body>
+</html>

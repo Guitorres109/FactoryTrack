@@ -72,6 +72,7 @@ export function sair() {
   sessionStorage.removeItem('Clientes');
   sessionStorage.removeItem('Produtos');
   sessionStorage.removeItem('Usuarios');
+  sessionStorage.removeItem('Ordens');
   window.location.href = '/';
 }
 

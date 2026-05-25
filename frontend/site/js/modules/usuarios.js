@@ -14,7 +14,10 @@ export async function carregarUsuarios() {
         <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th></tr></thead>
         <tbody>
           ${us.map(u => `
-            <tr>
+            <tr 
+              onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}'"
+              style="cursor:pointer"
+            >
             <input type="hidden" id="u-id" value="${u.id || u._id}">
               <td style="display:flex;align-items:center;gap:10px">
                 <img src="${u.foto ? `${services.API}/uploads/usuarios/${u.foto}` : `${services.API}/uploads/usuarios/default.png`}" 

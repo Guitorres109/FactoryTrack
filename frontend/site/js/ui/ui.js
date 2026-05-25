@@ -248,8 +248,7 @@ export async function carregarDashboard() {
 
         return `
           <div class="mini-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-
-            <div style="display: flex; align-items: center; gap: 10px;">
+            <div onclick="window.location.href='/metaltech/ordem?id=${p.id}'" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
               <img src="${img}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border)">
 
               <div>
