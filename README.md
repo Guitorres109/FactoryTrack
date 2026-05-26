@@ -136,15 +136,18 @@ Criar um sistema integrado que permita:
 
 #### 🔐 Tela de Login
 
-![Login Mobile](./assets/mobile-login.png)
+<img width="397" height="834" alt="image" src="https://github.com/user-attachments/assets/dfae5e91-67ce-4de2-a683-e3ce9ae30600" />
+
 
 #### 📝 Cadastro de Ordem
 
-![Cadastro Ordem](./assets/mobile-cadastro.png)
+<img width="386" height="818" alt="image" src="https://github.com/user-attachments/assets/12387180-8ede-46b2-8738-44285a377c8a" />
+
 
 #### 📋 Lista de Ordens
 
-![Lista Ordens](./assets/mobile-lista.png)
+<img width="384" height="820" alt="image" src="https://github.com/user-attachments/assets/cd4a6fab-5e26-41f8-a604-0b4ebd033f73" />
+
 
 ---
 
@@ -152,15 +155,18 @@ Criar um sistema integrado que permita:
 
 #### 🔐 Tela de Login
 
-![Login Web](./assets/web-login.png)
+<img width="1920" height="940" alt="{93C17862-0284-48D2-9657-C7933F9320E4}" src="https://github.com/user-attachments/assets/c3ab6223-c199-4b0c-baed-d9ce214cca4e" />
+
 
 #### 📊 Dashboard / Listagem
 
-![Dashboard](./assets/web-dashboard.png)
+<img width="1919" height="938" alt="image" src="https://github.com/user-attachments/assets/5d7fa7ba-7a07-4c23-a45b-a5309bc32e17" />
+
 
 #### 📄 Detalhes da Ordem
 
-![Detalhes](./assets/web-detalhes.png)
+<img width="1919" height="946" alt="image" src="https://github.com/user-attachments/assets/b3d0c87e-460f-4028-b227-16e0a5692f23" />
+
 
 ---
 
