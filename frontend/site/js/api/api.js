@@ -20,3 +20,11 @@ export async function api(method, url, body) {
   if (!res.ok) throw new Error(data.erro || 'Erro na requisição');
   return data;
 }
+export function abrirQrCode(id, cliente, data) {
+
+  const link = `http://10.106.208.32:3010/metaltech/ordem?id=${id}&cliente=${encodeURIComponent(cliente)}&data=${encodeURIComponent(data)}`;
+
+  const url = `http://10.106.208.32:3000/api/qrcode?url=${encodeURIComponent(link)}`;
+
+  window.open(url, '_blank');
+}

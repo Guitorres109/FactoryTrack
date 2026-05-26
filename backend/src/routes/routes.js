@@ -36,6 +36,7 @@ const Produto  = require('../models/produto');
 const Cliente  = require('../models/cliente');
 const Ordem = require('../models/ordem');
 const Atividades = require('../models/atividades');
+const QRCode = require('qrcode');
 
 // ================================
 // LOGIN
@@ -97,6 +98,26 @@ router.get('/auth/me', auth, (req, res) => {
   res.json(req.usuario);
 });
 
+router.get('/qrcode', async (req, res) => {
+  try {
+    const link = req.query.url;
+
+    if (!link) {
+      return res.status(400).json({ error: 'URL não informada' });
+    }
+
+    const qrBuffer = await QRCode.toBuffer(link);
+
+    res.writeHead(200, {
+      'Content-Type': 'image/png'
+    });
+
+    res.end(qrBuffer);
+
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao gerar QR Code' });
+  }
+});
 // ================================
 // ATIVIDADES
 // ================================

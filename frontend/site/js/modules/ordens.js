@@ -65,6 +65,7 @@ export async function carregarordens() {
               <td class="td-acoes">
                 <div style="display:flex;gap:5px">
                   <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
+                  <button class="btn btn-blue btn-sm" onclick="abrirQrCode(${p.id}, '${p.cliente?.nome}', '${p.createdAt}')">🔗</button>
               ${!isAtendente ? `
                     <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}', '${p.usuario?.nome || '—'}')">🗑️</button>
                   </div>
@@ -173,6 +174,7 @@ export function aplicarFiltroOrdens(status) {
               <td class="td-acoes">
                 <div style="display:flex;gap:5px">
                   <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
+                  <button class="btn btn-blue btn-sm" onclick="abrirQrCode(${p.id}, '${p.cliente?.nome}', '${p.createdAt}')">🔗</button>
               ${!isAtendente ? `
                     <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
                   </div>
