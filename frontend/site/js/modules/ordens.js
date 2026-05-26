@@ -33,14 +33,13 @@ export async function carregarordens() {
         <tbody>
           ${ordens.map(p => `
             <tr 
-              onclick="window.location.href='/metaltech/ordem?id=${p.id}'"
               style="cursor:pointer"
             >
-              <td><div><strong style="color:var(--primary)">#${p.numeroOrdem? String(p.numeroOrdem).padStart(3, '0'): '???'}</strong></div><small style="color:var(--muted); font-size: 11px">${p.usuario?.nome || '—'}</small></td>
-              <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${services.formatarTelefone(p.cliente?.telefone || '')}</small></td>
-              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
-              <td>${services.badge(p.status)}</td>
-              <td style="font-size:0.75rem; line-height:1.4;">${new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()? `<div style="margin-bottom:6px;"><span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'"><div><strong style="color:var(--primary)">#${p.numeroOrdem? String(p.numeroOrdem).padStart(3, '0'): '???'}</strong></div><small style="color:var(--muted); font-size: 11px">${p.usuario?.nome || '—'}</small></td>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'"><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${services.formatarTelefone(p.cliente?.telefone || '')}</small></td>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">${services.badge(p.status)}</td>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="font-size:0.75rem; line-height:1.4;">${new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()? `<div style="margin-bottom:6px;"><span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
                       <strong style="font-size:0.7rem; font-weight:100;">
                         ${new Date(p.createdAt).toLocaleString('pt-BR')}
                       </strong>

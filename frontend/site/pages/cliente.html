@@ -46,10 +46,10 @@ async function carregarCliente(){
       Busca no sessionStorage
     */
 
-    const clientesStorage = sessionStorage.getItem('Clientes')
+    let clientesStorage = sessionStorage.getItem('Clientes')
 
     if(!clientesStorage){
-      throw new Error('Nenhum cliente encontrado')
+      clientesStorage = fetch('http://10.106.208.32:3000/api/clientes')
     }
 
     const clientes = JSON.parse(clientesStorage)

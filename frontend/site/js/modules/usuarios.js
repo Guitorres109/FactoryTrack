@@ -15,19 +15,18 @@ export async function carregarUsuarios() {
         <tbody>
           ${us.map(u => `
             <tr 
-              onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}'"
               style="cursor:pointer"
             >
             <input type="hidden" id="u-id" value="${u.id || u._id}">
-              <td style="display:flex;align-items:center;gap:10px">
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'" style="display:flex;align-items:center;gap:10px">
                 <img src="${u.foto ? `${services.API}/uploads/usuarios/${u.foto}` : `${services.API}/uploads/usuarios/default.png`}" 
                     style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
                 <div><strong>${u.nome}</strong></div>
               </td>
-              <td>${u.email}</td>
-              <td><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
-              <td><span class="badge ${u.ativo ? 'b-on' : 'b-off'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
-              <td style="font-size:.73rem;color:var(--muted)">
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'">${u.email}</td>
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'"><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'"><span class="badge ${u.ativo ? 'b-on' : 'b-off'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'" style="font-size:.73rem;color:var(--muted)">
                 ${new Date(u.createdAt).toLocaleDateString('pt-BR')}
               </td>
               <td>

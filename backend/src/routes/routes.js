@@ -242,7 +242,7 @@ router.delete('/clientes/:id', auth, async (req, res) => {
 // ================================
 // PEDIDOS
 // ================================
-router.get('/ordens', auth, async (req, res) => {
+router.get('/ordens', async (req, res) => {
   try {
     res.json(await Ordem.findAll());
   } catch (e) {

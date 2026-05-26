@@ -31,51 +31,56 @@
 
   const conteudo = document.getElementById('conteudo')
 
-  async function carregarOrdem(){
+  async function carregarOrdem() {
 
-    try{
+  try {
 
-      /*
-        Busca do sessionStorage
-        Exemplo:
-        sessionStorage.setItem('ordens', JSON.stringify([...]))
-      */
+      let ordensStorage = sessionStorage.getItem('Ordens');
 
-      const ordensStorage = sessionStorage.getItem('Ordens')
+      let ordens;
 
-      if(!ordensStorage){
-        throw new Error('Nenhuma ordem encontrada no sessionStorage')
+      // Se não existir no sessionStorage
+      if (!ordensStorage) {
+
+        const response = await fetch('http://10.106.208.32:3000/api/ordens');
+
+        ordens = await response.json();
+
+        // salva no sessionStorage
+        sessionStorage.setItem('Ordens', JSON.stringify(ordens));
+
+      } else {
+
+        ordens = JSON.parse(ordensStorage);
+
       }
-
-      const ordens = JSON.parse(ordensStorage)
 
       /*
         Busca pela ordem clicada
       */
 
-      const p = ordens.find(ordem => 
+      const p = ordens.find(ordem =>
         Number(ordem.id) === id ||
         Number(ordem._id) === id
-      )
+      );
 
-      if(!p){
-        throw new Error('Ordem não encontrada')
+      if (!p) {
+        throw new Error('Ordem não encontrada');
       }
 
-      renderizar(p)
+      renderizar(p);
 
-    }catch(err){
+    } catch (err) {
 
       conteudo.innerHTML = `
         <div class="card empty">
           <h2>Ordem não encontrada</h2>
           <p>${err.message}</p>
         </div>
-      `
+      `;
 
-      console.error(err)
+      console.error(err);
     }
-
   }
 
   function renderizar(p){

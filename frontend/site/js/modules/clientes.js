@@ -59,13 +59,12 @@ export function renderClientes(lista) {
 
           return `
             <tr 
-              onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'"
               style="cursor:pointer"
             >
-              <td><strong>${c.nome || '—'}</strong></td>
-              <td>${formatarTelefone(c.telefone)}</td>
-              <td style="font-size:.76rem;color:var(--muted)">${endereco}</td>
-              <td style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'"><strong>${c.nome || '—'}</strong></td>
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'">${formatarTelefone(c.telefone)}</td>
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'" style="font-size:.76rem;color:var(--muted)">${endereco}</td>
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'" style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
               <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm"onclick='abrirEdicaoCliente(${JSON.stringify(c)})'>✏️</button><button class="btn btn-danger btn-sm"onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button></div></td>
             </tr>
           `;
