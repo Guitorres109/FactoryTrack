@@ -94,6 +94,10 @@ app.get("/js/services/index.js", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/js/services/index.js"));
 });
 
+app.get("/js/services/cache.js", (req, res) => {
+    res.sendFile(path.join(__dirname, "./site/js/services/cache.js"));
+});
+
 app.get("/js/ui/ui.js", (req, res) => {
     res.sendFile(path.join(__dirname, "./site/js/ui/ui.js"));
 });

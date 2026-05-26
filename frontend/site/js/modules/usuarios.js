@@ -1,47 +1,114 @@
 import * as services from '/js/services/index.js';
 
+let cUsuarios = JSON.parse(sessionStorage.getItem('Usuarios') || '[]' )
+
 export async function carregarUsuarios() {
   const el = document.getElementById('tbl-usuarios');
+
   el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
+
   try {
-    const us = await services.api('GET', '/usuarios');
+    // ❌ NÃO forçar cache aqui (isso causa bug de timing)
+    const cache = JSON.parse(sessionStorage.getItem('Usuarios') || '[]');
+
+    let us = cache;
+
+    // fallback seguro API
+    if (!Array.isArray(us) || !us.length) {
+      us = await services.api('GET', '/usuarios');
+    }
+
+    us = (us || []).sort((a, b) => {
+      if (a.perfil === 'Administrador' && b.perfil !== 'Administrador') return -1;
+      if (a.perfil !== 'Administrador' && b.perfil === 'Administrador') return 1;
+      return (a.nome || '').localeCompare(b.nome || '');
+    });
+
     if (!us.length) {
       el.innerHTML = '<div class="empty"><span class="ei">🔐</span>Nenhum usuário</div>';
       return;
     }
+
+    const goToUser = (u) =>
+      `/metaltech/usuario?id=${u._id || u.id}&nome=${encodeURIComponent(u.nome || '')}&email=${encodeURIComponent(u.email || '')}`;
+
     el.innerHTML = `
       <table>
-        <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th>
+          </tr>
+        </thead>
+
         <tbody>
           ${us.map(u => `
-            <tr 
-              style="cursor:pointer"
-            >
-            <input type="hidden" id="u-id" value="${u.id || u._id}">
-              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'" style="display:flex;align-items:center;gap:10px">
-                <img src="${u.foto ? `${services.API}/uploads/usuarios/${u.foto}` : `${services.API}/uploads/usuarios/default.png`}" 
-                    style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+            <tr style="cursor:pointer">
+
+              <input type="hidden" id="u-id" value="${u.id || u._id}">
+
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'"
+                  style="display:flex;align-items:center;gap:10px">
+
+                <img src="${u.foto
+                  ? `${services.API}/uploads/usuarios/${u.foto}`
+                  : `${services.API}/uploads/usuarios/default.png`}"
+                  style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+
                 <div><strong>${u.nome}</strong></div>
               </td>
-              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'">${u.email}</td>
-              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'"><span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">${u.perfil}</span></td>
-              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'"><span class="badge ${u.ativo ? 'b-on' : 'b-off'}">${u.ativo ? 'Ativo' : 'Inativo'}</span></td>
-              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'" style="font-size:.73rem;color:var(--muted)">
+
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'">
+                ${u.email}
+              </td>
+
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'">
+                <span class="badge ${u.perfil === 'Administrador' ? 'b-admin' : 'b-atend'}">
+                  ${u.perfil}
+                </span>
+              </td>
+
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'">
+                <span class="badge ${u.ativo ? 'b-on' : 'b-off'}">
+                  ${u.ativo ? 'Ativo' : 'Inativo'}
+                </span>
+              </td>
+
+              <td onclick="window.location.href='/metaltech/usuario?id=${u.id}&nome=${u.nome}&email=${u.email}'"
+                  style="font-size:.73rem;color:var(--muted)">
                 ${new Date(u.createdAt).toLocaleDateString('pt-BR')}
               </td>
+
               <td>
                 <div style="display:flex;gap:5px">
-                  <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}', '${u.ativo}', '${u.foto}')">✏️</button>
-                  <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deletarUsuario('${u._id}','${u.nome}')">🗑️</button>
+                  <button class="btn btn-danger btn-sm"
+                    onclick="event.stopPropagation(); abrirEdicaoUsuario('${u._id}', '${u.nome}', '${u.email}', '${u.perfil}', '${u.ativo}', '${u.foto}')">✏️</button>
+
+                  <button class="btn btn-danger btn-sm"
+                    onclick="event.stopPropagation(); deletarUsuario('${u._id}','${u.nome}')">🗑️</button>
                 </div>
               </td>
+
             </tr>
           `).join('')}
         </tbody>
-      </table>`;
+      </table>
+    `;
+
   } catch (e) {
+    console.error(e);
     el.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
   }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
+function escapeAttr(str) {
+  return String(str).replaceAll("'", "\\'");
 }
 
 //====================================

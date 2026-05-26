@@ -121,10 +121,6 @@ document.querySelectorAll('.modal-bg').forEach(bg =>
   bg.addEventListener('click', e => { if (e.target === bg) bg.classList.remove('open'); })
 );
 
-function R$(v) {
-  return 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
-}
-
 export function badge(s) {
   const r = {
     recebido:     '📥 Recebido',
@@ -178,8 +174,8 @@ export function ir(pg, btn) {
 
     if (btn) btn.classList.add('ativo');
 
-    carregarordens(); // mantém seu padrão atual
-    abrirOrdem();     // chama a função
+    services.carregarordens(); // mantém seu padrão atual
+    services.abrirOrdem();     // chama a função
 
     return;
   }
@@ -204,42 +200,53 @@ export function ir(pg, btn) {
 }
 
 export async function carregarDashboard() {
+  const produtosCache = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+
+  // 🔥 se não tiver cache, força carregar ANTES de tudo
+  if (!produtosCache.length) {
+    await services.cache();
+  }
+
   const spin = document.getElementById('spin-dashboard');
   spin.style.display = 'block';
+
   const h = new Date().getHours();
   const s = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   document.getElementById('dash-sub').textContent = `${s}! Aqui está o resumo.`;
 
   try {
-    const [Produtos, clientes, ordens, atividades, usuarios] = await Promise.all([
-      services.api('GET', '/produtos'), 
-      services.api('GET', '/clientes'),
-      services.api('GET', '/ordens'),   
-      services.api('GET', '/atividades'),
-      services.api('GET', '/usuarios')
-    ]);
+    const Produtos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+    const clientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
+    const ordens = JSON.parse(sessionStorage.getItem('Ordens') || '[]');
+    const usuarios = JSON.parse(sessionStorage.getItem('Usuarios') || '[]');
 
-    cProdutos   = Produtos;
-    cClientes = clientes;
-    cUsuarios = usuarios
-    
-    const emAberto = ordens.filter(o =>
+    const atividades = await services.api('GET', '/atividades');
+
+    // cache global seguro (opcional)
+    window.cProdutos = Produtos;
+    window.cClientes = clientes;
+    window.cUsuarios = usuarios;
+
+    const emAberto = (ordens || []).filter(o =>
       o.status === 'recebido' || o.status === 'em_producao'
     );
 
-    
     document.getElementById('s-piz').textContent = Produtos.length;
     document.getElementById('s-cli').textContent = clientes.length;
     document.getElementById('s-ped').textContent = ordens.length;
-    if (emAberto.length === 1){document.getElementById('s-ped-sub').textContent = `${emAberto.length} Ordem de produção pendente`}else{document.getElementById('s-ped-sub').textContent = `${emAberto.length} Ordens de produção pendentes`}
-    
+
+    document.getElementById('s-ped-sub').textContent =
+      emAberto.length === 1
+        ? '1 Ordem de produção pendente'
+        : `${emAberto.length} Ordens de produção pendentes`;
+
     const elP = document.getElementById('dash-ordens');
 
     elP.innerHTML =
       ordens.slice(0, 8).map(p => {
 
-        const usuario = cUsuarios.find(u =>
-          String(u.id) === String(p.usuarioId || p.usuario?.id)
+        const usuario = usuarios.find(u =>
+          String(u.id || u._id) === String(p.usuarioId || p.usuario?.id)
         );
 
         const img = usuario?.foto
@@ -247,16 +254,17 @@ export async function carregarDashboard() {
           : `${services.API}/uploads/usuarios/default.png`;
 
         return `
-          <div class="mini-row" style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-            <div onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-              <img src="${img}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border)">
+          <div class="mini-row" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'"
+                 style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+
+              <img src="${img}"
+                   style="width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">
 
               <div>
                 <div class="mn">
-                  #${p.numeroOrdem
-                    ? String(p.numeroOrdem).padStart(3, '0')
-                    : '???'
-                  } · ${p.cliente?.nome || '—'}
+                  #${p.numeroOrdem ? String(p.numeroOrdem).padStart(3, '0') : '???'}
+                  · ${p.cliente?.nome || '—'}
                 </div>
 
                 <div class="mc">
@@ -266,42 +274,43 @@ export async function carregarDashboard() {
             </div>
 
             <div style="text-align:right">
-              ${badge(p.status)}<br>
-              <small style="color:var(--muted)"></small>
+              ${badge(p.status)}
             </div>
-
           </div>
         `;
-      }).join('') ||
-      '<div class="empty"><span class="ei">📋</span>Nenhum ordem ainda</div>';
+      }).join('') || '<div class="empty"><span class="ei">📋</span>Nenhuma ordem ainda</div>';
 
     const elC = document.getElementById('dash-cardapio');
 
-  if (!atividades.length) {
-    elC.innerHTML = '<div class="empty"><span class="ei">⚙️</span>Nenhuma atividade</div>';
-    return;
-  }
+    if (!atividades?.length) {
+      elC.innerHTML = '<div class="empty"><span class="ei">⚙️</span>Nenhuma atividade</div>';
+      spin.style.display = 'none';
+      return;
+    }
 
-  const itens = await Promise.all(
-    atividades.slice(0, 8).map(async (a) => {
-      const texto = await formatarAtividade(a);
+    const itens = await Promise.all(
+      atividades.slice(0, 8).map(async (a) => {
+        const texto = await formatarAtividade(a);
 
-      return `
-        <div class="mini-row">
-          <span style="display:inline-flex; align-items:center; gap:5px;">
-            ${texto}
-          </span>
-          <small style="color:var(--muted)">
-            ${a.createdAt ? new Date(a.createdAt).toLocaleString() : ''}
-          </small>
-        </div>
-      `;
-    })
-  );
-  elC.innerHTML = itens.join('');
+        return `
+          <div class="mini-row">
+            <span>${texto}</span>
+            <small style="color:var(--muted)">
+              ${a.createdAt ? new Date(a.createdAt).toLocaleString('pt-BR') : ''}
+            </small>
+          </div>
+        `;
+      })
+    );
 
+    elC.innerHTML = itens.join('');
+
+  } catch (e) {
+    console.error(e);
+    toast('Erro dashboard: ' + e.message, 'err');
+  } finally {
     spin.style.display = 'none';
-  } catch (e) { toast('Erro dashboard: ' + e.message, 'err'); }
+  }
 }
 
 export async function carregarAtividades() {

@@ -4,27 +4,71 @@ let cClientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
 let clientesCache = [];
 
 export async function carregarClientes(busca = '') {
-  const el = document.getElementById('tbl-clientes');
 
+  const el = document.getElementById('tbl-clientes');
+  
   try {
-    if (busca && busca.length < 2) {
+
+    // 🔥 busca cache salvo
+    let clientesCache = JSON.parse(
+      sessionStorage.getItem('Clientes') || 'null'
+    );
+
+    // 🔍 busca pequena → usa cache atual
+    if (busca && busca.length < 2 && clientesCache) {
       renderClientes(clientesCache);
       return;
     }
 
-    el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
+    el.innerHTML = `
+      <div class="spin-wrap">
+        <div class="spin"></div>
+        Carregando...
+      </div>
+    `;
 
-    const url = `/clientes${busca ? `?busca=${encodeURIComponent(busca.trim())}` : ''}`;
+    let clientes;
 
-    const resposta = await services.api('GET', url);
+    // ✅ sem busca → tenta usar cache
+    if (!busca && clientesCache) {
 
-    clientesCache = Array.isArray(resposta) ? resposta : [];
+      clientes = clientesCache;
 
-    renderClientes(clientesCache);
+    } else {
+
+      // 🌐 busca API
+      const url = `/clientes${
+        busca
+          ? `?busca=${encodeURIComponent(busca.trim())}`
+          : ''
+      }`;
+
+      const resposta = await services.api('GET', url);
+
+      clientes = Array.isArray(resposta)
+        ? resposta
+        : [];
+
+      // 💾 salva cache apenas da lista completa
+      if (!busca) {
+        sessionStorage.setItem(
+          'Clientes',
+          JSON.stringify(clientes)
+        );
+      }
+    }
+
+    renderClientes(clientes);
 
   } catch (e) {
+
     console.error('Erro carregarClientes:', e);
-    el.innerHTML = `<div class="empty" style="color:var(--primary)">Erro ao carregar clientes</div>`;
+
+    el.innerHTML = `
+      <div class="empty" style="color:var(--primary)">
+        Erro ao carregar clientes
+      </div>
+    `;
   }
 }
 

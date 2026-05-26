@@ -4,14 +4,20 @@ let cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
 
 export async function carregarProdutos() {
   const el = document.getElementById('tbl-Produtos');
+
   el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
+
   try {
-    // Rota alterada para produtos
-    cProdutos = await api('GET', '/produtos');
-    if (!cProdutos.length) {
-      el.innerHTML = '<div class="empty"><span class="ei"></span>Nenhuma Produto</div>';
+    // 🔥 garante cache carregado
+    await services.cache?.();
+
+    const produtos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+
+    if (!produtos.length) {
+      el.innerHTML = '<div class="empty"><span class="ei"></span>Nenhum Produto</div>';
       return;
     }
+
     el.innerHTML = `
       <table>
         <thead>
@@ -26,8 +32,11 @@ export async function carregarProdutos() {
               <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm"onclick='abrirEdicaoProduto(${JSON.stringify(p)})'>✏️</button>
               <button class="btn btn-danger btn-sm"onclick="deletarProduto('${p._id}','${p.nome}')">🗑️</button></div></td>`).join('')}
         </tbody>
-      </table>`;
+      </table>
+    `;
+
   } catch (e) {
+    console.error(e);
     el.innerHTML = `<div class="empty" style="color:var(--red)">${e.message}</div>`;
   }
 }

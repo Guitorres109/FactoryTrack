@@ -15,5 +15,10 @@
     "express": "^5.2.1",
     "ors": "^1.0.0",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.4.0",
+    "globals": "^17.6.0"
   }
 }

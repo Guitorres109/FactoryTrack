@@ -1,22 +1,18 @@
 import * as services from '/js/services/index.js';
-
+import { cache } from '/js/services/cache.js';
+console.log('rodando app.js')
 Object.assign(window, services);
 
-const usuario = JSON.parse(localStorage.getItem('pz_usuario') || 'null');
+async function bootstrap() {
+  try {
+    await cache(); // 👈 PRIMEIRO passo obrigatório
+  } catch (e) {
+    console.error('Erro ao carregar cache:', e);
+  }
 
-const cProdutos = await services.api('GET', '/produtos');
-const cClientes = await services.api('GET', '/clientes');
-const cOrdens = await services.api('GET', '/ordens');
-
-let cUsuarios = null;
-if (usuario?.perfil === 'Administrador') {
-  cUsuarios = await services.api('GET', '/usuarios');
-}
-sessionStorage.setItem('Produtos', JSON.stringify(cProdutos));
-sessionStorage.setItem('Clientes', JSON.stringify(cClientes));
-sessionStorage.setItem('Ordens', JSON.stringify(cOrdens));
-if (cUsuarios) {
-  sessionStorage.setItem('Usuarios', JSON.stringify(cUsuarios));
+  // depois disso o site inicia
+  verificarLogin();
+  services.enableSidebarSwipe();
 }
 
 const socket = io('http://10.106.208.32:3000');
@@ -35,28 +31,29 @@ socket.on("sync", (data) => {
 
     case "produtos":
       mensagem = 'Produtos foram atualizados';
-      carregarProdutos();
+      services.carregarProdutos();
       break;
 
     case "clientes":
       mensagem = 'Clientes foram atualizados';
-      carregarClientes();
+      services.carregarClientes();
       break;
 
     case "ordens":
       mensagem = 'Ordens foram atualizadas';
-      carregarordens();
+      services.carregarordens();
       break;
 
     case "usuarios":
       mensagem = 'Usuários foram atualizados';
-      carregarUsuarios();
+      services.carregarUsuarios();
       break;
 
     default:
       mensagem = 'Dados sincronizados';
   }
 
+  services.cache()
   services.carregarDashboard();
 
   if (Notification.permission === 'granted') {
@@ -114,7 +111,4 @@ export function verificarLogin() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    verificarLogin();
-    services.enableSidebarSwipe();
-});
+document.addEventListener('DOMContentLoaded', bootstrap);

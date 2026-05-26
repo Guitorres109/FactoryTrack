@@ -2,14 +2,16 @@ import * as services from '/js/services/index.js';
 
 let cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
 let cClientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
+let cOrdens = JSON.parse(sessionStorage.getItem('Ordens') || 'null')
 
 export async function carregarordens() {
   const el = document.getElementById('tbl-ordens');
+  services.cache()
   el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
   try {
     // Rota alterada para ordens
-    const ordens = await services.api('GET', '/ordens');
-    ordensCache = ordens;
+    let ordens
+    if (!cOrdens){ordens = await services.api('GET', '/ordens');} else{ordens = cOrdens}
 
     if (!ordens.length) {
       el.innerHTML = '<div class="empty"><span class="ei">📋</span>Nenhum ordem</div>';
@@ -81,14 +83,13 @@ export async function carregarordens() {
   }
 }
 
-let ordensCache = [];
 export function aplicarFiltroOrdens(status) {
   const el = document.getElementById('tbl-ordens');
   const usuario = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
   const perfil = usuario?.perfil || '';
   const isAtendente = perfil === 'Atendente';
 
-  if (!ordensCache.length) return;
+  if (!cOrdens.length) return;
 
   const norm = (s) =>
     (s || '')
@@ -96,10 +97,10 @@ export function aplicarFiltroOrdens(status) {
       .toLowerCase()
       .replace(/\s/g, '_'); // transforma espaços em _
 
-  let filtradas = ordensCache;
+  let filtradas = cOrdens;
 
   if (status && status !== 'todas') {
-    filtradas = ordensCache.filter(o =>
+    filtradas = cOrdens.filter(o =>
       norm(o.status) === norm(status)
     );
   }
@@ -118,8 +119,10 @@ export function aplicarFiltroOrdens(status) {
       </thead>
       <tbody>
         ${filtradas.map(p => `
-          <tr>
-            <td>
+          <tr 
+              style="cursor:pointer"
+            >
+            <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">
                 <div>
                   <strong style="color:var(--primary)">
                     #${
@@ -134,10 +137,10 @@ export function aplicarFiltroOrdens(status) {
                   ${p.usuario?.nome || '—'}
                 </small>
               </td>
-              <td><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
-              <td style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
-              <td>${services.badge(p.status)}</td>
-              <td style="font-size:0.75rem; line-height:1.4;">
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'"><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">${services.badge(p.status)}</td>
+              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="font-size:0.75rem; line-height:1.4;">
                 ${
                   new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()
                     ? `
@@ -173,10 +176,10 @@ export function aplicarFiltroOrdens(status) {
               </td>
               <td class="td-acoes">
                 <div style="display:flex;gap:5px">
-                  <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
-                  <button class="btn btn-blue btn-sm" onclick="abrirQrCode(${p.id}, '${p.cliente?.nome}', '${p.createdAt}')">🔗</button>
+                  <button title="Editar status" class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
+                  <button title="Gerar QR Code" class="btn btn-blue btn-sm" onclick="abrirQrCode(${p.id}, '${p.cliente?.nome}', '${p.createdAt}')">🔗</button>
               ${!isAtendente ? `
-                    <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
+                    <button title="Excluir" class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
                   </div>
                 </td>
               ` : ''}

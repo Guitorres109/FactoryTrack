@@ -16,7 +16,7 @@ export async function api(method, url, body) {
   const res  = await fetch(API + url, opts);
   const data = await res.json();
 
-  if (res.status === 401) { sair(); throw new Error('Sessão expirada'); }
+  if (res.status === 401) { services.sair(); throw new Error('Sessão expirada'); }
   if (!res.ok) throw new Error(data.erro || 'Erro na requisição');
   return data;
 }

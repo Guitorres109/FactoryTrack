@@ -26,6 +26,7 @@ export async function fazerLogin() {
   erro.style.display = 'none';
 
   try {
+
     console.log(services.API)
     const res  = await fetch(services.API + '/auth/login', {
       method:  'POST',
@@ -131,8 +132,8 @@ export function aplicarPerfil(usuario) {
 
   const tituloProdutos = document.getElementById('pg-Produtos-titulo');
   const subProdutos    = document.getElementById('pg-Produtos-sub');
-  if (tituloProdutos) tituloProdutos.textContent = isAten ? 'Produtos' : 'Produtos';
-  if (subProdutos)    subProdutos.textContent    = isAten ? 'Produtos disponíveis' : 'Produtos disponiveis';
+  if (tituloProdutos) tituloProdutos.textContent = isAten ? 'Cardápio' : 'Produtos';
+  if (subProdutos)    subProdutos.textContent    = isAten ? 'Produtos disponíveis hoje' : 'Gerencie o cardápio';
   show('btn-nova-Produto', !isGar, 'inline-flex');
 
   show('stat-fat', novaOrdem, 'block');
