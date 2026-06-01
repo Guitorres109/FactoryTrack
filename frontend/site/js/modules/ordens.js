@@ -202,6 +202,33 @@ export async function aplicarFiltroOrdens(status) {
   `;
 }
 
+export async function syncOrdensCache() {
+  try {
+    const ordens = await services.api('GET', '/ordens');
+
+    if (!Array.isArray(ordens)) return [];
+
+    // atualiza memória global
+    cOrdens = ordens;
+
+    // atualiza sessionStorage
+    sessionStorage.setItem('Ordens', JSON.stringify(ordens));
+
+    // 🔥 AUTO REFRESH DA TELA
+    const el = document.getElementById('tbl-ordens');
+
+    if (el) {
+      carregarordens();
+    }
+
+    return ordens;
+
+  } catch (e) {
+    console.error('Erro ao sincronizar ordens:', e);
+    return [];
+  }
+}
+
 //====================================
 //função de abrir ordens
 //====================================
@@ -297,7 +324,7 @@ export async function salvarordem() {
     });
     toast('ordem de produção criada! ⚒️');
     fechar('m-ordem');
-    carregarordens();
+    await syncOrdensCache()
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }
 
@@ -324,7 +351,7 @@ export async function salvarStatus() {
     await services.api('PATCH', '/ordens/' + id + '/status', { status });
     toast('Status atualizado!');
     fechar('m-status');
-    carregarordens();
+    await syncOrdensCache()
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }
 
@@ -339,6 +366,6 @@ export async function deletarordem(id, usuario) {
     // Rota alterada para ordens
     await services.api('DELETE', '/ordens/' + id, {userId: userId});
     toast('ordem deletado!');
-    carregarordens();
+    await syncOrdensCache()
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }

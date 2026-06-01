@@ -85,6 +85,35 @@ export async function carregarProdutos() {
   }
 }
 
+export async function syncProdutosCache() {
+  try {
+    await services.cache?.();
+
+    let produtos = await services.api('GET', '/produtos') || [];
+
+    if (!Array.isArray(produtos)) return [];
+
+    // 🔥 atualiza memória global
+    cProdutos = produtos;
+
+    // 💾 atualiza sessionStorage
+    sessionStorage.setItem('Produtos', JSON.stringify(produtos));
+
+    // 🔄 auto refresh da tela
+    const el = document.getElementById('tbl-Produtos');
+
+    if (el) {
+      carregarProdutos();
+    }
+
+    return produtos;
+
+  } catch (e) {
+    console.error('Erro ao sincronizar produtos:', e);
+    return [];
+  }
+}
+
 export function abrirProduto() {
   document.getElementById('m-Produto-t').textContent = 'Novo Produto';
   document.getElementById('p-disp').value = '1';
@@ -116,21 +145,24 @@ export async function salvarProduto() {
     await api('POST', '/produtos', d);
     toast(id ? 'Produto atualizado!' : 'Produto criado!');
     fechar('m-Produto');
-    carregarProdutos();
+    await syncProdutosCache()
   } catch (e) { toast('Erro: ' + e.message, 'err'); console.log(e.message)}
 }
 
 
-export function abrirEdicaoProduto(p) {
-  abrir("e-produto")
-  document.getElementById('p-id').value = p.id || p._id
-  document.getElementById('e-nomeproduto').value = p.nome;
-  document.getElementById('e-desc').value = p.descricao || '';
-  if (p.disponivel === false){
-    document.getElementById('e-disp').value = 0;
-  } else{
-    document.getElementById('e-disp').value = 1;
-  }
+export function abrirEdicaoProduto(id) {
+  abrir("e-produto");
+
+  const produto = cProdutos.find(
+    p => String(p._id) === String(id)
+  );
+
+  if (!produto) return;
+
+  document.getElementById('p-id').value = produto._id || '';
+  document.getElementById('e-nomeproduto').value = produto.nome || '';
+  document.getElementById('e-desc').value = produto.descricao || '';
+  document.getElementById('e-disp').value = produto.disponivel ? 1 : 0;
 }
 
 export async function editarProduto() {
@@ -158,7 +190,7 @@ export async function editarProduto() {
     await api('PUT', `/produtos/${id}`, body);
     toast('Produto atualizado!');
     fechar('e-produto');
-    carregarProdutos();
+    await syncProdutosCache()
     
   } catch (e) {
     toast('Erro: ' + (e.message || 'desconhecido'), 'err');
@@ -176,7 +208,7 @@ export async function deletarProduto(id, nome) {
     // Rota alterada para produtos
     await api('DELETE', '/produtos/' + id, {usuarioId: usuarioId});
     toast('Produto deletada!');
-    carregarProdutos();
+    await syncProdutosCache()
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }
 

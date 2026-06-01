@@ -30,22 +30,22 @@ socket.on("sync", (data) => {
 
     case "produtos":
       mensagem = 'Produtos foram atualizados';
-      services.carregarProdutos();
+      services.syncProdutosCache()
       break;
 
     case "clientes":
       mensagem = 'Clientes foram atualizados';
-      services.carregarClientes();
+      services.syncClientesCache()
       break;
 
     case "ordens":
       mensagem = 'Ordens foram atualizadas';
-      services.carregarordens();
+      services.syncOrdensCache()
       break;
 
     case "usuarios":
       mensagem = 'Usuários foram atualizados';
-      services.carregarUsuarios();
+      services.syncUsuariosCache()
       break;
 
     default:

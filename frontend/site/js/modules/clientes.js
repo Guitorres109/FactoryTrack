@@ -167,6 +167,33 @@ export function buscarCli(valor) {
   renderClientes(filtrados);
 }
 
+export async function syncClientesCache() {
+  try {
+    const clientes = await services.api('GET', '/clientes');
+
+    if (!Array.isArray(clientes)) return [];
+
+    // 🔥 atualiza memória global
+    cClientes = clientes;
+
+    // 💾 atualiza sessionStorage
+    sessionStorage.setItem('Clientes', JSON.stringify(clientes));
+
+    // 🔄 auto refresh da tela
+    const el = document.getElementById('tbl-clientes');
+
+    if (el) {
+      carregarClientes();
+    }
+
+    return clientes;
+
+  } catch (e) {
+    console.error('Erro ao sincronizar clientes:', e);
+    return [];
+  }
+}
+
 
 export function abrirCliente() {
   document.getElementById('m-cli-t').textContent = 'Novo Cliente';
@@ -259,7 +286,7 @@ export async function editarCliente() {
     await api('PUT', `/clientes/${id}`, body);
     toast('Cliente atualizado!');
     fechar('e-cliente');
-    carregarClientes();
+    await syncClientesCache()
   } catch (e) {
     toast('Erro: ' + (e.message || 'desconhecido'), 'err');
   }
@@ -304,7 +331,7 @@ export async function salvarCliente() {
 
     toast(isEdit ? 'Cliente atualizado!' : 'Cliente cadastrado!');
     fechar('m-cliente');
-    carregarClientes();
+    await syncClientesCache()
 
   } catch (e) {
     toast('Erro: ' + (e?.message || 'desconhecido'), 'err');
@@ -321,6 +348,6 @@ export async function deletarCliente(id, nome) {
   try {
     await api('DELETE', '/clientes/' + id, { usuarioId });
     toast('Cliente deletado!');
-    carregarClientes();
+    await syncClientesCache()
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }

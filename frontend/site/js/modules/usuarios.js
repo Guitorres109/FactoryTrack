@@ -100,6 +100,40 @@ export async function carregarUsuarios() {
   }
 }
 
+export async function syncUsuariosCache() {
+  try {
+    let us = await services.api('GET', '/usuarios');
+
+    if (!Array.isArray(us)) return [];
+
+    // 🔥 mantém a mesma regra de ordenação
+    us = us.sort((a, b) => {
+      if (a.perfil === 'Administrador' && b.perfil !== 'Administrador') return -1;
+      if (a.perfil !== 'Administrador' && b.perfil === 'Administrador') return 1;
+      return (a.nome || '').localeCompare(b.nome || '');
+    });
+
+    // 🔥 atualiza memória global
+    cUsuarios = us;
+
+    // 💾 atualiza cache
+    sessionStorage.setItem('Usuarios', JSON.stringify(us));
+
+    // 🔄 auto refresh da tela
+    const el = document.getElementById('tbl-usuarios');
+
+    if (el) {
+      carregarUsuarios();
+    }
+
+    return us;
+
+  } catch (e) {
+    console.error('Erro ao sincronizar usuários:', e);
+    return [];
+  }
+}
+
 function escapeHtml(str) {
   return String(str)
     .replaceAll('&', '&amp;')
@@ -211,7 +245,7 @@ export async function salvarUsuario() {
 
     services.toast('Usuário criado!');
     services.fechar('m-usuario');
-    carregarUsuarios();
+    await syncUsuariosCache()
     USUARIO_LOGADO.foto = `${services.API}/uploads/usuarios/${foto_perfil ? foto_perfil.name : 'default.png'}`;
   } catch (e) {
     services.toast('Erro: ' + e.message, 'err');
@@ -288,7 +322,7 @@ export async function editarUsuario() {
 
     services.toast('Usuário atualizado!');
     services.fechar('e-usuario');
-    services.carregarUsuarios();
+    await syncUsuariosCache()
     services.carregarFoto()
   } catch (e) {
     console.error(e);
@@ -345,6 +379,6 @@ export async function deletarUsuario(id, nome) {
   try {
     await services.api('DELETE', '/usuarios/' + id, { usuarioId: JSON.parse(localStorage.getItem('pz_usuario'))?.id || JSON.parse(localStorage.getItem('pz_usuario'))?._id });
     services.toast('Usuário deletado!');
-    services.carregarUsuarios();
+    await syncUsuariosCache()
   } catch (e) { services.toast('Erro: ' + e.message, 'err'); }
 }
