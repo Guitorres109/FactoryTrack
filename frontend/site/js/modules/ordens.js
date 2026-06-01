@@ -14,7 +14,7 @@ export async function carregarordens() {
     if (!cOrdens){ordens = await services.api('GET', '/ordens');} else{ordens = cOrdens}
 
     if (!ordens.length) {
-      el.innerHTML = '<div class="empty"><span class="ei">📋</span>Nenhum ordem</div>';
+      el.innerHTML = '<div class="empty"><span class="ei">📋</span>Nenhuma ordem</div>';
       return;
     }
 
@@ -102,7 +102,7 @@ export async function aplicarFiltroOrdens(status) {
   }
 
   if (!Array.isArray(ordens) || !ordens.length) {
-    el.innerHTML = '<div class="empty">Nenhuma ordem encontrada</div>';
+    el.innerHTML = '<div class="empty"><span class="ei">📋</span>Nenhuma ordem</div>';
     return;
   }
 

@@ -72,12 +72,13 @@ export async function carregarClientes(busca = '') {
   }
 }
 
-export function renderClientes(lista) {
+export function renderClientes(lista = []) {
   const el = document.getElementById('tbl-clientes');
-
   if (!el) return;
 
-  if (!lista.length) {
+  clientesCache = Array.isArray(lista) ? lista : [];
+
+  if (!clientesCache.length) {
     el.innerHTML = '<div class="empty"><span class="ei">👥</span>Nenhum cliente</div>';
     return;
   }
@@ -94,22 +95,46 @@ export function renderClientes(lista) {
         </tr>
       </thead>
       <tbody>
-        ${lista.map(c => {
+        ${clientesCache.map(c => {
           const endereco = c.endereco
             ? [c.endereco.rua, c.endereco.numero, c.endereco.bairro, c.endereco.cidade]
                 .filter(Boolean)
                 .join(', ')
             : '—';
 
+          const safe = encodeURIComponent(JSON.stringify(c));
+
           return `
-            <tr 
-              style="cursor:pointer"
-            >
-              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'"><strong>${c.nome || '—'}</strong></td>
-              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'">${formatarTelefone(c.telefone)}</td>
-              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'" style="font-size:.76rem;color:var(--muted)">${endereco}</td>
-              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'" style="font-size:.76rem;color:var(--muted)">${c.observacoes || '—'}</td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm"onclick='abrirEdicaoCliente(${JSON.stringify(c)})'>✏️</button><button class="btn btn-danger btn-sm"onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button></div></td>
+            <tr style="cursor:pointer">
+
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'">
+                <strong>${c.nome || '—'}</strong>
+              </td>
+
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'">
+                ${formatarTelefone(c.telefone)}
+              </td>
+
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'"
+                  style="font-size:.76rem;color:var(--muted)">
+                ${endereco}
+              </td>
+
+              <td onclick="window.location.href='/metaltech/cliente?id=${c.id}&nome=${c.nome}'"
+                  style="font-size:.76rem;color:var(--muted)">
+                ${c.observacoes || '—'}
+              </td>
+
+              <td>
+                <div style="display:flex;gap:5px">
+                  <button class="btn btn-ghost btn-sm"
+                    onclick="abrirEdicaoCliente(JSON.parse(decodeURIComponent('${safe}')))">✏️</button>
+
+                  <button class="btn btn-danger btn-sm"
+                    onclick="deletarCliente('${c.id || c._id}','${c.nome}')">🗑️</button>
+                </div>
+              </td>
+
             </tr>
           `;
         }).join('')}
@@ -121,47 +146,50 @@ export function renderClientes(lista) {
 export function formatarTelefone(tel) {
   if (!tel) return '—';
 
-  // remove tudo que não for número
   const nums = tel.replace(/\D/g, '');
 
-  // se não tiver 10 ou 11 dígitos, retorna original
-  if (nums.length !== 10 && nums.length !== 11) {
-    return tel;
-  }
+  if (nums.length !== 10 && nums.length !== 11) return tel;
 
   const ddd = nums.slice(0, 2);
 
-  // celular (11 dígitos)
   if (nums.length === 11) {
     return `(${ddd}) ${nums.slice(2, 7)}-${nums.slice(7)}`;
   }
 
-  // fixo (10 dígitos)
   return `(${ddd}) ${nums.slice(2, 6)}-${nums.slice(6)}`;
 }
 
 function normalizar(txt) {
-  return txt
+  return (txt || '')
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 }
 
 export function buscarCli(valor) {
-  const query = normalizar(valor)
-    .trim()
-    .split(' ')
-    .filter(Boolean);
+  const el = document.getElementById('tbl-clientes');
 
-  if (!query.length) {
-    renderClientes(clientesCache);
+  const cache = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
+
+  const texto = (valor || '').trim();
+
+  // 📌 se input vazio → volta estado original
+  if (!texto) {
+    renderClientes(cache);
     return;
   }
 
-  const filtrados = clientesCache.filter(cli => {
-    const nome = normalizar(cli.nome || '');
+  const query = normalizar(texto)
+    .split(' ')
+    .filter(Boolean);
 
-    return query.every(p => nome.includes(p));
+  const filtrados = cache.filter(cli => {
+    const nome = normalizar(cli.nome || '');
+    const tel = normalizar(cli.telefone || '');
+
+    return query.every(p =>
+      nome.includes(p) || tel.includes(p)
+    );
   });
 
   renderClientes(filtrados);
