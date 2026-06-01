@@ -1,6 +1,5 @@
 import * as services from '/js/services/index.js';
 import { cache } from '/js/services/cache.js';
-console.log('rodando app.js')
 Object.assign(window, services);
 
 async function bootstrap() {

@@ -7,4 +7,3 @@ export * from '/js/modules/produtos.js'
 export * from '/js/modules/usuarios.js'
 export * from '/js/ui/ui.js'
 
-console.log("rodando index")

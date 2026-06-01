@@ -5,32 +5,76 @@ let cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
 export async function carregarProdutos() {
   const el = document.getElementById('tbl-Produtos');
 
+  if (!el) return;
+
   el.innerHTML = '<div class="spin-wrap"><div class="spin"></div> Carregando...</div>';
 
   try {
-    // 🔥 garante cache carregado
     await services.cache?.();
 
-    const produtos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+    let produtos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
+
+    // 🔥 se não tiver cache, busca API
+    if (!Array.isArray(produtos) || !produtos.length) {
+      produtos = await services.api('GET', '/produtos') || [];
+      console.log('buscando produtos')
+
+      // salva cache
+      sessionStorage.setItem('Produtos', JSON.stringify(produtos));
+    }
 
     if (!produtos.length) {
-      el.innerHTML = '<div class="empty"><span class="ei"></span>Nenhum Produto</div>';
+      el.innerHTML = '<div class="empty">Nenhum produto encontrado</div>';
       return;
     }
 
     el.innerHTML = `
       <table>
         <thead>
-          <tr><th>Nome</th><th>Status</th><th>Ações</th>
+          <tr>
+            <th>Nome</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
         </thead>
+
         <tbody>
-        ${cProdutos.map(p => `
+          ${produtos.map(p => `
             <tr>
-              <input type="hidden" id= "p-id">
-              <td><strong>${p.nome}</strong><br><small style="color:var(--muted)">${p.descricao || ''}</small></td>
-              <td><span class="badge ${Number(p.disponivel) === 1 ? 'b-on' : 'b-off'}">${badgeDisponivel(Number(p.disponivel))}</span></td>
-              <td><div style="display:flex;gap:5px"><button class="btn btn-ghost btn-sm"onclick='abrirEdicaoProduto(${JSON.stringify(p)})'>✏️</button>
-              <button class="btn btn-danger btn-sm"onclick="deletarProduto('${p._id}','${p.nome}')">🗑️</button></div></td>`).join('')}
+
+              <td>
+                <strong>${p.nome}</strong><br>
+                <small style="color:var(--muted)">
+                  ${p.descricao || ''}
+                </small>
+              </td>
+
+              <td>
+                <span class="badge ${Number(p.disponivel) === 1 ? 'b-on' : 'b-off'}">
+                  ${badgeDisponivel(Number(p.disponivel))}
+                </span>
+              </td>
+
+              <td>
+                <div style="display:flex;gap:5px">
+
+                  <button
+                    class="btn btn-ghost btn-sm"
+                    onclick="abrirEdicaoProduto('${p._id}')">
+                    ✏️
+                  </button>
+
+                  <button
+                    class="btn btn-danger btn-sm"
+                    onclick="deletarProduto('${p._id}','${p.nome}')">
+                    🗑️
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+          `).join('')}
         </tbody>
       </table>
     `;

@@ -83,24 +83,39 @@ export async function carregarordens() {
   }
 }
 
-export function aplicarFiltroOrdens(status) {
+export async function aplicarFiltroOrdens(status) {
   const el = document.getElementById('tbl-ordens');
+
   const usuario = JSON.parse(localStorage.getItem('pz_usuario') || '{}');
   const perfil = usuario?.perfil || '';
   const isAtendente = perfil === 'Atendente';
 
-  if (!cOrdens.length) return;
+  // 🔥 garante array
+  let ordens = Array.isArray(cOrdens) ? cOrdens : [];
+
+  // 🔥 se não tiver dados, busca da API
+  if (!ordens.length) {
+    ordens = await services.api('GET', '/ordens');
+
+    // salva globalmente para não buscar sempre
+    cOrdens = ordens || [];
+  }
+
+  if (!Array.isArray(ordens) || !ordens.length) {
+    el.innerHTML = '<div class="empty">Nenhuma ordem encontrada</div>';
+    return;
+  }
 
   const norm = (s) =>
     (s || '')
       .toString()
       .toLowerCase()
-      .replace(/\s/g, '_'); // transforma espaços em _
+      .replace(/\s/g, '_');
 
-  let filtradas = cOrdens;
+  let filtradas = ordens;
 
   if (status && status !== 'todas') {
-    filtradas = cOrdens.filter(o =>
+    filtradas = ordens.filter(o =>
       norm(o.status) === norm(status)
     );
   }
@@ -114,75 +129,72 @@ export function aplicarFiltroOrdens(status) {
     <table>
       <thead>
         <tr>
-          <th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th>${!isAtendente ? '<th>Ações</th>' : 'Status'}
+          <th>#</th><th>Cliente</th><th>Itens</th><th>Status</th><th>Data</th>${!isAtendente ? '<th>Ações</th>' : ''}
         </tr>
       </thead>
       <tbody>
         ${filtradas.map(p => `
-          <tr 
-              style="cursor:pointer"
-            >
+          <tr style="cursor:pointer">
+
             <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">
-                <div>
-                  <strong style="color:var(--primary)">
-                    #${
-                      p.numeroOrdem
-                        ? String(p.numeroOrdem).padStart(3, '0')
-                        : '???'
-                    }
-                  </strong>
-                </div>
+              <strong style="color:var(--primary)">
+                #${p.numeroOrdem ? String(p.numeroOrdem).padStart(3, '0') : '???'}
+              </strong>
+              <br>
+              <small style="color:var(--muted); font-size: 11px">
+                ${p.usuario?.nome || '—'}
+              </small>
+            </td>
 
-                <small style="color:var(--muted); font-size: 11px">
-                  ${p.usuario?.nome || '—'}
-                </small>
-              </td>
-              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'"><strong>${p.cliente?.nome || '—'}</strong><br><small style="color:var(--muted)">${p.cliente?.telefone || ''}</small></td>
-              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="font-size:.76rem"><div>${p.itens.map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`).join('<br>')}</div><small style="color:var(--muted); font-size: 11px">${p.observacoes || ''}</small></td>
-              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">${services.badge(p.status)}</td>
-              <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="font-size:0.75rem; line-height:1.4;">
-                ${
-                  new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()
-                    ? `
-                      <div style="margin-bottom:6px;">
-                        <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">
-                          Criado em
-                        </span>
-                        <strong style="font-size:0.7rem; font-weight:100;">
-                          ${new Date(p.createdAt).toLocaleString('pt-BR')}
-                        </strong>
-                      </div>
-                    `
-                    : `
-                      <div style="margin-bottom:6px;">
-                        <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">
-                          Criado em
-                        </span>
-                        <strong style="font-size:0.7rem; font-weight:100;">
-                          ${new Date(p.createdAt).toLocaleString('pt-BR')}
-                        </strong>
-                      </div>
+            <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">
+              <strong>${p.cliente?.nome || '—'}</strong><br>
+              <small style="color:var(--muted)">${p.cliente?.telefone || ''}</small>
+            </td>
 
-                      <div>
-                        <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">
-                          Última alteração
-                        </span>
-                        <strong style="font-size:0.7rem; font-weight:100;">
-                          ${new Date(p.updatedAt).toLocaleString('pt-BR')}
-                        </strong>
-                      </div>
-                    `
+            <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">
+              ${(p.itens || [])
+                .map(it => `${it.quantidade}x ${it.nomeProduto || '?'}`)
+                .join('<br>')}
+            </td>
+
+            <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'">
+              ${services.badge(p.status)}
+            </td>
+
+            <td onclick="window.location.href='/metaltech/ordem?id=${p.id}&cliente=${p.cliente?.nome}&data=${p.createdAt}'" style="font-size:0.75rem; line-height:1.4;">${new Date(p.createdAt).getTime() === new Date(p.updatedAt).getTime()? `<div style="margin-bottom:6px;"><span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
+                      <strong style="font-size:0.7rem; font-weight:100;">
+                        ${new Date(p.createdAt).toLocaleString('pt-BR')}
+                      </strong>
+                    </div>
+                  `
+                  : `
+                    <div style="margin-bottom:6px;">
+                      <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Criado em</span>
+                      <strong style="font-size:0.7rem; font-weight:100;">
+                        ${new Date(p.createdAt).toLocaleString('pt-BR')}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span style="display:block; font-size:0.65rem; color:var(--muted); margin-bottom:2px;">Última alteração</span>
+                      <strong style="font-size:0.7rem; font-weight:100;">
+                        ${new Date(p.updatedAt).toLocaleString('pt-BR')}
+                      </strong>
+                    </div>
+                  `
                 }
               </td>
-              <td class="td-acoes">
+
+            <td class="td-acoes">
                 <div style="display:flex;gap:5px">
-                  <button title="Editar status" class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
-                  <button title="Gerar QR Code" class="btn btn-blue btn-sm" onclick="abrirQrCode(${p.id}, '${p.cliente?.nome}', '${p.createdAt}')">🔗</button>
+                  <button class="btn btn-blue btn-sm" onclick="abrirStatus('${p._id}','${p.status}')">📝</button>
+                  <button class="btn btn-blue btn-sm" onclick="abrirQrCode(${p.id}, '${p.cliente?.nome}', '${p.createdAt}')">🔗</button>
               ${!isAtendente ? `
-                    <button title="Excluir" class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}')">🗑️</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletarordem('${p._id}', '${p.usuario?.nome || '—'}')">🗑️</button>
                   </div>
                 </td>
               ` : ''}
+
           </tr>
         `).join('')}
       </tbody>

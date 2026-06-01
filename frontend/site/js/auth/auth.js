@@ -26,8 +26,6 @@ export async function fazerLogin() {
   erro.style.display = 'none';
 
   try {
-
-    console.log(services.API)
     const res  = await fetch(services.API + '/auth/login', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
