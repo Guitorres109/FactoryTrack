@@ -221,6 +221,8 @@ export async function syncOrdensCache() {
       carregarordens();
     }
 
+    services.carregarDashboard()
+
     return ordens;
 
   } catch (e) {

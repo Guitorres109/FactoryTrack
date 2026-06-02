@@ -1,6 +1,6 @@
 import * as services from '/js/services/index.js';
 
-export const LINK = 'http://10.106.208.32:3000'
+export const LINK = 'http://10.106.224.142:3000'
 export const API = `${LINK}/api`;
 
 export async function api(method, url, body) {
@@ -22,9 +22,9 @@ export async function api(method, url, body) {
 }
 export function abrirQrCode(id, cliente, data) {
 
-  const link = `http://10.106.208.32:3010/metaltech/ordem?id=${id}&cliente=${encodeURIComponent(cliente)}&data=${encodeURIComponent(data)}`;
+  const link = `${LINK}/metaltech/ordem?id=${id}&cliente=${encodeURIComponent(cliente)}&data=${encodeURIComponent(data)}`;
 
-  const url = `http://10.106.208.32:3000/api/qrcode?url=${encodeURIComponent(link)}`;
+  const url = `${LINK}/api/qrcode?url=${encodeURIComponent(link)}`;
 
   window.open(url, '_blank');
 }
