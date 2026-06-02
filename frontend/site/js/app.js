@@ -2,6 +2,8 @@ import * as services from '/js/services/index.js';
 import { cache } from '/js/services/cache.js';
 Object.assign(window, services);
 
+const LINK = 'http://10.106.224.142:3000'
+
 async function bootstrap() {
   try {
     await cache(); // 👈 PRIMEIRO passo obrigatório
@@ -14,7 +16,7 @@ async function bootstrap() {
   services.enableSidebarSwipe();
 }
 
-const socket = io('http://10.106.208.32:3000');
+const socket = io(LINK);
 
 if (Notification.permission !== 'granted') {
   Notification.requestPermission();

@@ -186,12 +186,34 @@
 
 <div id="m-Produto" class="modal-bg">
   <div class="modal">
+    <div class="fg">
+      <div style="margin-top: 10px;">
+        <img 
+          id="preview-foto-produto"
+          src="http://10.106.208.32:3000/api/uploads/produtos/default.png"
+          style="
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 2px solid #ccc;
+            display: block;
+          "
+        >
+      </div>
+    </div>
     <h3 id="m-Produto-t">Novo Produto</h3>
     <input type="hidden" id="p-id">
     <div class="fr2">
       <div class="fg"><label>Nome <small id="icon-obrigatorio">*</small></label><input type="text" id="p-nome" placeholder="Ex: Barra Sextavada de Aço" onkeydown="if(event.key==='Enter') salvarProduto()"></div>
     </div>
     <div class="fg"><label>Descrição</label><input type="text" id="p-desc" placeholder="Breve descrição..." onkeydown="if(event.key==='Enter') salvarProduto()"></div>
+    <div class="fg" style="position: relative;">
+      <label>Foto do Produto</label>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="file" name="imagem" id="p-foto" onchange="preview_foto_produto('criar')"/>
+      </div>
+    </div>
     <div class="fg"><label>Disponível</label>
       <select id="p-disp">
         <option value="true">✅ Sim</option>
@@ -336,7 +358,7 @@
       <label>Foto de perfil</label>
       <div style="display: flex; align-items: center; gap: 10px;">
         <input type="file" name="imagem" id="u-foto" onchange="preview_foto('criar')"/>
-        <!-- <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button> -->
+        <button class="btn-rm" onclick="removerFotoUsuario()">🗑</button>
       </div>
     </div>
     
@@ -466,12 +488,34 @@
 
 <div id="e-produto" class="modal-bg">
   <div class="modal">
+    <div class="fg">
+      <div style="margin-top: 10px;">
+        <img 
+          id="preview-foto-produto-edit"
+          src="http://10.106.208.32:3000/api/uploads/produtos/default.png"
+          style="
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 20px;
+            border: 2px solid #ccc;
+            display: block;
+          "
+        >
+      </div>
+    </div>
     <h3 id="e-Produto-t">Editar Produto</h3>
     <input type="hidden" id="p-id">
     <div class="fr2">
       <div class="fg"><label>Nome *</label><input id="e-nomeproduto" placeholder="Ex: Barra Sextavada de Aço"></div>
     </div>
     <div class="fg"><label>Descrição</label><input id="e-desc" placeholder="Breve descrição..."></div>
+    <div class="fg" style="position: relative;">
+      <label>Foto do Produto</label>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <input type="file" name="imagem" id="ep-foto" onchange="preview_foto_produto('editar')"/>
+      </div>
+    </div>
     <div class="fg"><label>Disponível</label>
       <select id="e-disp">
         <option value="1">✅ Sim</option>

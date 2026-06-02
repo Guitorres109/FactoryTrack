@@ -42,11 +42,17 @@ export async function carregarProdutos() {
           ${produtos.map(p => `
             <tr>
 
-              <td>
-                <strong>${p.nome}</strong><br>
-                <small style="color:var(--muted)">
-                  ${p.descricao || ''}
-                </small>
+              <td style="display: flex; align-itens: center; gap: 10px;">
+                <img src="${p.foto
+                    ? `${services.API}/uploads/produtos/${p.foto}`
+                    : `${services.API}/uploads/produtos/default.png`}"
+                    style="width:50px;height:50px; object-fit:cover;">
+                <div>    
+                  <strong>${p.nome}</strong><br>
+                  <small style="color:var(--muted)">
+                    ${p.descricao || ''}
+                  </small>
+                </div>   
               </td>
 
               <td>
@@ -114,6 +120,42 @@ export async function syncProdutosCache() {
   }
 }
 
+export function preview_foto_produto(funcao) {
+
+  let preview_foto;
+  let input_foto;
+  let foto_perfil;
+
+  if (funcao === 'criar') {
+    console.log('criar')
+    preview_foto = document.getElementById('preview-foto-produto');
+    input_foto = document.getElementById('p-foto');
+    foto_perfil = input_foto.files[0];
+  }
+
+  
+  else if (funcao === 'editar') {
+    console.log('editar')
+    preview_foto = document.getElementById('preview-foto-produto-edit');
+    input_foto = document.getElementById('ep-foto');
+    foto_perfil = input_foto.files[0];
+  }
+
+  // Se removeu a imagem
+  if (!foto_perfil) {
+    preview_foto.src = `${services.API}/uploads/produtos/default.png;`
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    preview_foto.src = e.target.result;
+  };
+
+  reader.readAsDataURL(foto_perfil);
+}
+
 export function abrirProduto() {
   document.getElementById('m-Produto-t').textContent = 'Novo Produto';
   document.getElementById('p-disp').value = '1';
@@ -128,25 +170,38 @@ export function abrirProduto() {
 //====================================
 
 export async function salvarProduto() {
-  const id   = document.getElementById('p-id').value;
+  const id = document.getElementById('p-id').value;
   const nome = document.getElementById('p-nome').value.trim();
-  const usuarioId =JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id
-  if (!nome) { toast('Insira o nome do produto', 'err'); return; }
+  const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id;
 
-  const d = {
-    nome,
-    descricao:    document.getElementById('p-desc').value.trim(),
-    disponivel: document.getElementById('p-disp').value,
-    usuarioId: usuarioId
-  };
+  if (!nome) {
+    toast('Insira o nome do produto', 'err');
+    return;
+  }
+
+  const form = new FormData();
+
+  form.append('nome', nome);
+  form.append('descricao', document.getElementById('p-desc').value.trim());
+  form.append('disponivel', document.getElementById('p-disp').value);
+  form.append('usuarioId', usuarioId);
+
+  const foto = document.getElementById('p-foto').files[0];
+  if (foto) {
+    form.append('foto', foto);
+  }
 
   try {
-    // Rotas alteradas para produtos
-    await api('POST', '/produtos', d);
+    await api('POST', '/produtos', form);
+
     toast(id ? 'Produto atualizado!' : 'Produto criado!');
     fechar('m-Produto');
-    await syncProdutosCache()
-  } catch (e) { toast('Erro: ' + e.message, 'err'); console.log(e.message)}
+    await syncProdutosCache();
+
+  } catch (e) {
+    toast('Erro: ' + e.message, 'err');
+    console.log(e);
+  }
 }
 
 
@@ -163,12 +218,15 @@ export function abrirEdicaoProduto(id) {
   document.getElementById('e-nomeproduto').value = produto.nome || '';
   document.getElementById('e-desc').value = produto.descricao || '';
   document.getElementById('e-disp').value = produto.disponivel ? 1 : 0;
+  const foto_produto = document.getElementById('preview-foto-produto-edit');
+  foto_produto.src = `${services.API}/uploads/produtos/${produto.foto || 'default.png'}`
 }
 
 export async function editarProduto() {
   const id = document.getElementById('p-id').value;
   const nome = document.getElementById('e-nomeproduto').value.trim();
   const descricao = document.getElementById('e-desc').value.trim();
+  const foto_produto = document.getElementById('ep-foto').files[0]
   const disponivel = Number(document.getElementById('e-disp').value);
   const usuarioId = JSON.parse(localStorage.getItem('pz_usuario') || 'null')?.id
 
@@ -186,6 +244,9 @@ export async function editarProduto() {
   try {
     // Criação do corpo da requisição
     let body = { nome, descricao, disponivel, usuarioId };
+    if(foto_produto){
+      body.foto = foto_produto;
+    }
     // Enviar a requisição para a API
     await api('PUT', `/produtos/${id}`, body);
     toast('Produto atualizado!');

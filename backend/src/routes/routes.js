@@ -155,34 +155,123 @@ router.get('/produtos/:id', auth, async (req, res) => {
   }
 });
 
-router.post('/produtos', auth, async (req, res) => {
-  try {
-    if (!req.body.nome)
-      return res.status(400).json({ erro: 'Nome é obrigatório' });
+router.post('/produtos',auth, upload.single('foto'),async (req, res) => {
+    try {
+      const {
+        nome,
+        descricao,
+        disponivel,
+        usuarioId
+      } = req.body;
 
-    const novo = await Produto.create(req.body);
+      let foto = null;
 
-    global.sync('produtos'); // 🔥
+      if (req.file) {
+        foto = req.file.filename;
+      }
+      console.log(req.file);
 
-    res.status(201).json(novo);
+      const novo = await Produto.create({
+        nome,
+        descricao,
+        disponivel,
+        usuarioId,
+        foto
+      });
 
-  } catch (e) {
-    res.status(500).json({ erro: e.message });
+      global.sync('produtos');
+
+      res.status(201).json(novo);
+
+    } catch (e) {
+      res.status(500).json({ erro: e.message });
+    }
   }
-});
+);
 
-router.put('/produtos/:id', auth, async (req, res) => {
-  try {
-    const p = await Produto.update(req.params.id, req.body);
-    if (!p) return res.status(404).json({ erro: 'Produto não encontrado' });
+router.put(
+  '/produtos/:id',
+  auth,
+  upload.single('foto'),
+  async (req, res) => {
+    try {
 
-    global.sync('produtos'); // 🔥
+      const produtoAtual =
+        await Produto.findById(req.params.id);
 
-    res.json(p);
-  } catch (e) {
-    res.status(500).json({ erro: e.message });
+      if (!produtoAtual) {
+        return res
+          .status(404)
+          .json({ erro: 'Produto não encontrado' });
+      }
+
+      let fotoPath = produtoAtual.foto;
+
+      if (req.file) {
+
+        const nomeAntigo = req.file.filename;
+
+        const extensao =
+          path.extname(nomeAntigo);
+
+        const novoNome =
+          `produto_${req.params.id}_${Date.now()}${extensao}`;
+
+        const caminhoAntigo = path.join(
+          __dirname,
+          '../database/uploads/produtos',
+          nomeAntigo
+        );
+
+        const caminhoNovo = path.join(
+          __dirname,
+          '../database/uploads/produtos',
+          novoNome
+        );
+
+        fs.renameSync(
+          caminhoAntigo,
+          caminhoNovo
+        );
+
+        fotoPath = novoNome;
+
+        // remove foto antiga
+        if (produtoAtual.foto) {
+
+          const fotoAntiga = path.join(
+            __dirname,
+            '../database/uploads/produtos',
+            produtoAtual.foto
+          );
+
+          if (fs.existsSync(fotoAntiga)) {
+            try {
+              fs.unlinkSync(fotoAntiga);
+            } catch (err) {
+              console.error(err);
+            }
+          }
+        }
+      }
+
+      const p = await Produto.update(
+        req.params.id,
+        {
+          ...req.body,
+          foto: fotoPath
+        }
+      );
+
+      global.sync('produtos');
+
+      res.json(p);
+
+    } catch (e) {
+      res.status(500).json({ erro: e.message });
+    }
   }
-});
+);
 
 router.delete('/produtos/:id', auth, async (req, res) => {
   try {
