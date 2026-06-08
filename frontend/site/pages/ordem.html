@@ -42,6 +42,7 @@
       // Se não existir no sessionStorage
       if (!ordensStorage) {
 
+        //ip//
         const response = await fetch('http://10.106.208.32:3000/api/ordens');
 
         ordens = await response.json();

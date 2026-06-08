@@ -1,6 +1,6 @@
 import * as services from '/js/services/index.js';
 
-export const LINK = 'http://10.106.224.142:3000'
+export const LINK = 'http://10.106.208.29:3000'
 export const API = `${LINK}/api`;
 
 export async function api(method, url, body) {

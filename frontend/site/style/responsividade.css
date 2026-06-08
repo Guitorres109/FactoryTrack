@@ -223,3 +223,33 @@
   :root { --sidebar-w: 240px; }
   .stats-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 }
+
+@media(max-width:700px){
+
+  .user-content{
+    padding:
+      0
+      20px
+      24px;
+  }
+
+  .user-banner{
+    height:120px;
+  }
+
+  .user-photo-wrap{
+    width:100px;
+    height:100px;
+
+    margin-top:-50px;
+  }
+
+  .user-header h1{
+    font-size:1.8rem;
+  }
+
+  .user-grid{
+    grid-template-columns:1fr;
+  }
+
+}

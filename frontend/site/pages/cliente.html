@@ -49,6 +49,7 @@ async function carregarCliente(){
     let clientesStorage = sessionStorage.getItem('Clientes')
 
     if(!clientesStorage){
+      // -----ip-----
       clientesStorage = fetch('http://10.106.208.32:3000/api/clientes')
     }
 
