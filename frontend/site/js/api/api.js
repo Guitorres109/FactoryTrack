@@ -1,5 +1,7 @@
 import * as services from '/js/services/index.js';
 
+//IP aqui
+
 //Rotas de APi e do qrcode gerado pelo server
 
 const IP = '10.106.224.145'

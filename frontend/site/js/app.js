@@ -23,6 +23,8 @@ async function bootstrap() {
 //Socket com o servidor para ter mudanças instantâneas
 //====================================
 
+//IP aqui
+
 const socket = io('http://10.106.224.145:3000');
 
 if (Notification.permission !== 'granted') {
