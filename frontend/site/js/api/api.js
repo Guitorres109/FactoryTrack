@@ -1,8 +1,12 @@
 import * as services from '/js/services/index.js';
 
-export const LINK = 'http://10.106.208.29:3000'
+//Rotas de APi e do qrcode gerado pelo server
+
+const IP = '10.106.224.145'
+export const LINK = `http://${IP}:3000`
 export const API = `${LINK}/api`;
 
+//Pegar dados do Server
 export async function api(method, url, body) {
   const opts = {
     method,
@@ -22,7 +26,7 @@ export async function api(method, url, body) {
 }
 export function abrirQrCode(id, cliente, data) {
 
-  const link = `${LINK}/metaltech/ordem?id=${id}&cliente=${encodeURIComponent(cliente)}&data=${encodeURIComponent(data)}`;
+  const link = `${IP}:3010/metaltech/ordem?id=${id}&cliente=${encodeURIComponent(cliente)}&data=${encodeURIComponent(data)}`;
 
   const url = `${LINK}/api/qrcode?url=${encodeURIComponent(link)}`;
 

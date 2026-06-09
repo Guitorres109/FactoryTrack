@@ -2,6 +2,11 @@ import * as services from '/js/services/index.js';
 import { cache } from '/js/services/cache.js';
 Object.assign(window, services);
 
+
+//====================================
+//Função para carregar o cache ao entrar na pagina
+//====================================
+
 async function bootstrap() {
   try {
     await cache(); // 👈 PRIMEIRO passo obrigatório
@@ -14,7 +19,11 @@ async function bootstrap() {
   services.enableSidebarSwipe();
 }
 
-const socket = io('http://10.106.208.32:3000');
+//====================================
+//Socket com o servidor para ter mudanças instantâneas
+//====================================
+
+const socket = io('http://10.106.224.145:3000');
 
 if (Notification.permission !== 'granted') {
   Notification.requestPermission();
@@ -77,6 +86,10 @@ socket.on("sync", (data) => {
   };
   
 });
+
+//====================================
+//Verifica se o server esta ON
+//====================================
 
 
 export async function verificar() {

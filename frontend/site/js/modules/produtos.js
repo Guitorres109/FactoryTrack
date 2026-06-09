@@ -1,6 +1,9 @@
 import * as services from '/js/services/index.js';
 let cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
 
+//====================================
+//Carregar produtos na lista
+//====================================
 
 export async function carregarProdutos() {
   const el = document.getElementById('tbl-Produtos');
@@ -85,6 +88,10 @@ export async function carregarProdutos() {
   }
 }
 
+//====================================
+//Atualizar produtos na lista
+//====================================
+
 export async function syncProdutosCache() {
   try {
     await services.cache?.();
@@ -114,15 +121,16 @@ export async function syncProdutosCache() {
   }
 }
 
+//====================================
+//Abrir modal de criar os produtos
+//====================================
+
 export function abrirProduto() {
   document.getElementById('m-Produto-t').textContent = 'Novo Produto';
   document.getElementById('p-disp').value = '1';
   abrir('m-Produto');
 }
 
-//====================================
-//função de editar Produto no DB
-//====================================
 //====================================
 //função de salvar Produtos no DB
 //====================================
@@ -149,6 +157,9 @@ export async function salvarProduto() {
   } catch (e) { toast('Erro: ' + e.message, 'err'); console.log(e.message)}
 }
 
+//====================================
+//Abrir modal para editar os produtos
+//====================================
 
 export function abrirEdicaoProduto(id) {
   abrir("e-produto");
@@ -164,6 +175,10 @@ export function abrirEdicaoProduto(id) {
   document.getElementById('e-desc').value = produto.descricao || '';
   document.getElementById('e-disp').value = produto.disponivel ? 1 : 0;
 }
+
+//====================================
+//Editar os produtos
+//====================================
 
 export async function editarProduto() {
   const id = document.getElementById('p-id').value;
@@ -198,7 +213,7 @@ export async function editarProduto() {
   }
 }
 //====================================
-//função de deletar Produtos do cardapio
+//função de deletar Produtos
 //====================================
 
 export async function deletarProduto(id, nome) {
@@ -211,7 +226,3 @@ export async function deletarProduto(id, nome) {
     await syncProdutosCache()
   } catch (e) { toast('Erro: ' + e.message, 'err'); }
 }
-
-//====================================
-//função de carregar clientes
-//====================================

@@ -72,6 +72,10 @@ export async function carregarClientes(busca = '') {
   }
 }
 
+//====================================
+//Rendenizar os clientes
+//====================================
+
 export function renderClientes(lista = []) {
   const el = document.getElementById('tbl-clientes');
   if (!el) return;
@@ -143,6 +147,10 @@ export function renderClientes(lista = []) {
   `;
 }
 
+//====================================
+//Formatar o telefone no formato 	(11) 99988-7766
+//====================================
+
 export function formatarTelefone(tel) {
   if (!tel) return '—';
 
@@ -159,12 +167,20 @@ export function formatarTelefone(tel) {
   return `(${ddd}) ${nums.slice(2, 6)}-${nums.slice(6)}`;
 }
 
+//====================================
+//Ajustar o texto
+//====================================
+
 function normalizar(txt) {
   return (txt || '')
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 }
+
+//====================================
+//Buscar cliente pela barra de pesquisa
+//====================================
 
 export function buscarCli(valor) {
   const el = document.getElementById('tbl-clientes');
@@ -195,6 +211,10 @@ export function buscarCli(valor) {
   renderClientes(filtrados);
 }
 
+//====================================
+//Atualizar o cache
+//====================================
+
 export async function syncClientesCache() {
   try {
     const clientes = await services.api('GET', '/clientes');
@@ -222,6 +242,9 @@ export async function syncClientesCache() {
   }
 }
 
+//====================================
+//Abrir o modal do cliente
+//====================================
 
 export function abrirCliente() {
   document.getElementById('m-cli-t').textContent = 'Novo Cliente';
@@ -244,6 +267,10 @@ export function abrirCliente() {
   }
 }
 
+//====================================
+//Busca de cep
+//====================================
+
 export async function buscarCEPCliente(cep) {
   cep = cep.replace(/\D/g, '');
   
@@ -263,7 +290,7 @@ export async function buscarCEPCliente(cep) {
 }
 
 //====================================
-//função de editar cliente
+//função de Abrir o modal para editar o cliente
 //====================================
 
 
@@ -281,6 +308,10 @@ export function abrirEdicaoCliente(c) {
   document.getElementById('e-comp').value = end.complemento || '';
   document.getElementById('e-obs').value = c.observacoes || '';
 }
+
+//====================================
+//Função de editar o cliente
+//====================================
 
 export async function editarCliente() {
   const id = document.getElementById('c-id').value;

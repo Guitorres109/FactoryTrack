@@ -1,5 +1,10 @@
 import * as services from '/js/services/index.js';
 
+//====================================
+//Salvar os dados no cache do navegador
+//====================================
+
+
 export async function cache() {
   const [cProdutos, cClientes, cOrdens, cUsuarios] = await Promise.all([
     services.api('GET', '/produtos'),

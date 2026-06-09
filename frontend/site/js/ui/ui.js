@@ -4,6 +4,10 @@ let cProdutos
 let cClientes
 let cUsuarios
 
+//====================================
+//Funções de UI e UX
+//====================================
+
 export function toggleSenha(id) {
   const input = document.getElementById(id);
   input.type = input.type === 'password' ? 'text' : 'password';

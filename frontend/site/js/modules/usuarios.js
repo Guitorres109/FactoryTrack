@@ -2,6 +2,10 @@ import * as services from '/js/services/index.js';
 
 let cUsuarios = JSON.parse(sessionStorage.getItem('Usuarios') || '[]' )
 
+//====================================
+//Carregar os produtos na lista
+//====================================
+
 export async function carregarUsuarios() {
   const el = document.getElementById('tbl-usuarios');
 
@@ -100,6 +104,10 @@ export async function carregarUsuarios() {
   }
 }
 
+//====================================
+//Atualizar lista de produtos após salvar
+//====================================
+
 export async function syncUsuariosCache() {
   try {
     let us = await services.api('GET', '/usuarios');
@@ -146,7 +154,7 @@ function escapeAttr(str) {
 }
 
 //====================================
-//função de abrir usuarios
+//função de abrir o modal de usuarios
 //====================================
 
 export function abrirUsuario() {
@@ -156,7 +164,7 @@ export function abrirUsuario() {
 }
 
 //====================================
-//função de salvar usuarios
+//função de ver a foto que voce vai editar
 //====================================
 
 export function preview_foto(funcao) {
@@ -192,6 +200,10 @@ export function preview_foto(funcao) {
 
   reader.readAsDataURL(foto_perfil);
 }
+
+//====================================
+//Função de salvar usuarios
+//====================================
 
 export async function salvarUsuario() {
 
@@ -252,6 +264,10 @@ export async function salvarUsuario() {
   }
 }
 
+//====================================
+//Abrir Modal de Usuario
+//====================================
+
 export function abrirEdicaoUsuario(id, nome, email, perfil, ativo, foto) {
   abrir('e-usuario'); // abre modal
   document.getElementById("u-id").value = id;
@@ -263,6 +279,10 @@ export function abrirEdicaoUsuario(id, nome, email, perfil, ativo, foto) {
   const foto_perfil = document.getElementById('preview-foto-edit');
   foto_perfil.src = `${services.API}/uploads/usuarios/${foto || 'default.png'}`
 }
+
+//====================================
+//Editar o usuario
+//====================================
 
 export async function editarUsuario() {
   const id = document.getElementById('u-id').value;
@@ -329,6 +349,10 @@ export async function editarUsuario() {
     services.toast('Erro: ' + e.message, 'err');
   }
 }
+
+//====================================
+//Remover foto de usuario
+//====================================
 
 export async function removerFotoUsuario() {
   const usuarioId = document.getElementById("u-id").value;

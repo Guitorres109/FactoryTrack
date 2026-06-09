@@ -4,6 +4,10 @@ let cProdutos = JSON.parse(sessionStorage.getItem('Produtos') || '[]');
 let cClientes = JSON.parse(sessionStorage.getItem('Clientes') || '[]');
 let cOrdens = JSON.parse(sessionStorage.getItem('Ordens') || 'null')
 
+//====================================
+//Carregar ordens na lista
+//====================================
+
 export async function carregarordens() {
   const el = document.getElementById('tbl-ordens');
   services.cache()
@@ -82,6 +86,10 @@ export async function carregarordens() {
     el.innerHTML = `<div class="empty" style="color:var(--primary)">${e.message}</div>`;
   }
 }
+
+//====================================
+//Aplicar filtro nas ordens
+//====================================
 
 export async function aplicarFiltroOrdens(status) {
   const el = document.getElementById('tbl-ordens');
@@ -202,6 +210,10 @@ export async function aplicarFiltroOrdens(status) {
   `;
 }
 
+//====================================
+//Carregar ordens após atualizar
+//====================================
+
 export async function syncOrdensCache() {
   try {
     const ordens = await services.api('GET', '/ordens');
@@ -232,7 +244,7 @@ export async function syncOrdensCache() {
 }
 
 //====================================
-//função de abrir ordens
+//função de abrir modal de ordens
 //====================================
 
 export async function abrirOrdem() {
@@ -265,7 +277,7 @@ export async function abrirOrdem() {
 }
 
 //====================================
-//função de adicionar item
+//função de adicionar mais um item no pedido
 //====================================
 
 export function addItem() {
@@ -341,7 +353,7 @@ export function abrirStatus(id, status) {
 }
 
 //====================================
-//função de salavr status de ordem
+//função de salvar status de ordem
 //====================================
 
 export async function salvarStatus() {

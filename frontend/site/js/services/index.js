@@ -1,3 +1,7 @@
+//====================================
+//Linkar todos os arquivos
+//====================================
+
 export * from '/js/api/api.js'
 export * from '/js/services/cache.js'
 export * from '/js/auth/auth.js'

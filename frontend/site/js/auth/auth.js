@@ -7,6 +7,9 @@ export let TOKEN = localStorage.getItem('pz_token') || '';
 export let USUARIO_LOGADO = JSON.parse(localStorage.getItem('pz_usuario') || 'null');
 const telaLogin = document.getElementById("tela-login")
 
+
+//Login
+
 export async function fazerLogin() {
   const email = document.getElementById('l-email').value.trim(); 
   const senha = document.getElementById('l-senha').value;
@@ -79,6 +82,10 @@ if (TOKEN && USUARIO_LOGADO) {
   services.aplicarPerfil(USUARIO_LOGADO);
   document.body.classList.add('logado');
 }
+
+//====================================
+//função de aplicar perfil (atendente ou ADM)
+//====================================
 
 export function aplicarPerfil(usuario) {
   services.carregarFoto()
